@@ -9,7 +9,7 @@
 ********************************************************************************
 * \copyright
 *
-* (c) 2018, Cypress Semiconductor Corporation
+* (c) 2019, Cypress Semiconductor Corporation
 * or a subsidiary of Cypress Semiconductor Corporation. All rights
 * reserved.
 *
@@ -48,21 +48,21 @@
 #include "string.h"
 #include "stdlib.h"
 #include "stdbool.h"
+
 #ifdef MCUBOOT_HAVE_ASSERT_H
 #include "mcuboot_config/mcuboot_assert.h"
 #else
 #include <assert.h>
 #endif
 
-
 #include "cy_device_headers.h"
 
-#include "device.h"
-
-#include "util.h"
-#include "flash.h"
-#include "flash_map.h"
-#include "flash_psoc6.h"
+// TODO:
+//#include "device.h"
+//#include "util.h"
+//#include "flash.h"
+//#include "flash_map.h"
+#include "cy_flash_psoc6.h"
 
 #include "cy_flash.h"
 #include "cy_syspm.h"
@@ -72,37 +72,11 @@
 #define PSOC6_WR_ERROR_FLASH_WRITE 2
 
 #define PSOC6_FLASH_ERASE_BLOCK_SIZE	CY_FLASH_SIZEOF_ROW /* PSoC6 Flash erases by Row */
-#define PSOC6_CONFIG_FLASH_SIZE         16384*16
 
-#if defined(CONFIG_FLASH_PAGE_LAYOUT)
-static const struct flash_pages_layout dev_layout = {
-	.pages_count = KB(PSOC6_CONFIG_FLASH_SIZE) / PSOC6_FLASH_ERASE_BLOCK_SIZE,
-	.pages_size = PSOC6_FLASH_ERASE_BLOCK_SIZE,
-};
-
-static void psoc6_flash_pages_layout(const struct flash_pages_layout **layout,
-									size_t *layout_size)
+int psoc6_flash_read(off_t addr, void *data, size_t len)
 {
-	*layout = &dev_layout;
-	*layout_size = 1;
-}
-#endif /* CONFIG_FLASH_PAGE_LAYOUT */
-
-int psoc6_flash_init(struct device *device)
-{
-	(void)device;
-	/* Nothing to do here */
-	return 0;
-}
-
-int psoc6_flash_read(off_t addr,
-			   void *data, size_t len)
-{
-	uint32_t address;
-
-	address = FLASH_DEVICE_BASE + addr;
 	/* flash read by simple memory copying */
-	memcpy((void *)data, (const void*)address, (size_t)len);
+	memcpy((void *)data, (const void*)addr, (size_t)len);
 
 	return 0;
 }
@@ -111,11 +85,8 @@ int psoc6_flash_write(off_t addr,
 			    const void *data, size_t len)
 {
 	int rc;
-	uint32_t address;
 
-	address = FLASH_DEVICE_BASE + addr;
-
-	rc = psoc6_flash_write_hal((uint8_t *)data, address, len);
+	rc = psoc6_flash_write_hal((uint8_t *)data, addr, len);
 
 	return rc;
 }
@@ -129,7 +100,7 @@ int psoc6_flash_erase(off_t addr, size_t size)
 	uint32_t rowIdxStart, rowIdxEnd, rowNum;
 	uint8_t  buff[CY_FLASH_SIZEOF_ROW];
 
-	addrStart = FLASH_DEVICE_BASE + addr;
+	addrStart = addr;
 	addrEnd   = addrStart + size;
 
 	/* find if area bounds are aligned to rows */
@@ -197,33 +168,6 @@ int psoc6_flash_erase(off_t addr, size_t size)
 	return rc;
 }
 
-int psoc6_flash_write_protection_set(bool enable)
-{
-	(void)(enable);
-	/* N/A in PSoC6 Flash Driver */
-	return 0;
-}
-
-int psoc6_flash_pm_ctl(u32_t command, void *context)
-{
-	(void)(command);
-	(void)(context);
-	/* Nothing to do here */
-	return 0;
-}
-
-const struct flash_driver_api psoc6_flash_api =
-{
-	.read 				= psoc6_flash_read,
-	.write 				= psoc6_flash_write,
-	.erase 				= psoc6_flash_erase,
-	.write_protection 	= psoc6_flash_write_protection_set,
-#if defined(CONFIG_FLASH_PAGE_LAYOUT)
-	.page_layout 		= (flash_api_pages_layout)psoc6_flash_pages_layout,
-#endif
-	.write_block_size = 4,
-};
-
 /*******************************************************************************
 * Function Name: psoc6_flash_write_hal
 ****************************************************************************//**
@@ -265,17 +209,18 @@ int psoc6_flash_write_hal(uint8_t data[],
 
     bool cond1, cond2, cond3;
 
-    /* Make sure, that varFlash[] points to Flash or WFlash */
+    /* Make sure, that varFlash[] points to Flash */
     cond1 = ((eeOffset >= CY_FLASH_BASE) &&
     		((eeOffset + len) <= (CY_FLASH_BASE + CY_FLASH_SIZE)));
 
-    cond2 = ((eeOffset >= CY_EM_EEPROM_BASE) &&
-    		((eeOffset + len) <= (CY_EM_EEPROM_BASE + CY_EM_EEPROM_SIZE)));
+//    cond2 = ((eeOffset >= CY_EM_EEPROM_BASE) &&
+//    		((eeOffset + len) <= (CY_EM_EEPROM_BASE + CY_EM_EEPROM_SIZE)));
+//
+//	cond3 = ((eeOffset >= (uint32_t)SFLASH->BLE_DEVICE_ADDRESS) &&
+//			((eeOffset + len) <= ((uint32_t)SFLASH->BLE_DEVICE_ADDRESS + CY_FLASH_SIZEOF_ROW)));
 
-	cond3 = ((eeOffset >= (uint32_t)SFLASH->BLE_DEVICE_ADDRESS) &&
-			((eeOffset + len) <= ((uint32_t)SFLASH->BLE_DEVICE_ADDRESS + CY_FLASH_SIZEOF_ROW)));
-
-    if(cond1 || cond2 || cond3)
+//    if(cond1 || cond2 || cond3)
+    if(cond1)
     {
         eeOffset -= CY_FLASH_BASE;
         rowId = eeOffset / CY_FLASH_SIZEOF_ROW;
@@ -319,7 +264,7 @@ int psoc6_flash_write_hal(uint8_t data[],
         rc = CY_FLASH_DRV_INVALID_INPUT_PARAMETERS;
     }
 
-    /* Return BLE error code */
+    /* Return error code */
     switch(rc)
     {
         case CY_FLASH_DRV_SUCCESS:

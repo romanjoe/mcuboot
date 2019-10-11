@@ -1,15 +1,14 @@
 /***************************************************************************//**
-* \file cy_flash_pal.h
+* \file cy_flash_psoc6.h
 * \version 1.0
 *
 * \brief
-*  This is the source file of flash driver adoption layer between PSoC6 
-*  and standard MCUBoot code.
+*  This is the header file for PSoC6 flash driver adoption layer.
 *
 ********************************************************************************
 * \copyright
 *
-* (c) 2019, Cypress Semiconductor Corporation
+* © 2019, Cypress Semiconductor Corporation
 * or a subsidiary of Cypress Semiconductor Corporation. All rights
 * reserved.
 *
@@ -46,22 +45,21 @@
 *
 ******************************************************************************/
 
-/*< Opens the area for use. id is one of the `fa_id`s */
-int     flash_area_open(uint8_t id, const struct flash_area **);
-void    flash_area_close(const struct flash_area *);
-/*< Reads `len` bytes of flash memory at `off` to the buffer at `dst` */
-int     flash_area_read(const struct flash_area *, uint32_t off, void *dst,
-                     uint32_t len);
-/*< Writes `len` bytes of flash memory at `off` from the buffer at `src` */
-int     flash_area_write(const struct flash_area *, uint32_t off,
-                     const void *src, uint32_t len);
-/*< Erases `len` bytes of flash memory at `off` */
-int     flash_area_erase(const struct flash_area *, uint32_t off, uint32_t len);
-/*< Returns this `flash_area`s alignment */
-uint8_t flash_area_align(const struct flash_area *);
-/*< Initializes an array of flash_area elements for the slot's sectors */
-int     flash_area_to_sectors(int idx, int *cnt, struct flash_area *ret);
-/*< Returns the `fa_id` for slot, where slot is 0 (primary) or 1 (secondary) */
-int     flash_area_id_from_image_slot(int slot);
-/*< Returns the slot, for the `fa_id` supplied */
-int     flash_area_id_to_image_slot(int area_id);
+#ifndef CY_FLASH_PSOC6_H_
+#define CY_FLASH_PSOC6_H_
+
+#include "stddef.h"
+#include "stdbool.h"
+
+#ifndef off_t
+typedef long int off_t;
+#endif
+
+int psoc6_flash_read(off_t addr, void *data, size_t len);
+int psoc6_flash_write(off_t addr, const void *data, size_t len);
+int psoc6_flash_erase(off_t addr, size_t size);
+
+int psoc6_flash_write_hal(uint8_t data[],
+                            uint32_t address,
+                            uint32_t len);
+#endif /* CY_FLASH_PSOC6_H_ */

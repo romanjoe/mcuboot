@@ -47,13 +47,14 @@ DEFINES_APP := -DMBEDTLS_CONFIG_FILE="\"crypto_config_sw.h\""
 SOURCES_MCUBOOT := $(wildcard $(CURDIR)/../bootutil/src/*.c)
 
 SOURCES_APP := $(wildcard $(CUR_APP_PATH)/*.c)
+SOURCES_APP += $(wildcard $(CURDIR)/cy_flash_pal/*.c)
 #SOURCES_APP += $(SOURCES_MCUBOOT)
 
 #INCLUDES_DIRS_MCUBOOT := $(addprefix -I, $(CURDIR)/../bootutil/include)
 #INCLUDES_DIRS_MCUBOOT += $(addprefix -I, $(CURDIR)/../bootutil/src)
 
 INCLUDE_DIRS_APP := $(addprefix -I, $(CURDIR))
-INCLUDE_DIRS_APP += $(addprefix -I, $(CURDIR)/cy_flash_pal)
+INCLUDE_DIRS_APP += $(addprefix -I, $(CURDIR)/cy_flash_pal/include)
 INCLUDE_DIRS_APP += $(addprefix -I, $(CUR_APP_PATH))
 INCLUDE_DIRS_APP += $(addprefix -I, $(CUR_APP_PATH)/config)
 INCLUDE_DIRS_APP += $(addprefix -I, $(CUR_APP_PATH)/os)

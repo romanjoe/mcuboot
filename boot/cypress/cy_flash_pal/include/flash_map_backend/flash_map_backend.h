@@ -1,4 +1,10 @@
 /*
+ * Copyright (c) 2018 Nordic Semiconductor ASA
+ * Copyright (c) 2015 Runtime Inc
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+ /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -16,7 +22,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-/*******************************************************************************
+ /*******************************************************************************
 * \copyright
 *
 * (c) 2018, Cypress Semiconductor Corporation
@@ -59,36 +65,62 @@
 * so agrees to indemnify Cypress against all liability.
 *
 ********************************************************************************/
+#ifndef __FLASH_MAP_BACKEND_H__
+#define __FLASH_MAP_BACKEND_H__
 
-#ifndef H_UTIL_FLASH_MAP_
-#define H_UTIL_FLASH_MAP_
+#include <mcuboot_config/mcuboot_config.h>
+#include "cy_flash.h"
 
-//#include "cy_flash_map.h"
-
-#define FLASH_DEV_NAME					CONFIG_SOC_FLASH_PSOC6_NAME
-#define FLASH_ALIGN						4
-
-#define FLASH_DEVICE_BASE 				0x10000000
-
-#define FLASH_AREA_IMAGE_0_SIZE			FLASH_AREA_IMAGE_SIZE
-
-#define FLASH_AREA_IMAGE_1_SIZE			FLASH_AREA_IMAGE_SIZE
-
-#define FLASH_AREA_IMAGE_SCRATCH_OFFSET	0xF0000
-#define FLASH_AREA_IMAGE_SCRATCH_SIZE	0x1000
-
-#if((FLASH_AREA_IMAGE_0_OFFSET & 0x3FF) != 0)
-#error "FLASH_AREA_IMAGE_0_OFFSET must be even to 0x400 (vector table size)."
+#ifndef CY_BOOT_SCRATCH_SIZE
+#define CY_BOOT_SCRATCH_SIZE                (0x1000)
 #endif
 
-#if((FLASH_AREA_IMAGE_1_OFFSET & 0x3FF) != 0)
-#error "FLASH_AREA_IMAGE_1_OFFSET must be even to 0x400 (vector table size)."
+#ifndef CY_BOOT_BOOTLOADER_SIZE
+#define CY_BOOT_BOOTLOADER_SIZE             (0x10000)
 #endif
 
-#define CY_IMG_HDR_SIZE 0x400
+#ifndef CY_BOOT_PRIMARY_1_SIZE
+#define CY_BOOT_PRIMARY_1_SIZE              (0x10000)
+#endif
 
-#ifdef __cplusplus
-extern "C" {
+#ifndef CY_BOOT_SECONDARY_1_SIZE
+#define CY_BOOT_SECONDARY_1_SIZE            (0x10000)
+#endif
+
+#if (MCUBOOT_IMAGE_NUMBER == 2) /* if dual-image */
+#ifndef CY_BOOT_PRIMARY_2_SIZE
+#define CY_BOOT_PRIMARY_2_SIZE              (0x10000)
+#endif
+
+#ifndef CY_BOOT_SECONDARY_2_SIZE
+#define CY_BOOT_SECONDARY_2_SIZE            (0x10000)
+#endif
+#endif
+
+#if (MCUBOOT_IMAGE_NUMBER == 1)
+
+#define FLASH_AREA_IMAGE_PRIMARY(x)    (((x) == 0) ?          \
+                                         FLASH_AREA_IMAGE_0 : \
+                                         FLASH_AREA_IMAGE_0)
+#define FLASH_AREA_IMAGE_SECONDARY(x)  (((x) == 0) ?          \
+                                         FLASH_AREA_IMAGE_1 : \
+                                         FLASH_AREA_IMAGE_1)
+
+#elif (MCUBOOT_IMAGE_NUMBER == 2)
+
+#define FLASH_AREA_IMAGE_PRIMARY(x)    (((x) == 0) ?          \
+                                         FLASH_AREA_IMAGE_0 : \
+                                        ((x) == 1) ?          \
+                                         FLASH_AREA_IMAGE_2 : \
+                                         255)
+#define FLASH_AREA_IMAGE_SECONDARY(x)  (((x) == 0) ?          \
+                                         FLASH_AREA_IMAGE_1 : \
+                                        ((x) == 1) ?          \
+                                         FLASH_AREA_IMAGE_3 : \
+                                         255)
+
+#else
+#error "Image slot and flash area mapping is not defined"
 #endif
 
 /**
@@ -167,56 +199,35 @@ struct flash_map_entry {
     unsigned int ref_count;
 };
 
-
 /*
  * Retrieve a memory-mapped flash device's base address.
- *
  * On success, the address will be stored in the value pointed to by
  * ret.
- *
  * Returns 0 on success, or an error code on failure.
  */
 int flash_device_base(uint8_t fd_id, uintptr_t *ret);
 
-/*
- * Start using flash area.
- */
-int flash_area_open(uint8_t id, const struct flash_area **);
+/*< Opens the area for use. id is one of the `fa_id`s */
+int     flash_area_open(uint8_t id, const struct flash_area **);
+void    flash_area_close(const struct flash_area *);
+/*< Reads `len` bytes of flash memory at `off` to the buffer at `dst` */
+int     flash_area_read(const struct flash_area *, uint32_t off, void *dst,
+                     uint32_t len);
+/*< Writes `len` bytes of flash memory at `off` from the buffer at `src` */
+int     flash_area_write(const struct flash_area *, uint32_t off,
+                     const void *src, uint32_t len);
+/*< Erases `len` bytes of flash memory at `off` */
+int     flash_area_erase(const struct flash_area *, uint32_t off, uint32_t len);
+/*< Returns this `flash_area`s alignment */
+size_t flash_area_align(const struct flash_area *);
+/*< Initializes an array of flash_area elements for the slot's sectors */
+int     flash_area_to_sectors(int idx, int *cnt, struct flash_area *ret);
+/*< Returns the `fa_id` for slot, where slot is 0 (primary) or 1 (secondary) */
+int     flash_area_id_from_image_slot(int slot);
+/*< Returns the slot, for the `fa_id` supplied */
+int     flash_area_id_to_image_slot(int area_id);
 
-void flash_area_close(const struct flash_area *);
+int flash_area_id_from_multi_image_slot(int image_index, int slot);
+int flash_area_id_to_multi_image_slot(int image_index, int area_id);
 
-/*
- * Read/write/erase. Offset is relative from beginning of flash area.
- */
-int flash_area_read(const struct flash_area *, uint32_t off, void *dst,
-  uint32_t len);
-int flash_area_write(const struct flash_area *, uint32_t off, const void *src,
-  uint32_t len);
-int flash_area_erase(const struct flash_area *, uint32_t off, uint32_t len);
-
-/*
- * Alignment restriction for flash writes.
- */
-uint8_t flash_area_align(const struct flash_area *);
-
-/*
- * Given flash area ID, return info about sectors within the area.
- */
-int flash_area_get_sectors(int fa_id, int *count,
-  struct flash_sector *sectors);
-
-/*
- * Similar to flash_area_get_sectors(), but return the values in an
- * array of struct flash_area instead.
- */
-/* __attribute__((deprecated)) */
-int flash_area_to_sectors(int idx, int *cnt, struct flash_area *ret);
-
-int flash_area_id_from_image_slot(int slot);
-int flash_area_id_to_image_slot(int area_id);
-
-#ifdef __cplusplus
-}
-#endif
-
-#endif /* H_UTIL_FLASH_MAP_ */
+#endif /* __FLASH_MAP_BACKEND_H__ */

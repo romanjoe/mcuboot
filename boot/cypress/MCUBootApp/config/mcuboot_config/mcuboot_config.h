@@ -9,6 +9,7 @@
 #ifndef __MCUBOOT_CONFIG_H__
 #define __MCUBOOT_CONFIG_H__
 
+<<<<<<< HEAD
 =======
 /* Copyright 2019 Cypress Semiconductor Corporation
  *
@@ -22,6 +23,10 @@
 #include "cy_flash.h"
 #include "flash_map/flash_map.h"
 >>>>>>> Initial implementation of "cypress" port infrastructure to upstream MCUBoot
+=======
+// TODO: can it be there?
+#include "cy_flash.h"
+>>>>>>> Saving work:
 /*
  * Template configuration file for MCUboot.
  *
@@ -123,7 +128,23 @@
 /* Default maximum number of flash sectors per image slot; change
  * as desirable. */
 <<<<<<< HEAD
+<<<<<<< HEAD
 #define MCUBOOT_MAX_IMG_SECTORS 128
+=======
+
+#ifdef CY_USE_EXTERNAL_FLASH
+// #define MCUBOOT_MAX_IMG_SECTORS 3936
+#define MCUBOOT_MAX_IMG_SECTORS ((CY_FLASH_SIZE - CY_BOOT_BOOTLOADER_SIZE - CY_BOOT_SCRATCH_SIZE) / CY_FLASH_SIZEOF_ROW)
+#else
+// #define MCUBOOT_MAX_IMG_SECTORS 1968
+#ifndef CY_FLASH_SIZEOF_ROW
+#error
+#endif
+#define MCUBOOT_MAX_IMG_SECTORS ((CY_FLASH_SIZE - CY_BOOT_BOOTLOADER_SIZE - CY_BOOT_SCRATCH_SIZE) / CY_FLASH_SIZEOF_ROW / 2)
+#endif
+
+//#define MCUBOOT_MAX_IMG_SECTORS 128
+>>>>>>> Saving work:
 
 /* Default number of separately updateable images; change in case of
  * multiple images. */

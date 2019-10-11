@@ -36,6 +36,10 @@ APPS := MCUBootApp
 OUT := $(APP_NAME)/out
 OUT_TARGET := $(OUT)/$(TARGET)
 
+OUT_CFG := $(OUT_TARGET)/$(BUILDCFG)
+OUT_OBJ := $(OUT_CFG)/obj
+OUT_APP := $(OUT_CFG)
+
 ifneq ($(filter $(APP_NAME), $(APPS)),)
 include ./$(APP_NAME)/$(APP_NAME).mk
 else
@@ -161,30 +165,32 @@ all: clean app
 
 app:
 	@`mkdir -p ./$(OUT)`
-	@`mkdir -p ./$(OUT)/obj`
 	@`mkdir -p ./$(OUT_TARGET)`
+	@`mkdir -p ./$(OUT_CFG)`
+	@`mkdir -p ./$(OUT_OBJ)`
+
 	$(MAKE) build -j8
 
-build: $(OUT_TARGET)/$(APP_NAME).hex
-	$(GCC_PATH)/bin/arm-none-eabi-size --format=berkeley $(OUT_TARGET)/$(APP_NAME).elf
+build: $(OUT_APP)/$(APP_NAME).hex
+	$(GCC_PATH)/bin/arm-none-eabi-size --format=berkeley $(OUT_APP)/$(APP_NAME).elf
 
-$(OUT_TARGET)/$(APP_NAME).hex: $(OUT_TARGET)/$(APP_NAME).elf
-	$(GCC_PATH)/bin/arm-none-eabi-objcopy $(OUT_TARGET)/$(APP_NAME).elf -O ihex $(OUT_TARGET)/$(APP_NAME).hex
+$(OUT_APP)/$(APP_NAME).hex: $(OUT_APP)/$(APP_NAME).elf
+	$(GCC_PATH)/bin/arm-none-eabi-objcopy $(OUT_APP)/$(APP_NAME).elf -O ihex $(OUT_APP)/$(APP_NAME).hex
 
-$(OUT_TARGET)/$(APP_NAME).elf: $(addprefix $(OUT)/obj/, $(O_FILES))
+$(OUT_APP)/$(APP_NAME).elf: $(addprefix $(OUT_OBJ)/, $(O_FILES))
 	@echo "We are here "
 	@# the first  line prints a command
 	@# the second line executes the command and prints the command's stdout and stderr with colors
 	@echo $(LD) $(O_FILES) -o $@ $(LDFLAGS)
-	@$(LD) $(addprefix $(OUT)/obj/, $(O_FILES)) -o $@ $(LDFLAGS)
+	@$(LD) $(addprefix $(OUT_OBJ)/, $(O_FILES)) -o $@ $(LDFLAGS)
 
 
-$(OUT)/obj/%.o: %.c
+$(OUT_OBJ)/%.o: %.c
 	@echo $(CC) $(CFLAGS) $(INCLUDE_DIRS) $(CC_DEPEND) $(@:.o=.d) -c $< -o $@
 	@$(CC) $(CFLAGS) $(INCLUDE_DIRS) $(CC_DEPEND) $(@:.o=.d) -c $< -o $@
 	@echo
 
-$(OUT)/obj/%.o: %.S
+$(OUT_OBJ)/%.o: %.S
 ifeq ($(COMPILER), GCC_ARM)
 	@echo @$(CC) $(CFLAGS) $(INCLUDE_DIRS) -c $< -o $@
 	@$(CC) $(CFLAGS) $(INCLUDE_DIRS) -c $< -o $@
@@ -192,8 +198,8 @@ else
 	@echo $(AS) $< -o $@ $(AS_FLAGS)
 	@$(AS) $< -o $@ $(AS_FLAGS)
 endif
-	@echo
-
+#	@echo
+#***********************************
 #$(OUT)/obj/%.o: %.S
 #ifeq ($(COMPILER), GCC_ARM)
 #	@echo @$(CC) $(CFLAGS) $(INCLUDE_DIRS) -c $< -o $@

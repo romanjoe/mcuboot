@@ -9,7 +9,7 @@ There are four assets required:
 
 Those are present as submodules.
 
-To retrive working environment, root repo has to be cloned recursively:
+To retrieve working environment, root repo has to be cloned recursively:
 
 __git clone --recursive https://github.com/JuulLabs-OSS/mcuboot.git__
 
