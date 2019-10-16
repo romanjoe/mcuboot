@@ -91,7 +91,7 @@ CFLAGS += $(DEFINES)
 #################################################################################
 ## Application sources
 #################################################################################
-#SOURCES_APPLICATION = 
+#SOURCES_APPLICATION =
 #
 #################################################################################
 ## Common section
@@ -179,42 +179,43 @@ $(OUT_APP)/$(APP_NAME).hex: $(OUT_APP)/$(APP_NAME).elf
 
 $(OUT_TARGET)/$(APP_NAME).elf: $(addprefix $(OUT)/obj/, $(O_FILES))
 	@echo "LD $@"
-	@echo "We are here "
-	@# the first  line prints a command
-	@# the second line executes the command and prints the command's stdout and stderr with colors
-# 	@echo $(LD) $(O_FILES) -o $@ $(LDFLAGS)
-	@$(LD) $(addprefix $(OUT)/obj/, $(O_FILES)) -o $@ $(LDFLAGS)
+ifeq ($(MAKEINFO), 1)
+	@echo $(LD) $(O_FILES) $(CC_DEPEND) $(@:.o=.d) -o $@ $(LDFLAGS)
+endif
+	@$(LD) $(addprefix $(OUT)/obj/, $(O_FILES)) $(CC_DEPEND) $(@:.o=.d) -o $@ $(LDFLAGS)
 
 
 $(OUT)/obj/%.o: %.c
 	@echo "CC $<"
-# 	@echo $(CC) $(CFLAGS) $(INCLUDE_DIRS) $(CC_DEPEND) $(@:.o=.d) -c $< -o $@
+ifeq ($(MAKEINFO), 1)
+	@echo $(CC) $(CFLAGS) $(INCLUDE_DIRS) $(CC_DEPEND) $(@:.o=.d) -c $< -o $@
+endif
 	@$(CC) $(CFLAGS) $(INCLUDE_DIRS) $(CC_DEPEND) $(@:.o=.d) -c $< -o $@
-# 	@echo
+ifeq ($(MAKEINFO), 1)
+	@echo
+endif
 
 $(OUT)/obj/%.o: %.S
-	@echo "AS $<" 
+	@echo "AS $<"
 ifeq ($(COMPILER), GCC_ARM)
-# 	@echo @$(CC) $(CFLAGS) $(INCLUDE_DIRS) -c $< -o $@
-	@$(CC) $(CFLAGS) $(INCLUDE_DIRS) -c $< -o $@
+ifeq ($(MAKEINFO), 1)
+	@echo @$(CC) $(CFLAGS) $(INCLUDE_DIRS) $(CC_DEPEND) $(@:.o=.d) -c $< -o $@
+endif
+	@$(CC) $(CFLAGS) $(INCLUDE_DIRS) $(CC_DEPEND) $(@:.o=.d) -c $< -o $@
 else
 	@echo $(AS) $< -o $@ $(AS_FLAGS)
 	@$(AS) $< -o $@ $(AS_FLAGS)
 endif
-# 	@echo
-
-#$(OUT)/obj/%.o: %.S
-#ifeq ($(COMPILER), GCC_ARM)
-#	@echo @$(CC) $(CFLAGS) $(INCLUDE_DIRS) -c $< -o $@
-#	@$(CC) $(CFLAGS) $(INCLUDE_DIRS) -c $< -o $@
-#else
-#	@echo $(AS) $< -o $@ $(AS_FLAGS)
-#	@$(AS) $< -o $@ $(AS_FLAGS)
-#endif
-#	@echo
+ifeq ($(MAKEINFO), 1)
+	@echo
+endif
 
 clean:
-	rm -rf ./$(APP_NAME)/out
+	@echo "Cleanup out directory..."
+	@rm -rf ./$(APP_NAME)/out
+
+upload:
+	cp $(OUT_TARGET)/$(APP_NAME).hex /d/
 
 #all: target_psoc6_ble2 target_psoc6_2m target_psoc6_2m_psvp
 #
@@ -236,7 +237,7 @@ clean:
 #
 #
 ## Build target
-#build: 
+#build:
 
 #	$(OUT)/$(APP_NAME)_CM0p.hex
 #	$(GCC_PATH)/bin/arm-none-eabi-size -B -d $(OUT)/$(APP_NAME)_CM0p.elf
