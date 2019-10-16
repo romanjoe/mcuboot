@@ -177,29 +177,32 @@ build: $(OUT_APP)/$(APP_NAME).hex
 $(OUT_APP)/$(APP_NAME).hex: $(OUT_APP)/$(APP_NAME).elf
 	$(GCC_PATH)/bin/arm-none-eabi-objcopy $(OUT_APP)/$(APP_NAME).elf -O ihex $(OUT_APP)/$(APP_NAME).hex
 
-$(OUT_APP)/$(APP_NAME).elf: $(addprefix $(OUT_OBJ)/, $(O_FILES))
+$(OUT_TARGET)/$(APP_NAME).elf: $(addprefix $(OUT)/obj/, $(O_FILES))
+	@echo "LD $@"
 	@echo "We are here "
 	@# the first  line prints a command
 	@# the second line executes the command and prints the command's stdout and stderr with colors
-	@echo $(LD) $(O_FILES) -o $@ $(LDFLAGS)
-	@$(LD) $(addprefix $(OUT_OBJ)/, $(O_FILES)) -o $@ $(LDFLAGS)
+# 	@echo $(LD) $(O_FILES) -o $@ $(LDFLAGS)
+	@$(LD) $(addprefix $(OUT)/obj/, $(O_FILES)) -o $@ $(LDFLAGS)
 
 
-$(OUT_OBJ)/%.o: %.c
-	@echo $(CC) $(CFLAGS) $(INCLUDE_DIRS) $(CC_DEPEND) $(@:.o=.d) -c $< -o $@
+$(OUT)/obj/%.o: %.c
+	@echo "CC $<"
+# 	@echo $(CC) $(CFLAGS) $(INCLUDE_DIRS) $(CC_DEPEND) $(@:.o=.d) -c $< -o $@
 	@$(CC) $(CFLAGS) $(INCLUDE_DIRS) $(CC_DEPEND) $(@:.o=.d) -c $< -o $@
-	@echo
+# 	@echo
 
-$(OUT_OBJ)/%.o: %.S
+$(OUT)/obj/%.o: %.S
+	@echo "AS $<" 
 ifeq ($(COMPILER), GCC_ARM)
-	@echo @$(CC) $(CFLAGS) $(INCLUDE_DIRS) -c $< -o $@
+# 	@echo @$(CC) $(CFLAGS) $(INCLUDE_DIRS) -c $< -o $@
 	@$(CC) $(CFLAGS) $(INCLUDE_DIRS) -c $< -o $@
 else
 	@echo $(AS) $< -o $@ $(AS_FLAGS)
 	@$(AS) $< -o $@ $(AS_FLAGS)
 endif
-#	@echo
-#***********************************
+# 	@echo
+
 #$(OUT)/obj/%.o: %.S
 #ifeq ($(COMPILER), GCC_ARM)
 #	@echo @$(CC) $(CFLAGS) $(INCLUDE_DIRS) -c $< -o $@
