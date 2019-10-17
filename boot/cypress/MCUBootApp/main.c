@@ -83,13 +83,11 @@ int main(void)
     /* Initialize the device and board peripherals */
     int result = cybsp_init();
 
-    if (result != CY_RSLT_SUCCESS)
-    {
-        CY_ASSERT(0);
-    }
-
-    /* Initialize the User LED */
-    cyhal_gpio_init((cyhal_gpio_t) CYBSP_USER_LED1, CYHAL_GPIO_DIR_OUTPUT, CYHAL_GPIO_DRIVE_STRONG, CYBSP_LED_STATE_OFF);
+typedef struct
+{
+    unsigned char *buf;
+    size_t length;
+} rnd_buf_info;
 
     /* Initialize retarget-io to use the debug UART port */
     cy_retarget_io_init(CYBSP_DEBUG_UART_TX, CYBSP_DEBUG_UART_RX, CY_RETARGET_IO_BAUDRATE);
