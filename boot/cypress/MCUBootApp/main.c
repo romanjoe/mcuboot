@@ -50,6 +50,7 @@
 * limitations under the License.
 *******************************************************************************/
 
+/* Cypress pdl/bsp headers */
 #include "cy_pdl.h"
 #include "cyhal.h"
 #include "cybsp.h"
@@ -120,9 +121,84 @@ typedef struct
     for (;;)
     {
 		/* Toggle the user LED periodically */
-        Cy_SysLib_Delay(blinky_period) ;
+        Cy_SysLib_Delay(500) ;
+#include "flash_map_backend/flash_map_backend.h"
+
+
+static void do_boot(struct boot_rsp *rsp)
+{
+    uintptr_t flash_base;
+    uint32_t app_addr = 0;
+    int rc;
+
+    /* The beginning of the image is the ARM vector table, containing
+     * the initial stack pointer address and the reset vector
+     * consecutively. Manually set the stack pointer and jump into the
+     * reset vector
+     */
+    rc = flash_device_base(rsp->br_flash_dev_id, &flash_base);
+    //assert(rc == 0);
 
         /* Invert the USER LED state */
         cyhal_gpio_toggle((cyhal_gpio_t) CYBSP_USER_LED1);
+#if (MCUBOOT_LOG_LEVEL != MCUBOOT_LOG_LEVEL_OFF)
+   while(!Cy_SCB_UART_IsTxComplete(SCB5))
+   {
+      /* Wait until UART transmission complete */
+   }
+#endif
+
+    app_addr = flash_base + rsp->br_image_off + rsp->br_hdr->ih_hdr_size;
+
+    __enable_irq();
+
+    /* It is aligned to 0x400 (256 records in vector table*4bytes each) */
+    Cy_SysEnableCM4(app_addr);
+}
+
+int main(void)
+{
+    // /* Initialize the device and board peripherals */
+    // int result = cybsp_init();
+
+    // if (result != CY_RSLT_SUCCESS)
+    // {
+    //     CY_ASSERT(0);
+    // }
+
+    // /* Initialize the User LED */
+    // cyhal_gpio_init((cyhal_gpio_t) CYBSP_USER_LED1, CYHAL_GPIO_DIR_OUTPUT, CYHAL_GPIO_DRIVE_STRONG, CYBSP_LED_STATE_OFF);
+
+    // /* enable interrupts */
+    // __enable_irq();
+
+    // for (;;)
+    // {
+	// 	/* Toggle the user LED periodically */
+    //     Cy_SysLib_Delay(500) ;
+
+    //     /* Invert the USER LED state */
+    //     cyhal_gpio_toggle((cyhal_gpio_t) CYBSP_USER_LED1);
+    // }
+
+    struct boot_rsp rsp;
+    int rc = 0;
+
+    /* Check if pre-image processing was successful */
+    /* If not - remain in ACQUIRE state so device will not be dead */
+    CYBL_ASSERT(0 == rc);
+    BOOT_LOG_INF("Processing available images");
+
+    rc = boot_go(&rsp);
+    if (rc != 0)
+    {
+        BOOT_LOG_ERR("Unable to find bootable image");
+        while (1);
     }
+
+    BOOT_LOG_INF("Jumping to the image in slot 0");
+    do_boot(&rsp);
+
+    BOOT_LOG_ERR("Never should get here");
+    while (1);
 }

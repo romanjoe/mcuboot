@@ -224,7 +224,7 @@ int flash_area_read(const struct flash_area *fa, uint32_t off, void *dst,
 }
 
 /*< Writes `len` bytes of flash memory at `off` from the buffer at `src` */
-int     flash_area_write(const struct flash_area *fa, uint32_t off,
+int flash_area_write(const struct flash_area *fa, uint32_t off,
                      const void *src, uint32_t len)
 {
     int rc = 0;
@@ -254,7 +254,7 @@ int     flash_area_write(const struct flash_area *fa, uint32_t off,
 }
 
 /*< Erases `len` bytes of flash memory at `off` */
-int     flash_area_erase(const struct flash_area *fa, uint32_t off, uint32_t len)
+int flash_area_erase(const struct flash_area *fa, uint32_t off, uint32_t len)
 {
     int rc = 0;
     size_t addr;

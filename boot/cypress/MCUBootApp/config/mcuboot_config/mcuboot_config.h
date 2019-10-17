@@ -6,9 +6,6 @@
  */
 #ifndef MCUBOOT_CONFIG_H
 #define MCUBOOT_CONFIG_H
-
-#include "cy_flash.h"
-#include "flash_map/flash_map.h"
 /*
  * Template configuration file for MCUboot.
  *
@@ -86,10 +83,11 @@
 
 /* Default maximum number of flash sectors per image slot; change
  * as desirable. */
-extern struct flash_map_entry part_map[];
+#define MCUBOOT_MAX_IMG_SECTORS 128
 
-/* Image Size / 512b sector WR/RD by PSoC6 FlashDriver */
-inline size_t Cy_BootMaxImgSectors(void) {return ((part_map[0].area.fa_size)/CY_FLASH_SIZEOF_ROW);}
+/* Default number of separately updateable images; change in case of
+ * multiple images. */
+#define MCUBOOT_IMAGE_NUMBER 1
 
 /*
  * Logging
@@ -128,7 +126,7 @@ inline size_t Cy_BootMaxImgSectors(void) {return ((part_map[0].area.fa_size)/CY_
  * NOTE: Each source file is still able to request its own logging level by
  * defining BOOT_LOG_LEVEL before #including `bootutil_log.h`
  */
-#define MCUBOOT_HAVE_LOGGING 1
+#define MCUBOOT_HAVE_LOGGING 0
 
 #define MCUBOOT_ROLLBACK_PROTECTION
 
