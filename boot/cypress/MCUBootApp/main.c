@@ -73,7 +73,7 @@ int main(void)
     __enable_irq();
 
     struct flash_area *fa;
-    result = flash_area_open(0, fa);
+    result = flash_area_open(0, &fa);
 
     for (;;)
     {

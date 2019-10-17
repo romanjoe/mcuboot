@@ -21,7 +21,7 @@
 * \version 1.0
 *
 * \brief
-*  This is the source file of flash driver adaptation layer between PSoC6 
+*  This is the source file of flash driver adaptation layer between PSoC6
 *  and standard MCUBoot code.
 *
 ********************************************************************************
@@ -74,6 +74,8 @@
 #include "mcuboot_config/mcuboot_config.h"
 
 #include "cy_pdl.h"
+
+#define NELEMS(x)  (sizeof(x) / sizeof((x)[0]))
 
 #ifdef CY_FLASH_MAP_EXT_DESC
 /* Nothing to be there when external FlashMap Descriptors are used */
@@ -162,17 +164,17 @@ struct flash_area *boot_area_descs[] =
     &secondary_2,
 #endif
     &scratch,
-    NULL
 };
 #endif
 
 /*< Opens the area for use. id is one of the `fa_id`s */
-int     flash_area_open(uint8_t id, const struct flash_area **fa)
+int flash_area_open(uint8_t id, const struct flash_area **fa)
 {
     int ret = -1;
     uint32_t i = 0;
+    uint32_t descs_n = NELEMS(boot_area_descs);
 
-    while(boot_area_descs[i] != NULL)
+    for(i = 0; i < descs_n; i++)
     {
         if(id == boot_area_descs[i]->fa_id)
         {
@@ -180,26 +182,8 @@ int     flash_area_open(uint8_t id, const struct flash_area **fa)
             ret = 0;
             break;
         }
-        i++;
     }
 
-//    switch(id)
-//    {
-//    case FLASH_AREA_BOOTLOADER:
-//        *fa = &bootloader;
-//        break;
-//    case FLASH_AREA_IMAGE_PRIMARY(0):
-//        *fa = &primary;
-//        break;
-//    case FLASH_AREA_IMAGE_SECONDARY(0):
-//        *fa = &secondary;
-//        break;
-//    case FLASH_AREA_IMAGE_SCRATCH:
-//        *fa = &scratch;
-//        break;
-//    default:
-//        ret = -1;
-//    }
     return ret;
 }
 
@@ -214,17 +198,17 @@ int     flash_area_read(const struct flash_area *fa, uint32_t off, void *dst,
 {
     int rc = 0;
     size_t addr;
-    
+
     if (fa->fa_device_id == FLASH_DEVICE_INTERNAL_FLASH)
     {
         assert(off < fa->fa_off);
         assert(off + len < fa->fa_off);
-        
+
         addr = fa->fa_off + off;
 
         rc = psoc6_flash_read(addr, dst, len);
     }
-#ifdef CY_USE_EXTERNAL_FLASH    
+#ifdef CY_USE_EXTERNAL_FLASH
     else if ((fa->fa_device_id & FLASH_DEVICE_EXTERNAL_FLAG) == FLASH_DEVICE_EXTERNAL_FLAG)
     {
         // TODO: implement/split into psoc6_smif_read()
@@ -254,7 +238,7 @@ int     flash_area_write(const struct flash_area *fa, uint32_t off,
         addr = fa->fa_off + off;
         rc = psoc6_flash_write(addr, src, len);
     }
-#ifdef CY_USE_EXTERNAL_FLASH    
+#ifdef CY_USE_EXTERNAL_FLASH
     else if ((fa->fa_device_id & FLASH_DEVICE_EXTERNAL_FLAG) == FLASH_DEVICE_EXTERNAL_FLAG)
     {
         // TODO: implement/split into psoc6_smif_write()
@@ -265,7 +249,7 @@ int     flash_area_write(const struct flash_area *fa, uint32_t off,
         /* incorrect/non-existing flash device id */
         rc = -1;
     }
-    
+
     return rc;
 }
 
@@ -283,7 +267,7 @@ int     flash_area_erase(const struct flash_area *fa, uint32_t off, uint32_t len
         addr = fa->fa_off + off;
         rc = psoc6_flash_erase(addr, len);
     }
-#ifdef CY_USE_EXTERNAL_FLASH    
+#ifdef CY_USE_EXTERNAL_FLASH
     else if ((fa->fa_device_id & FLASH_DEVICE_EXTERNAL_FLAG) == FLASH_DEVICE_EXTERNAL_FLAG)
     {
         // TODO: implement/split into psoc6_smif_erase()
@@ -307,7 +291,7 @@ size_t flash_area_align(const struct flash_area *fa)
         // TODO: check how to handle that
         ret = CY_FLASH_ALIGN;
     }
-#ifdef CY_USE_EXTERNAL_FLASH    
+#ifdef CY_USE_EXTERNAL_FLASH
     else if ((fa->fa_device_id & FLASH_DEVICE_EXTERNAL_FLAG) == FLASH_DEVICE_EXTERNAL_FLAG)
     {
         // TODO: implement for SMIF WR/ERASE size
