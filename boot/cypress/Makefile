@@ -27,18 +27,16 @@
 # Main settings
 ################################################################################
 
+# Defines whether or not show verbose build output
 MAKEINFO ?= 1
-
+# Application name by default
 APP_NAME ?= MCUBootApp
-#
+# Set of supported applications
 APPS := MCUBootApp
-
+# Output folder
 OUT := $(APP_NAME)/out
+# Output folder to contain build artifacts
 OUT_TARGET := $(OUT)/$(TARGET)
-
-OUT_CFG := $(OUT_TARGET)/$(BUILDCFG)
-OUT_OBJ := $(OUT_CFG)/obj
-OUT_APP := $(OUT_CFG)
 
 ifneq ($(filter $(APP_NAME), $(APPS)),)
 include ./$(APP_NAME)/$(APP_NAME).mk
@@ -60,7 +58,6 @@ O_FILES := $(notdir $(C_FILES:.c=.o)) $(addsuffix .o, $(notdir $(basename $(ASM_
 
 DEFINES := $(DEFINES_APP)
 DEFINES += $(DEFINES_LIBS)
-DEFINES += -DCUSTOM_DEF
 
 ifeq ($(MAKEINFO), 1)
 $(info ==============================================================================)
@@ -165,17 +162,16 @@ all: clean app
 
 app:
 	@`mkdir -p ./$(OUT)`
+	@`mkdir -p ./$(OUT)/obj`
 	@`mkdir -p ./$(OUT_TARGET)`
-	@`mkdir -p ./$(OUT_CFG)`
-	@`mkdir -p ./$(OUT_OBJ)`
-
 	$(MAKE) build -j8
 
-build: $(OUT_APP)/$(APP_NAME).hex
-	$(GCC_PATH)/bin/arm-none-eabi-size --format=berkeley $(OUT_APP)/$(APP_NAME).elf
-
-$(OUT_APP)/$(APP_NAME).hex: $(OUT_APP)/$(APP_NAME).elf
-	$(GCC_PATH)/bin/arm-none-eabi-objcopy $(OUT_APP)/$(APP_NAME).elf -O ihex $(OUT_APP)/$(APP_NAME).hex
+build: $(OUT_TARGET)/$(APP_NAME).hex
+	$(GCC_PATH)/bin/arm-none-eabi-objdump $(OUT_TARGET)/$(APP_NAME).hex -s > $(OUT_TARGET)/$(APP_NAME).lst
+	$(GCC_PATH)/bin/arm-none-eabi-size --format=berkeley $(OUT_TARGET)/$(APP_NAME).elf
+	
+$(OUT_TARGET)/$(APP_NAME).hex: $(OUT_TARGET)/$(APP_NAME).elf
+	$(GCC_PATH)/bin/arm-none-eabi-objcopy $(OUT_TARGET)/$(APP_NAME).elf -O ihex $(OUT_TARGET)/$(APP_NAME).hex
 
 $(OUT_TARGET)/$(APP_NAME).elf: $(addprefix $(OUT)/obj/, $(O_FILES))
 	@echo "LD $@"
@@ -214,96 +210,17 @@ clean:
 	@echo "Cleanup out directory..."
 	@rm -rf ./$(APP_NAME)/out
 
+# TODO: update with generic solution
 upload:
+ifeq ($(HOST_OS), win)
 	cp $(OUT_TARGET)/$(APP_NAME).hex /d/
+else
+	cp $(OUT_TARGET)/$(APP_NAME).hex /Volumes/DAPLINK 
+endif
 
-#all: target_psoc6_ble2 target_psoc6_2m target_psoc6_2m_psvp
-#
-#build_info:
-#	@echo "*** Asm sources (ASM_FILES):"
-#	@echo $(ASM_FILES)
-#	@echo "*** C sources (C_FILES):"
-#	@echo $(C_FILES)
-#	@echo "*** Object files (O_FILES):"
-#	@echo $(O_FILES)
-##
-#target_psoc6_ble2:
-#	#Build for PSOC6ble2 $(SI_REVISION)
-#	@`mkdir -p ./out`
-#	@`mkdir -p ./out/obj`
-#	@`mkdir -p ./out/obj/$@`
-#	$(MAKE) build FAMILY:=$(FAMILY_PSOC6A_BLE2) TARGET=$@ SI_REVISION:=0D SUFFIX_FAMILY:=psoc62_0D SUFFIX_VERSION:=4.0.0.$(CY_BUILD_NUMBER) -j4
-#
-#
-#
-## Build target
-#build:
-
-#	$(OUT)/$(APP_NAME)_CM0p.hex
-#	$(GCC_PATH)/bin/arm-none-eabi-size -B -d $(OUT)/$(APP_NAME)_CM0p.elf
-#build:
-
-#$(OUT)/$(APP_NAME)_CM0p.hex: $(OUT)/$(APP_NAME)_CM0p_link.elf $(OUT)/fb_$(SUFFIX_FAMILY)_cm4_link.elf $(OUT)/fb_$(SUFFIX_FAMILY)_policy_templ1.elf $(OUT)/fb_$(SUFFIX_FAMILY)_policy_templ2.elf
-#	$(PDL_ELFTOOL) --sign $(OUT)/fb_$(SUFFIX_FAMILY)_cm4_link.elf --output $(OUT)/fb_$(SUFFIX_FAMILY)_cm4_link.elf
-#	$(PDL_ELFTOOL) --sign $(OUT)/$(APP_NAME)_CM0p_link.elf --output $(OUT)/$(APP_NAME)_CM0p_link.elf
-#	$(PDL_ELFTOOL) --merge $(OUT)/$(APP_NAME)_CM0p_link.elf $(OUT)/fb_$(SUFFIX_FAMILY)_cm4_link.elf --output $(OUT)/$(APP_NAME)_CM0p.elf
-#	$(PDL_ELFTOOL) --merge $(OUT)/$(APP_NAME)_CM0p.elf $(OUT)/fb_$(SUFFIX_FAMILY)_policy_templ1.elf --output $(OUT)/$(APP_NAME)_CM0p_link.elf --hex $(OUT)/$(APP_NAME)_CM0p.hex
-#	$(PDL_ELFTOOL) --merge $(OUT)/$(APP_NAME)_CM0p.elf $(OUT)/fb_$(SUFFIX_FAMILY)_policy_templ2.elf --output $(OUT)/$(APP_NAME)_CM0p2_link.elf --hex $(OUT)/$(APP_NAME)_CM0p_cm0open.hex
-#	$(OBJDUMP) -h -S $(OUT)/$(APP_NAME)_CM0p_link.elf > $(OUT)/$(APP_NAME)_CM0p.asm
-#
-# $(OUT)/$(APP_NAME)_CM0p.elf: $(addprefix $(OUT)/obj/, $(O_FILES))
-# 	@# the first  line prints a command
-# 	@# the second line executes the command and prints the command's stdout and stderr with colors
-# 	@echo $(LD) $(O_FILES) -o $@ $(LDFLAGS)
-# 	@$(LD) $(addprefix $(OUT)/obj/, $(O_FILES)) -o $@ $(LDFLAGS)
-#
-#$(OUT)/fb_$(SUFFIX_FAMILY)_cm4_link.elf : fb_cm4.c
-#	$(CC) $(CFLAGS)  -c fb_cm4.c -o $(OUT)/obj/$(TARGET)/fb_cm4.o
-#	$(LD) $(OUT)/obj/$(TARGET)/fb_cm4.o -o $@ $(LDFLAGS_CM4) $(COLOR_OUTPUT)
-#	$(OBJDUMP) -h -S $(OUT)/fb_$(SUFFIX_FAMILY)_cm4_link.elf > $(OUT)/fb_$(SUFFIX_FAMILY)_cm4.asm
-#
-#$(OUT)/fb_$(SUFFIX_FAMILY)_policy_templ1.elf : fb_policy_templ1.c
-#	$(CC) $(CFLAGS)  -c fb_policy_templ1.c -o $(OUT)/obj/$(TARGET)/fb_policy_templ1.o
-#	$(LD) $(OUT)/obj/$(TARGET)/fb_policy_templ1.o -o $@ $(LDFLAGS_TEMPL) $(COLOR_OUTPUT)
-#	$(OBJDUMP) -h -S $(OUT)/fb_$(SUFFIX_FAMILY)_policy_templ1.elf > $(OUT)/fb_$(SUFFIX_FAMILY)_policy_templ1.asm
-#
-#$(OUT)/fb_$(SUFFIX_FAMILY)_policy_templ2.elf : fb_policy_templ2.c
-#	$(CC) $(CFLAGS)  -c fb_policy_templ2.c -o $(OUT)/obj/$(TARGET)/fb_policy_templ2.o
-#	$(LD) $(OUT)/obj/$(TARGET)/fb_policy_templ2.o -o $@ $(LDFLAGS_TEMPL) $(COLOR_OUTPUT)
-#	$(OBJDUMP) -h -S $(OUT)/fb_$(SUFFIX_FAMILY)_policy_templ2.elf > $(OUT)/fb_$(SUFFIX_FAMILY)_policy_templ2.asm
-#
-
-#$(OUT)/$(APP_NAME)_CM0p.elf : ./$(APP_NAME)/main.c
-#	$(CC) $(CFLAGS)  -c main.c -o $(OUT)/obj/main.o
-#	$(LD) $(OUT)/obj/main.o -o $@ $(LDFLAGS_TEMPL) $(COLOR_OUTPUT)
-##	$(OBJDUMP) -h -S $(OUT)/$(APP_NAME)_CM0p.elf > $(OUT)/fb_$(SUFFIX_FAMILY)_policy_templ2.asm
-
-# $(OUT)/obj/%.o: %.c
-# 	@echo $(CC) $(CFLAGS) $(CC_DEPEND) $(@:.o=.d) -c $< -o $@
-# 	@$(CC) $(CFLAGS) $(CC_DEPEND) $(@:.o=.d) -c $< -o $@ $(COLOR_OUTPUT)
-# 	@echo
-
-# $(OUT)/obj/%.o: %.s
-# ifeq ($(COMPILER), GCC)
-# 	@echo @$(CC) $(CFLAGS) -c $< -o $@
-# 	@$(CC) $(CFLAGS) -c $< -o $@ $(COLOR_OUTPUT)
-# else
-# 	@echo $(AS) $< -o $@ $(AS_FLAGS)
-# 	@$(AS) $< -o $@ $(AS_FLAGS) $(COLOR_OUTPUT)
-# endif
-# 	@echo
-
-# clean:
-# 	rm -rf ./$(APP_NAME)/out
-
-# DEBUG PRINT
-#$(info ******************)
-#$(info LDFLAGS: $(LDFLAGS))
-#$(info ******************)
 ifeq ($(MAKEINFO) , 1)
 $(info ASM_FILES: $(ASM_FILES))
 $(info C_FILES: $(C_FILES))
-$(info INCLUDES: $(INCLUDES))
 $(info INCLUDE_DIRS: $(INCLUDE_DIRS))
 $(info DEFINES: $(DEFINES))
 $(info CC: $(CC))

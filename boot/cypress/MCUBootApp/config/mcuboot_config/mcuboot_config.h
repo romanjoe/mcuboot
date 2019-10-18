@@ -33,7 +33,7 @@
 
 /* Uncomment for ECDSA signatures using curve P-256. */
 #define MCUBOOT_SIGN_EC256
-
+#define NUM_ECC_BYTES (4*8) // rnok: to make compilable
 
 /*
  * Upgrade mode
@@ -137,7 +137,7 @@
 /* Uncomment if your platform has its own mcuboot_config/mcuboot_assert.h.
  * If so, it must provide an ASSERT macro for use by bootutil. Otherwise,
  * "assert" is used. */
-#define MCUBOOT_HAVE_ASSERT_H
+//#define MCUBOOT_HAVE_ASSERT_H
 
 //#ifdef MCUBOOT_SIGN_RSA
 //#error "RSA is not supported in this release."

@@ -56,6 +56,7 @@
 #include "cybsp.h"
 #include "cy_retarget_io.h"
 
+#include "sysflash/sysflash.h"
 #include "flash_map_backend/flash_map_backend.h"
 
 #define BLINKY_PERIOD_OK    (1000u)
@@ -64,6 +65,22 @@
 #define BUFF_SIZE           (128u)
 
 uint32_t read_buff[BUFF_SIZE];
+uint32_t write_buff[BUFF_SIZE] = {  0x06, 0xf7, 0xa5, 0x60, 0x07, 0x82, 0x54, 0x33,
+                                    0xc4, 0xc6, 0x11, 0x53, 0xdf, 0x1a, 0x13, 0x5e,
+                                    0xee, 0x2f, 0x38, 0xec, 0x68, 0x7b, 0x49, 0x2e,
+                                    0xd4, 0x0d, 0x9c, 0x90, 0x34, 0x37, 0x55, 0x76,
+                                    0x06, 0xf7, 0xa5, 0x60, 0x07, 0x82, 0x54, 0x33,
+                                    0xc4, 0xc6, 0x11, 0x53, 0xdf, 0x1a, 0x13, 0x5e,
+                                    0xee, 0x2f, 0x38, 0xec, 0x68, 0x7b, 0x49, 0x2e,
+                                    0xd4, 0x0d, 0x9c, 0x90, 0x34, 0x37, 0x55, 0x76,
+                                    0x06, 0xf7, 0xa5, 0x60, 0x07, 0x82, 0x54, 0x33,
+                                    0xc4, 0xc6, 0x11, 0x53, 0xdf, 0x1a, 0x13, 0x5e,
+                                    0xee, 0x2f, 0x38, 0xec, 0x68, 0x7b, 0x49, 0x2e,
+                                    0xd4, 0x0d, 0x9c, 0x90, 0x34, 0x37, 0x55, 0x76,
+                                    0x06, 0xf7, 0xa5, 0x60, 0x07, 0x82, 0x54, 0x33,
+                                    0xc4, 0xc6, 0x11, 0x53, 0xdf, 0x1a, 0x13, 0x5e,
+                                    0xee, 0x2f, 0x38, 0xec, 0x68, 0x7b, 0x49, 0x2e,
+                                    0xd4, 0x0d, 0x9c, 0x90, 0x34, 0x37, 0x55, 0x76 };
 
 void print_mem(uint32_t *addr, uint32_t len)
 {
@@ -84,11 +101,13 @@ int main(void)
     /* Initialize the device and board peripherals */
     int result = cybsp_init();
 
-typedef struct
-{
-    unsigned char *buf;
-    size_t length;
-} rnd_buf_info;
+    if (result != CY_RSLT_SUCCESS)
+    {
+        CY_ASSERT(0);
+    }
+
+    /* Initialize the User LED */
+    cyhal_gpio_init((cyhal_gpio_t) CYBSP_USER_LED1, CYHAL_GPIO_DIR_OUTPUT, CYHAL_GPIO_DRIVE_STRONG, CYBSP_LED_STATE_OFF);
 
     /* Initialize retarget-io to use the debug UART port */
     cy_retarget_io_init(CYBSP_DEBUG_UART_TX, CYBSP_DEBUG_UART_RX, CY_RETARGET_IO_BAUDRATE);
@@ -98,12 +117,14 @@ typedef struct
 
     printf("\n\r\n\rMCUBoot Application\n\r\n\r");
 
+    /* Flash write test */
     struct flash_area *fa;
-    result = flash_area_open(0, (const struct flash_area **)&fa);
+
+    result = flash_area_open(FLASH_AREA_BOOTLOADER, (const struct flash_area **)&fa);
 
     if(result == CY_RSLT_SUCCESS)
     {
-        result = flash_area_read(fa, 0x100000, read_buff, BUFF_SIZE);
+        result = flash_area_read(fa, 0x0, read_buff, BUFF_SIZE);
         printf("Reading memory:\n\r");
         print_mem(read_buff, BUFF_SIZE/4);
     }
@@ -118,87 +139,38 @@ typedef struct
         blinky_period = BLINKY_PERIOD_ERROR;
     }
 
+    /* Flash write test */
+    result = flash_area_open(FLASH_AREA_IMAGE_SCRATCH, (const struct flash_area **)&fa);
+
+    if(result == CY_RSLT_SUCCESS)
+    {
+        result = flash_area_write(fa, 0x0, write_buff, BUFF_SIZE);
+        printf("Writing memory memory:\n\r");
+        print_mem(write_buff, BUFF_SIZE/4);
+    }
+
+    if(result == CY_RSLT_SUCCESS)
+    {
+        result = flash_area_read(fa, 0x0, read_buff, BUFF_SIZE);
+        printf("Reading memory previously written:\n\r");
+        print_mem(read_buff, BUFF_SIZE/4);
+    }
+    if(result == CY_RSLT_SUCCESS)
+    {
+        flash_area_close((const struct flash_area *)fa);
+    }
+
+    if(result != CY_RSLT_SUCCESS)
+    {
+        blinky_period = BLINKY_PERIOD_ERROR;
+    }
+
     for (;;)
     {
 		/* Toggle the user LED periodically */
-        Cy_SysLib_Delay(500) ;
-#include "flash_map_backend/flash_map_backend.h"
-
-
-static void do_boot(struct boot_rsp *rsp)
-{
-    uintptr_t flash_base;
-    uint32_t app_addr = 0;
-    int rc;
-
-    /* The beginning of the image is the ARM vector table, containing
-     * the initial stack pointer address and the reset vector
-     * consecutively. Manually set the stack pointer and jump into the
-     * reset vector
-     */
-    rc = flash_device_base(rsp->br_flash_dev_id, &flash_base);
-    //assert(rc == 0);
+        Cy_SysLib_Delay(blinky_period) ;
 
         /* Invert the USER LED state */
         cyhal_gpio_toggle((cyhal_gpio_t) CYBSP_USER_LED1);
-#if (MCUBOOT_LOG_LEVEL != MCUBOOT_LOG_LEVEL_OFF)
-   while(!Cy_SCB_UART_IsTxComplete(SCB5))
-   {
-      /* Wait until UART transmission complete */
-   }
-#endif
-
-    app_addr = flash_base + rsp->br_image_off + rsp->br_hdr->ih_hdr_size;
-
-    __enable_irq();
-
-    /* It is aligned to 0x400 (256 records in vector table*4bytes each) */
-    Cy_SysEnableCM4(app_addr);
-}
-
-int main(void)
-{
-    // /* Initialize the device and board peripherals */
-    // int result = cybsp_init();
-
-    // if (result != CY_RSLT_SUCCESS)
-    // {
-    //     CY_ASSERT(0);
-    // }
-
-    // /* Initialize the User LED */
-    // cyhal_gpio_init((cyhal_gpio_t) CYBSP_USER_LED1, CYHAL_GPIO_DIR_OUTPUT, CYHAL_GPIO_DRIVE_STRONG, CYBSP_LED_STATE_OFF);
-
-    // /* enable interrupts */
-    // __enable_irq();
-
-    // for (;;)
-    // {
-	// 	/* Toggle the user LED periodically */
-    //     Cy_SysLib_Delay(500) ;
-
-    //     /* Invert the USER LED state */
-    //     cyhal_gpio_toggle((cyhal_gpio_t) CYBSP_USER_LED1);
-    // }
-
-    struct boot_rsp rsp;
-    int rc = 0;
-
-    /* Check if pre-image processing was successful */
-    /* If not - remain in ACQUIRE state so device will not be dead */
-    CYBL_ASSERT(0 == rc);
-    BOOT_LOG_INF("Processing available images");
-
-    rc = boot_go(&rsp);
-    if (rc != 0)
-    {
-        BOOT_LOG_ERR("Unable to find bootable image");
-        while (1);
     }
-
-    BOOT_LOG_INF("Jumping to the image in slot 0");
-    do_boot(&rsp);
-
-    BOOT_LOG_ERR("Never should get here");
-    while (1);
 }
