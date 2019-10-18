@@ -187,13 +187,13 @@ int flash_area_open(uint8_t id, const struct flash_area **fa)
     return ret;
 }
 
-void    flash_area_close(const struct flash_area *fa)
+void flash_area_close(const struct flash_area *fa)
 {
     (void)fa;/* Nothing to do there */
 }
 
 /*< Reads `len` bytes of flash memory at `off` to the buffer at `dst` */
-int     flash_area_read(const struct flash_area *fa, uint32_t off, void *dst,
+int flash_area_read(const struct flash_area *fa, uint32_t off, void *dst,
                      uint32_t len)
 {
     int rc = 0;
