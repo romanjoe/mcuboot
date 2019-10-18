@@ -17,3 +17,6 @@
 [submodule "boot/cypress/libs/bsp/psoc6hal"]
 	path = boot/cypress/libs/bsp/psoc6hal
 	url = http://git-ore.aus.cypress.com/repo-staging/psoc6hal
+[submodule "boot/cypress/libs/retarget-io"]
+	path = boot/cypress/libs/retarget-io
+	url = http://git-ore.aus.cypress.com/repo-staging/retarget-io
