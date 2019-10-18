@@ -50,6 +50,7 @@ SOURCES_BSP := $(wildcard $(BSP_PATH)/COMPONENT_BSP_DESIGN_MODUS/GeneratedSource
 SOURCES_BSP += $(BSP_PATH)/startup/system_psoc6_cm0plus.c
 SOURCES_BSP += $(BSP_PATH)/cybsp.c
 SOURCES_BSP += $(wildcard $(CUR_LIBS_PATH)/bsp/psoc6hal/src/*.c)
+SOURCES_BSP += $(wildcard $(CUR_LIBS_PATH)/bsp/psoc6hal/src/pin_packages/*.c)
 
 
 # Collect dirrectories containing headers for TARGET BSP

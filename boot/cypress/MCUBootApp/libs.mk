@@ -37,12 +37,18 @@ SOURCES_PDL := $(wildcard $(CUR_LIBS_PATH)/pdl/psoc6pdl/drivers/source/*.c)
 # Collect source files for MbedTLS
 #SOURCES_MBEDTLS := $(wildcard $(CUR_LIBS_PATH)/mbedtls/library/*.c)
 
+# Collect source files for Retarget-io
+SOURCES_RETARGET_IO := $(wildcard $(CUR_LIBS_PATH)/retarget-io/*.c)
+
 # PDL related include directories
 INCLUDE_DIRS_PDL := $(CUR_LIBS_PATH)/pdl/psoc6pdl/drivers/include
 INCLUDE_DIRS_PDL += $(CUR_LIBS_PATH)/pdl/psoc6pdl/devices/include/ip
 INCLUDE_DIRS_PDL += $(CUR_LIBS_PATH)/pdl/psoc6pdl/devices/include
 INCLUDE_DIRS_PDL += $(CUR_LIBS_PATH)/pdl/psoc6pdl/cmsis/include
 INCLUDE_DIRS_PDL += $(CUR_LIBS_PATH)/bsp/core-lib/include
+
+# Retarget-io related include directories
+INCLUDE_DIRS_RETARGET_IO := $(CUR_LIBS_PATH)/retarget-io
 
 # MbedTLS related include directories
 #INCLUDE_DIRS_MBEDTLS := $(CUR_LIBS_PATH)/mbedtls/include
@@ -51,11 +57,13 @@ INCLUDE_DIRS_PDL += $(CUR_LIBS_PATH)/bsp/core-lib/include
 # Collected source files for libraries
 SOURCES_LIBS := $(SOURCES_PDL)
 SOURCES_LIBS += $(SOURCES_BSP)
+SOURCES_LIBS += $(SOURCES_RETARGET_IO)
 #SOURCES_LIBS += $(SOURCES_MBEDTLS)
 
 # Collected include directories for libraries
 INCLUDE_DIRS_LIBS := $(addprefix -I,$(INCLUDE_DIRS_PDL))
 INCLUDE_DIRS_LIBS += $(addprefix -I,$(INCLUDE_DIRS_BSP))
+INCLUDE_DIRS_LIBS += $(addprefix -I,$(INCLUDE_DIRS_RETARGET_IO))
 #INCLUDE_DIRS_LIBS += $(addprefix -I,$(INCLUDE_DIRS_MBEDTLS))
 
 ASM_FILES_PDL := 
