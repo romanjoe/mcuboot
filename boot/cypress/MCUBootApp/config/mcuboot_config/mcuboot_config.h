@@ -32,7 +32,7 @@
 //#define MCUBOOT_SIGN_RSA
 
 /* Uncomment for ECDSA signatures using curve P-256. */
-#define MCUBOOT_SIGN_EC256
+#define MCUBOOT_SIGN_EC256 1
 #define NUM_ECC_BYTES (4*8) // rnok: to make compilable
 
 /*
@@ -146,5 +146,10 @@
 #ifdef MCUBOOT_SIGN_EC
 #error "EC256 supported only."
 #endif
+
+#define MCUBOOT_WATCHDOG_FEED()         \
+    do {                                \
+        /* TODO: to be implemented */   \
+    } while (0)
 
 #endif /* MCUBOOT_CONFIG_H */
