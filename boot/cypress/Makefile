@@ -40,6 +40,8 @@ OUT_TARGET := $(OUT)/$(TARGET)
 # Defines whether or not image should be signed
 SIGN ?= 0
 
+HEADER_OFFSET ?= 0
+
 ifneq ($(filter $(APP_NAME), $(APPS)),)
 include ./$(APP_NAME)/$(APP_NAME).mk
 else
@@ -171,14 +173,13 @@ app:
 build: $(OUT_TARGET)/$(APP_NAME).hex
 	$(GCC_PATH)/bin/arm-none-eabi-objdump $(OUT_TARGET)/$(APP_NAME).hex -s > $(OUT_TARGET)/$(APP_NAME).lst
 	$(GCC_PATH)/bin/arm-none-eabi-size --format=berkeley $(OUT_TARGET)/$(APP_NAME).elf
+
+$(OUT_TARGET)/$(APP_NAME).hex: $(OUT_TARGET)/$(APP_NAME).elf
+	$(GCC_PATH)/bin/arm-none-eabi-objcopy --change-addresses=$(HEADER_OFFSET) -O ihex $(OUT_TARGET)/$(APP_NAME).elf $(OUT_TARGET)/$(APP_NAME).hex
 ifeq ($(SIGN), 1)
 	python3 ../../scripts/imgtool.py sign -k $(APP_NAME)/keys/cypress-test-ec-p256.pem -v "1.0" --align 8 -H 1024 -S 65536 --pad-header --overwrite-only $(OUT_TARGET)/$(APP_NAME).hex $(OUT_TARGET)/$(APP_NAME)_signed.hex
 	$(GCC_PATH)/bin/arm-none-eabi-objdump $(OUT_TARGET)/$(APP_NAME)_signed.hex -s > $(OUT_TARGET)/$(APP_NAME)_signed.lst
 endif
-
-
-$(OUT_TARGET)/$(APP_NAME).hex: $(OUT_TARGET)/$(APP_NAME).elf
-	$(GCC_PATH)/bin/arm-none-eabi-objcopy $(OUT_TARGET)/$(APP_NAME).elf -O ihex $(OUT_TARGET)/$(APP_NAME).hex
 
 $(OUT_TARGET)/$(APP_NAME).elf: $(addprefix $(OUT)/obj/, $(O_FILES))
 	@echo "LD $@"
@@ -215,7 +216,7 @@ endif
 
 clean:
 	@echo "Cleanup out directory..."
-	@rm -rf ./$(APP_NAME)/out
+	rm -rf ./$(APP_NAME)/out
 
 # TODO: update with generic solution
 upload:
