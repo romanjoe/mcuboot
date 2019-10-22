@@ -48,7 +48,8 @@ endif
 # NOTE: Absolute pathes for now for the sake of development
 ifeq ($(HOST_OS), win)
 	ifeq ($(COMPILER), GCC_ARM)
-		GCC_PATH := c:\Users\$(USERNAME)\ModusToolbox_1.0\tools\gcc-7.2.1-1.0
+		TOOLCHAIN ?= c:\Users\$(USERNAME)\ModusToolbox_1.0\tools\gcc-7.2.1-1.0
+		GCC_PATH := $(TOOLCHAIN)
 		# executables
 		CC       := "$(GCC_PATH)/bin/arm-none-eabi-gcc"
 		LD       := $(CC)
@@ -62,13 +63,15 @@ ifeq ($(HOST_OS), win)
 	endif
 
 else ifeq ($(HOST_OS), osx)
-	GCC_PATH := /Users/$(USER)/toolchains/gcc-arm-none-eabi-6
+	TOOLCHAIN ?= /Users/$(USER)/toolchains/gcc-arm-none-eabi-6
+	GCC_PATH := $(TOOLCHAIN)
 
 	CC := "$(GCC_PATH)/bin/arm-none-eabi-gcc"
 	LD := $(CC)
 
 else ifeq ($(HOST_OS), linux)
-#	GCC_PATH := /usr/bin/gcc-arm-none-eabi/bin/arm-none-eabi-gcc
+	TOOLCHAIN ?= /usr/bin/gcc-arm-none-eabi/bin/arm-none-eabi-gcc
+	GCC_PATH := $(TOOLCHAIN)
 	# executables
 	CC := "$(GCC_PATH)/bin/arm-none-eabi-gcc"
 	LD := $(CC) 
