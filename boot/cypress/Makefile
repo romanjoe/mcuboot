@@ -188,9 +188,9 @@ endif
 $(OUT_FILE_NAME).elf: $(addprefix $(OUT)/obj/, $(O_FILES))
 	@echo "LD $@"
 ifeq ($(MAKEINFO), 1)
-	@echo $(LD) $(O_FILES) $(CC_DEPEND) $(@:.o=.d) -o $@ $(LDFLAGS)
+	@echo $(LD) $(O_FILES) $(CC_DEPEND) $(@:.o=.d) -o $@ $(LDFLAGS) -Wl,-Map,$(OUT_FILE_NAME).map
 endif
-	@$(LD) $(addprefix $(OUT)/obj/, $(O_FILES)) $(CC_DEPEND) $(@:.o=.d) -o $@ $(LDFLAGS)
+	@$(LD) $(addprefix $(OUT)/obj/, $(O_FILES)) $(CC_DEPEND) $(@:.o=.d) -o $@ $(LDFLAGS) -Wl,-Map,$(OUT_FILE_NAME).map
 
 
 $(OUT)/obj/%.o: %.c
