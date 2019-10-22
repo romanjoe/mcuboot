@@ -55,33 +55,60 @@
 #include "cybsp.h"
 #include "cy_retarget_io.h"
 
-#define BLINKY_PERIOD_OK    (1000u)
-#define BLINKY_PERIOD_ERROR (100u)
+#ifdef BOOT_IMG
+    #define BLINK_PERIOD          (1000u)
+    #define GREETING_MESSAGE_VER  "[BlinkyApp] BlinkyApp v1.0\n"
+    #define GREETING_MESSAGE_INFO "[BlinkyApp] Red led blinks with 1 sec period\n"
+#elif UPGRADE_IMG
+    #define BLINK_PERIOD          (100u)
+    #define GREETING_MESSAGE_VER  "[BlinkyApp] BlinkyApp v2.0 [+]\n"
+    #define GREETING_MESSAGE_INFO "[BlinkyApp] Red led blinks with 0.5 sec period\n"
+#else
+    #error "[BlinkyApp] Please specify type of image: -DBOOT_IMG or -DUPGRADE_IMG\n\r"
+#endif
 
-int main(void)
+void check_result(int res)
 {
-    uint32_t blinky_period = BLINKY_PERIOD_OK;
-
-/* Initialize the device and board peripherals */
-    int result = cybsp_init() ;
-
-    if (result != CY_RSLT_SUCCESS)
+    if (res != CY_RSLT_SUCCESS)
     {
         CY_ASSERT(0);
     }
+}
 
-    /* Initialize the User LED */
-    cyhal_gpio_init((cyhal_gpio_t) CYBSP_USER_LED1, CYHAL_GPIO_DIR_OUTPUT, CYHAL_GPIO_DRIVE_STRONG, CYBSP_LED_STATE_OFF);
+void test_app_init_hardware(void)
+{
+    int rc = !CY_RSLT_SUCCESS;
 
-    /* Initialize retarget-io to use the debug UART port */
-    cy_retarget_io_init(CYBSP_DEBUG_UART_TX, CYBSP_DEBUG_UART_RX, CY_RETARGET_IO_BAUDRATE);
+    cybsp_init();
 
     /* enable interrupts */
     __enable_irq();
 
-    printf("\n\r========================================================================\n\r");
-    printf("Test Application started. \n\rRed led should now blink with 1 second period.");
-    printf("\n\r========================================================================\n\r");
+    /* Initialize retarget-io to use the debug UART port */
+    check_result(cy_retarget_io_init(CYBSP_DEBUG_UART_TX, CYBSP_DEBUG_UART_RX,
+                                     CY_RETARGET_IO_BAUDRATE));
+    
+    printf("===========================\n");
+    printf(GREETING_MESSAGE_VER);
+    printf("===========================\n");
+
+    /* Initialize the User LED */
+    check_result(cyhal_gpio_init((cyhal_gpio_t) CYBSP_USER_LED1, CYHAL_GPIO_DIR_OUTPUT,
+                                 CYHAL_GPIO_DRIVE_STRONG, CYBSP_LED_STATE_OFF));
+
+    printf("\r[BlinkyApp] GPIO initialized \n");
+    printf("[BlinkyApp] UART initialized \n");
+    printf("[BlinkyApp] Retarget I/O set to 115200 baudrate \n");
+    
+}
+
+int main(void)
+{
+    uint32_t blinky_period = BLINK_PERIOD;
+
+    test_app_init_hardware();
+
+    printf(GREETING_MESSAGE_INFO);
 
     for (;;)
     {
