@@ -48,13 +48,13 @@ endif
 # NOTE: Absolute pathes for now for the sake of development
 ifeq ($(HOST_OS), win)
 	ifeq ($(COMPILER), GCC_ARM)
-		GCC_PATH ?= c:\Users\$(USERNAME)\ModusToolbox_1.0\tools\gcc-7.2.1-1.0
+		GCC_PATH ?= c:/Users/$(USERNAME)/ModusToolbox_1.0/tools/gcc-7.2.1-1.0
 		# executables
 		CC       := "$(GCC_PATH)/bin/arm-none-eabi-gcc"
 		LD       :=  $(CC)
 
 	else ifeq ($(COMPILER), IAR)
-		IAR_PATH ?= C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.0\arm
+		IAR_PATH ?= C:/Program Files (x86)/IAR Systems/Embedded Workbench 8.0/arm
 		# executables
 		CC       := "$(IAR_PATH)/bin/iccarm.exe"
 		AS       := "$(IAR_PATH)/bin/iasmarm.exe"

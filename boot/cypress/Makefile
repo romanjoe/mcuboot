@@ -37,6 +37,10 @@ APPS := MCUBootApp BlinkyApp
 OUT := $(APP_NAME)/out
 # Output folder to contain build artifacts
 OUT_TARGET := $(OUT)/$(TARGET)
+
+OUT_CFG := $(OUT_TARGET)/$(BUILDCFG)
+OUT_OBJ := $(OUT_CFG)/obj
+OUT_APP := $(OUT_CFG)
 # Defines whether or not image should be signed
 SIGN ?= 0
 
@@ -162,7 +166,7 @@ VPATH = $(dir $(C_FILES) $(ASM_FILES))
 
 # Default name pattern for output files
 # may be modified in %Application%.mk file
-OUT_FILE_NAME ?= $(OUT_TARGET)/$(APP_NAME)
+OUT_FILE_NAME ?= $(OUT_APP)/$(APP_NAME)
 
 PYTHON_PATH ?= python3 
 IMGTOOL_PATH ?=	../../scripts/imgtool.py
@@ -178,30 +182,31 @@ all: clean app
 
 app:
 	@`mkdir -p ./$(OUT)`
-	@`mkdir -p ./$(OUT)/obj`
 	@`mkdir -p ./$(OUT_TARGET)`
+	@`mkdir -p ./$(OUT_CFG)`
+	@`mkdir -p ./$(OUT_OBJ)`
 	$(MAKE) build -j8
 
-build: $(OUT_FILE_NAME).hex
-	$(GCC_PATH)/bin/arm-none-eabi-objdump $(OUT_FILE_NAME).hex -s > $(OUT_FILE_NAME).lst
-	$(GCC_PATH)/bin/arm-none-eabi-size --format=berkeley $(OUT_FILE_NAME).elf
+build: $(OUT_APP)/$(APP_NAME).hex
+	$(GCC_PATH)/bin/arm-none-eabi-objdump $(OUT_APP)/$(APP_NAME).hex -s > $(OUT_FILE_NAME).lst
+	$(GCC_PATH)/bin/arm-none-eabi-size --format=berkeley $(OUT_APP)/$(APP_NAME).elf
 
-$(OUT_FILE_NAME).hex: $(OUT_FILE_NAME).elf
-	$(GCC_PATH)/bin/arm-none-eabi-objcopy --change-addresses=$(HEADER_OFFSET) -O ihex $(OUT_FILE_NAME).elf $(OUT_FILE_NAME).hex
+$(OUT_APP)/$(APP_NAME).hex: $(OUT_APP)/$(APP_NAME).elf
+	$(GCC_PATH)/bin/arm-none-eabi-objcopy --change-addresses=$(HEADER_OFFSET) -O ihex $(OUT_APP)/$(APP_NAME).elf $(OUT_APP)/$(APP_NAME).hex
 ifeq ($(SIGN), 1)
-	$(PYTHON_PATH) $(IMGTOOL_PATH) $(SIGN_ARGS) $(OUT_FILE_NAME).hex $(OUT_FILE_NAME)_signed.hex
-	$(GCC_PATH)/bin/arm-none-eabi-objdump $(OUT_FILE_NAME)_signed.hex -s > $(OUT_FILE_NAME)_signed.lst
+	$(PYTHON_PATH) $(IMGTOOL_PATH) $(SIGN_ARGS) $(OUT_APP)/$(APP_NAME).hex $(OUT_APP)/$(APP_NAME)_signed.hex
+	$(GCC_PATH)/bin/arm-none-eabi-objdump $(OUT_APP)/$(APP_NAME)_signed.hex -s > $(OUT_APP)/$(APP_NAME)_signed.lst
 endif
 
-$(OUT_FILE_NAME).elf: $(addprefix $(OUT)/obj/, $(O_FILES))
+$(OUT_APP)/$(APP_NAME).elf: $(addprefix $(OUT_OBJ)/, $(O_FILES))
 	@echo "LD $@"
 ifeq ($(MAKEINFO), 1)
 	@echo $(LD) $(O_FILES) $(CC_DEPEND) $(@:.o=.d) -o $@ $(LDFLAGS) -Wl,-Map,$(OUT_FILE_NAME).map
 endif
-	@$(LD) $(addprefix $(OUT)/obj/, $(O_FILES)) $(CC_DEPEND) $(@:.o=.d) -o $@ $(LDFLAGS) -Wl,-Map,$(OUT_FILE_NAME).map
+	@$(LD) $(addprefix $(OUT_OBJ)/, $(O_FILES)) $(CC_DEPEND) $(@:.o=.d) -o $@ $(LDFLAGS) -Wl,-Map,$(OUT_FILE_NAME).map
 
 
-$(OUT)/obj/%.o: %.c
+$(OUT_OBJ)/%.o: %.c
 	@echo "CC $<"
 ifeq ($(MAKEINFO), 1)
 	@echo $(CC) $(CFLAGS) $(INCLUDE_DIRS) $(CC_DEPEND) $(@:.o=.d) -c $< -o $@
@@ -211,7 +216,7 @@ ifeq ($(MAKEINFO), 1)
 	@echo
 endif
 
-$(OUT)/obj/%.o: %.S
+$(OUT_OBJ)/%.o: %.S
 	@echo "AS $<"
 ifeq ($(COMPILER), GCC_ARM)
 ifeq ($(MAKEINFO), 1)
