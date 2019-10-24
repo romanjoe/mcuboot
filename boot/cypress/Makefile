@@ -196,9 +196,9 @@ clean:
 # TODO: update with generic solution
 upload:
 ifeq ($(HOST_OS), win)
-	cp $(OUT_APP)/$(APP_NAME).hex /d/
+	cp $(OUT_FILE_NAME).hex /d/
 else
-	cp $(OUT_APP)/$(APP_NAME).hex /Volumes/DAPLINK 
+	cp $(OUT_FILE_NAME).hex /Volumes/DAPLINK 
 endif
 
 ifeq ($(MAKEINFO) , 1)

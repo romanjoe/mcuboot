@@ -13,10 +13,7 @@ lin_build:
     - pwd
     - git submodule deinit --all -f
     - git submodule update --init
-    - cd boot/cypress/libs/mbedtls
-    - git submodule deinit --all -f
-    - git submodule update --init
-    - cd ../..
+    - cd boot/cypress
     - make app APP_NAME=MCUBootApp TARGET=CY8CPROTO-062-4343W-M0 BUILDCFG=Debug TOOLCHAIN_PATH=/home/fw-security/ModusToolbox/tools_2.0/gcc-7.2.1
 
 
@@ -29,10 +26,7 @@ mac_build:
     - pwd
     - git submodule deinit --all -f
     - git submodule update --init
-    - cd boot/cypress/libs/mbedtls
-    - git submodule deinit --all -f
-    - git submodule update --init
-    - cd ../..
+    - cd boot/cypress
     - make app APP_NAME=MCUBootApp TARGET=CY8CPROTO-062-4343W-M0 BUILDCFG=Debug TOOLCHAIN_PATH=/Applications/ModusToolbox/tools_2.0/gcc-7.2.1
     
 
@@ -44,10 +38,7 @@ win_build:
     - cd
     - git submodule deinit --all -f
     - git submodule update --init
-    - cd boot/cypress/libs/mbedtls
-    - git submodule deinit --all -f
-    - git submodule update --init
-    - cd ../..
+    - cd boot/cypress
     - C:/msys64/usr/bin/make.exe app APP_NAME=MCUBootApp TARGET=CY8CPROTO-062-4343W-M0 BUILDCFG=Debug TOOLCHAIN_PATH=C:/Users/cydesigner/ModusToolbox/tools_2.0/gcc-7.2.1
 
 # Preparing build artifacts for a deployment job
