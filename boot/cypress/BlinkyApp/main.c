@@ -60,9 +60,9 @@
     #define GREETING_MESSAGE_VER  "[BlinkyApp] BlinkyApp v1.0\n"
     #define GREETING_MESSAGE_INFO "[BlinkyApp] Red led blinks with 1 sec period\n"
 #elif UPGRADE_IMG
-    #define BLINK_PERIOD          (100u)
+    #define BLINK_PERIOD          (250u)
     #define GREETING_MESSAGE_VER  "[BlinkyApp] BlinkyApp v2.0 [+]\n"
-    #define GREETING_MESSAGE_INFO "[BlinkyApp] Red led blinks with 0.5 sec period\n"
+    #define GREETING_MESSAGE_INFO "[BlinkyApp] Red led blinks with 0.25 sec period\n"
 #else
     #error "[BlinkyApp] Please specify type of image: -DBOOT_IMG or -DUPGRADE_IMG\n\r"
 #endif
@@ -113,7 +113,7 @@ int main(void)
     for (;;)
     {
 		/* Toggle the user LED periodically */
-        Cy_SysLib_Delay(blinky_period);
+        Cy_SysLib_Delay(blinky_period/2);
 
         /* Invert the USER LED state */
         cyhal_gpio_toggle((cyhal_gpio_t) CYBSP_USER_LED1);
