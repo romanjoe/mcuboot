@@ -166,7 +166,7 @@ OUT_FILE_NAME ?= $(OUT_TARGET)/$(APP_NAME)
 
 PYTHON_PATH ?= python3 
 IMGTOOL_PATH ?=	../../scripts/imgtool.py
-SIGN_ARGS := sign -H 1024 --pad-header --align 8 -v "2.0" -S 65536 -M 512 --overwrite-only
+SIGN_ARGS := sign -H 1024 --pad-header --align 8 -v "2.0" -S 65536 -M 512 --overwrite-only -R 0
 
 ifeq ($(UPGRADE_IMG), 1)
 	SIGN_ARGS += --pad
