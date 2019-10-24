@@ -83,47 +83,6 @@ DEFINES +=
 # updating CFLAGS at this point as DEFINES are completed
 CFLAGS += $(DEFINES)
 
-#DEFINES := -D$(CHIP_ID) -DCY_FB_OPT_$(SI_REVISION) -DNDEBUG -DCY_CORE_ID=0 $(DEFINES_CRYPTO) $(DEFINES_PDL) $(DEFINES_OTHER) -DCY_FB_BUILD_NUMBER=$(CY_BUILD_NUMBER)UL $(PSVP_DEFINES) $(DEFINES_JWT)
-
-## helper suffix for versioning support
-#SUFFIX := $(SUFFIX_FAMILY)_$(SUFFIX_VERSION)
-#
-#ifeq ($(CY_BUILD_NUMBER), )
-#	# may be useful when building from a command line on a local machine
-#	CY_BUILD_NUMBER := 10
-#endif
-#
-#################################################################################
-## Application sources
-#################################################################################
-#SOURCES_APPLICATION =
-#
-#################################################################################
-## Common section
-#################################################################################
-#
-## Project includes path define
-#INCLUDES := $(INCLUDES_JWT) $(INCLUDES_CRYPTOLIB) $(INCLUDES_PDL) $(INCLUDES_MBED_CRYPTO) -I"./hal"  -I"./crypto" -I.
-#
-## Other defines
-#DEFINES_OTHER := -DFB_SECURE_ENABLED -DCY_FLASH_RWW_DRV_SUPPORT_DISABLED
-#ifneq ($(FAMILY), $(FAMILY_PSOC6A_512K))
-#	DEFINES_OTHER := $(DEFINES_OTHER) -DCY_FB_ATTESTATON_ENABLE
-#endif
-#
-#ifneq (, $(findstring _psvp_, $(SUFFIX)))
-#	PSVP_DEFINES := -DCY_FB_OPT_PSVP
-#endif
-#
-#DEFINES := -D$(CHIP_ID) -DCY_FB_OPT_$(SI_REVISION) -DNDEBUG -DCY_CORE_ID=0 $(DEFINES_CRYPTO) $(DEFINES_PDL) $(DEFINES_OTHER) -DCY_FB_BUILD_NUMBER=$(CY_BUILD_NUMBER)UL $(PSVP_DEFINES) $(DEFINES_JWT)
-#
-#DEFINES += -DCY_FB_FAMILY=$(FAMILY) -DCY_FB_SI_REV=$(SI_REV)
-#
-#
-#ASM_FILES += $(ASM_FILES_PDL)
-#C_FILES := $(SOURCES_CRYPTOLIB) $(SOURCES_MBED_CRYPTO) $(SOURCES_JWT) $(SOURCES_BSP) $(SOURCES_PDL) $(SOURCES_FB)
-#C_FILES += $(wildcard hal/*.c)
-
 VPATH = $(dir $(C_FILES) $(ASM_FILES))
 
 ## Set colors for unix compatible terminals, otherwise comment this code
@@ -161,7 +120,6 @@ VPATH = $(dir $(C_FILES) $(ASM_FILES))
 #
 #	COLOR_OUTPUT =
 #endif
-#
 #
 
 # Default name pattern for output files
