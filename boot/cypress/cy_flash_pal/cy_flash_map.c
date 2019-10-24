@@ -72,6 +72,7 @@
 #include <sysflash/sysflash.h>
 #include "cy_flash_psoc6.h"
 #include "mcuboot_config/mcuboot_config.h"
+#include "mcuboot_config/mcuboot_logging.h"
 
 #include "cy_pdl.h"
 
