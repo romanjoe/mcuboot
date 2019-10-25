@@ -63,7 +63,7 @@ ifeq ($(HOST_OS), win)
 	endif
 
 else ifeq ($(HOST_OS), osx)
-	TOOLCHAIN_PATH ?= /Users/$(USER)/toolchains/gcc-arm-none-eabi-6
+	TOOLCHAIN_PATH ?= /opt/gcc-arm-none-eabi
 	GCC_PATH := $(TOOLCHAIN_PATH)
 
 	CC := "$(GCC_PATH)/bin/arm-none-eabi-gcc"
