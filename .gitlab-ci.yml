@@ -65,7 +65,7 @@ win_build:
 # Preparing build artifacts for a deployment job
     - cd ../..
     - mkdir deploy
-    - Copy-Item -Path ./boot/cypress/MCUBootApp/out/CY8CPROTO-062-4343W-M0/ -Destination ./deploy/CY8CPROTO-062-4343W-M0/ -Recurse
+    - Copy-Item -Path ./boot/cypress/MCUBootApp/out/CY8CPROTO-062-4343W-M0/Debug -Destination ./deploy/CY8CPROTO-062-4343W-M0/Debug -Recurse
   artifacts:
     expire_in: 1 weeks
     paths:
