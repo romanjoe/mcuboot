@@ -2,11 +2,11 @@
 
 **Description:**
 
-This application is based on upstream MCUBoot library. It is designed be first application started by FlashBoot on CM0p.
+This application is based on upstream MCUBoot library. It is designed be first application started on CM0p.
 
 Features implemented:
 * Run on CM0p core
-* Has dubug prints to terminal on 115200
+* Has debug prints to terminal on 115200
 * Can validate image hash of 2 slots in flash memory BOOT and UPGRADE
 * Starts image located in BOOT slot after validating signature
 * Performs upgrade operation from UPGRADE slot to BOOT slot after UPGRADE image hash verification
@@ -20,6 +20,8 @@ Features implemented:
 Size of slots `0x10000` - 64kb
 
 **How to build MCUBoot Bootloader:**
+
+Root directory for build is **boot/cypress**.
 
 The following command will build MCUBoot Bootloader HEX file:
 
