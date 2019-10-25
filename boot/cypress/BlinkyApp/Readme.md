@@ -40,6 +40,10 @@ Flags defaults:
 
 **How to program an application:**
 
+Use any preffered tool for programming hex files.
+
+Currently implemented makefile jobs use DAPLINK interface for programming.
+
 To program BOOT image:
 
 `make load_boot APP_NAME=BlinkyApp TARGET=CY8CPROTO-062-4343W`

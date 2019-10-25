@@ -34,6 +34,10 @@ Flags by defalt:
 
 **How to program MCUBoot Bootloader:**
 
+Use any preffered tool for programming hex files.
+
+Currently implemented makefile jobs use DAPLINK interface for programming.
+
 To program Bootloader image use following command:
 
 `make load APP_NAME=MCUBootApp TARGET=CY8CPROTO-062-4343W-M0`
