@@ -31,6 +31,9 @@
 MAKEINFO ?= 1
 # Application name by default
 APP_NAME ?= MCUBootApp
+
+BUILDCFG ?= Debug
+
 # Set of supported applications
 APPS := MCUBootApp BlinkyApp
 # Output folder
@@ -41,8 +44,6 @@ OUT_TARGET := $(OUT)/$(TARGET)
 OUT_CFG := $(OUT_TARGET)/$(BUILDCFG)
 OUT_OBJ := $(OUT_CFG)/obj
 OUT_APP := $(OUT_CFG)
-# Defines whether or not image should be signed
-SIGN ?= 0
 
 HEADER_OFFSET ?= 0
 
@@ -126,15 +127,17 @@ VPATH = $(dir $(C_FILES) $(ASM_FILES))
 # may be modified in %Application%.mk file
 OUT_FILE_NAME ?= $(OUT_APP)/$(APP_NAME)
 
-PYTHON_PATH ?= python3 
+# minimum Python 3.7 is required
+PYTHON_PATH ?= python
 IMGTOOL_PATH ?=	../../scripts/imgtool.py
 SIGN_ARGS := sign -H 1024 --pad-header --align 8 -v "2.0" -S 65536 -M 512 --overwrite-only -R 0
 
-ifeq ($(UPGRADE_IMG), 1)
+ifeq ($(IMG_TYPE), UPGRADE)
 	SIGN_ARGS += --pad
+	UPGRADE :=_upgrade
 endif
 
-.PHONY: all app build clean
+.PHONY: all app build clean sign upload boot upgrade 
 
 all: clean app
 
@@ -145,16 +148,20 @@ app:
 	@`mkdir -p ./$(OUT_OBJ)`
 	$(MAKE) build -j8
 
+sign: $(OUT_APP)/$(APP_NAME).hex
+	$(PYTHON_PATH) $(IMGTOOL_PATH) $(SIGN_ARGS) $(OUT_APP)/$(APP_NAME).hex $(OUT_APP)/$(APP_NAME)_signed$(UPGRADE).hex
+
 build: $(OUT_APP)/$(APP_NAME).hex
-	$(GCC_PATH)/bin/arm-none-eabi-objdump $(OUT_APP)/$(APP_NAME).hex -s > $(OUT_FILE_NAME).lst
+	$(GCC_PATH)/bin/arm-none-eabi-objdump $(OUT_APP)/$(APP_NAME).hex -s > $(OUT_APP)/$(APP_NAME).lst
 	$(GCC_PATH)/bin/arm-none-eabi-size --format=berkeley $(OUT_APP)/$(APP_NAME).elf
 
 $(OUT_APP)/$(APP_NAME).hex: $(OUT_APP)/$(APP_NAME).elf
 	$(GCC_PATH)/bin/arm-none-eabi-objcopy --change-addresses=$(HEADER_OFFSET) -O ihex $(OUT_APP)/$(APP_NAME).elf $(OUT_APP)/$(APP_NAME).hex
-ifeq ($(SIGN), 1)
-	$(PYTHON_PATH) $(IMGTOOL_PATH) $(SIGN_ARGS) $(OUT_APP)/$(APP_NAME).hex $(OUT_APP)/$(APP_NAME)_signed.hex
-	$(GCC_PATH)/bin/arm-none-eabi-objdump $(OUT_APP)/$(APP_NAME)_signed.hex -s > $(OUT_APP)/$(APP_NAME)_signed.lst
-endif
+
+#ifeq ($(SIGN), 1)
+#	$(PYTHON_PATH) $(IMGTOOL_PATH) $(SIGN_ARGS) $(OUT_APP)/$(APP_NAME).hex $(OUT_APP)/$(APP_NAME)_signed.hex
+#	$(GCC_PATH)/bin/arm-none-eabi-objdump $(OUT_APP)/$(APP_NAME)_signed.hex -s > $(OUT_APP)/$(APP_NAME)_signed.lst
+#endif
 
 $(OUT_APP)/$(APP_NAME).elf: $(addprefix $(OUT_OBJ)/, $(O_FILES))
 	@echo "LD $@"
@@ -196,10 +203,25 @@ clean:
 # TODO: update with generic solution
 upload:
 ifeq ($(HOST_OS), win)
-	cp $(OUT_FILE_NAME).hex /d/
+	cp $(OUT)/$(TARGET)/$(BUILDCFG)/$(APP_NAME).hex /d/
 else
-	cp $(OUT_FILE_NAME).hex /Volumes/DAPLINK 
+	cp $(OUT)/$(TARGET)/$(BUILDCFG)/$(APP_NAME).hex /Volumes/DAPLINK 
 endif
+
+boot:
+ifeq ($(HOST_OS), win)
+	cp $(OUT)/$(TARGET)/$(BUILDCFG)/$(APP_NAME)_signed.hex /d/
+else
+	cp $(OUT)/$(TARGET)/$(BUILDCFG)/$(APP_NAME)_signed.hex /Volumes/DAPLINK 
+endif
+
+upgrade:
+ifeq ($(HOST_OS), win)
+	cp $(OUT)/$(TARGET)/$(BUILDCFG)/$(APP_NAME)_signed_upgrade.hex /d/
+else
+	cp $(OUT)/$(TARGET)/$(BUILDCFG)/$(APP_NAME)_signed_upgrade.hex /Volumes/DAPLINK 
+endif
+
 
 ifeq ($(MAKEINFO) , 1)
 $(info ASM_FILES: $(ASM_FILES))

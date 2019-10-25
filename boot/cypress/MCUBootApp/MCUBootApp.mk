@@ -26,7 +26,6 @@
 # Cypress' MCUBoot Application supports GCC ARM only at this moment 
 # Set default compiler to GCC if not specified from command line
 COMPILER ?= GCC_ARM
-BUILDCFG ?= Debug
 
 ifneq ($(COMPILER), GCC_ARM)
 $(error Only GCC ARM is supported at this moment)

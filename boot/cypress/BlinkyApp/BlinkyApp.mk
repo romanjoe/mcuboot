@@ -29,11 +29,10 @@
 #   - build configuration to Debug
 #   - image type to BOOT
 COMPILER ?= GCC_ARM
-BUILDCFG ?= Debug
-IMG_TYPE ?= BOOT_IMG
+IMG_TYPE ?= BOOT
 
 # image type can be BOOT or UPGRADE
-IMG_TYPES = BOOT_IMG UPGRADE_IMG
+IMG_TYPES = BOOT UPGRADE
 
 ifneq ($(COMPILER), GCC_ARM)
 $(error Only GCC ARM is supported at this moment)
@@ -46,11 +45,10 @@ include $(CUR_APP_PATH)/libs.mk
 include $(CUR_APP_PATH)/toolchains.mk
 
 # Application-specific DEFINES
-ifeq ($(IMG_TYPE), BOOT_IMG)
+ifeq ($(IMG_TYPE), BOOT)
 	DEFINES_APP := -DBOOT_IMG
 else
 	DEFINES_APP := -DUPGRADE_IMG
-	OUT_FILE_NAME := $(OUT_TARGET)/$(APP_NAME)_upgrade
 endif
 
 # Collect Test Application sources
