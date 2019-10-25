@@ -128,7 +128,13 @@ VPATH = $(dir $(C_FILES) $(ASM_FILES))
 OUT_FILE_NAME ?= $(OUT_APP)/$(APP_NAME)
 
 # minimum Python 3.7 is required
-PYTHON_PATH ?= python
+# Python path definition
+ifeq ($(OS),Windows_NT)
+PYTHON_PATH?=python
+else
+PYTHON_PATH?=python3
+endif
+
 IMGTOOL_PATH ?=	../../scripts/imgtool.py
 SIGN_ARGS := sign -H 1024 --pad-header --align 8 -v "2.0" -S 65536 -M 512 --overwrite-only -R 0
 
