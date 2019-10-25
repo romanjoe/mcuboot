@@ -137,7 +137,7 @@ ifeq ($(IMG_TYPE), UPGRADE)
 	UPGRADE :=_upgrade
 endif
 
-.PHONY: all app build clean sign upload boot upgrade 
+.PHONY: all app build clean sign load load_boot load_upgrade 
 
 all: clean app
 
@@ -201,21 +201,21 @@ clean:
 	rm -rf ./$(APP_NAME)/out
 
 # TODO: update with generic solution
-upload:
+load:
 ifeq ($(HOST_OS), win)
 	cp $(OUT)/$(TARGET)/$(BUILDCFG)/$(APP_NAME).hex /d/
 else
 	cp $(OUT)/$(TARGET)/$(BUILDCFG)/$(APP_NAME).hex /Volumes/DAPLINK 
 endif
 
-boot:
+load_boot:
 ifeq ($(HOST_OS), win)
 	cp $(OUT)/$(TARGET)/$(BUILDCFG)/$(APP_NAME)_signed.hex /d/
 else
 	cp $(OUT)/$(TARGET)/$(BUILDCFG)/$(APP_NAME)_signed.hex /Volumes/DAPLINK 
 endif
 
-upgrade:
+load_upgrade:
 ifeq ($(HOST_OS), win)
 	cp $(OUT)/$(TARGET)/$(BUILDCFG)/$(APP_NAME)_signed_upgrade.hex /d/
 else

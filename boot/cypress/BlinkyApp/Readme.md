@@ -12,13 +12,18 @@ It is started by MCUBoot Application which is running on CM0p.
 
 **How to build an application:**
 
-The following command will build regular HEX file of a Blinky Application:
+The following command will build regular HEX file of a Blinky Application, BOOT slot:
 
-`make app APP_NAME=BlinkyApp TARGET=CY8CPROTO-062-4343W`
+`make app APP_NAME=BlinkyApp TARGET=CY8CPROTO-062-4343W IMG_TYPE=BOOT`
 
 This have following defaults suggested:
 
 `BUILDCFG=Debug`
+`IMG_TYPE=BOOT`
+
+To build UPGRADE image use following command:
+
+`make app APP_NAME=BlinkyApp TARGET=CY8CPROTO-062-4343W IMG_TYPE=UPGRADE`
 
 **How to sign an image:**
 
