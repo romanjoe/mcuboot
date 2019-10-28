@@ -38,7 +38,8 @@ def gen_ecdsa_p256(keyfile, passwd):
 
 
 def gen_ecdsa_p224(keyfile, passwd):
-    print("TODO: p-224 not yet implemented")
+    # print("TODO: p-224 not yet implemented")
+    keys.ECDSA224P1.generate().export_private(path=keyfile, passwd=passwd)
 
 
 def gen_ed25519(keyfile, passwd):
