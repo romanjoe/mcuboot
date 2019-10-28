@@ -139,7 +139,7 @@ IMGTOOL_PATH ?=	../../scripts/imgtool.py
 
 SIGN_KEY_FILE ?= cypress-test-ec-p256
 SIGN_ARGS := sign -H 1024 --pad-header --align 8 -v "2.0" -S 65536 -M 512 --overwrite-only -R 0 -k keys/$(SIGN_KEY_FILE).pem
-SIGN_KEY_FLAGS := -DECC256_KEY_FILE="\"$(SIGN_KEY_FILE).pub\""
+SIGN_KEY_FLAGS := -DECC256_KEY_FILE="\"keys/$(SIGN_KEY_FILE).pub\""
 
 ifeq ($(IMG_TYPE), UPGRADE)
 	SIGN_ARGS += --pad
@@ -217,14 +217,14 @@ else
 	cp $(OUT)/$(TARGET)/$(BUILDCFG)/$(APP_NAME).hex /Volumes/DAPLINK
 endif
 
-load_boot:
+load_boot: sign
 ifeq ($(HOST_OS), win)
 	cp $(OUT)/$(TARGET)/$(BUILDCFG)/$(APP_NAME)_signed.hex /d/
 else
 	cp $(OUT)/$(TARGET)/$(BUILDCFG)/$(APP_NAME)_signed.hex /Volumes/DAPLINK
 endif
 
-load_upgrade:
+load_upgrade: sign
 ifeq ($(HOST_OS), win)
 	cp $(OUT)/$(TARGET)/$(BUILDCFG)/$(APP_NAME)_signed_upgrade.hex /d/
 else
