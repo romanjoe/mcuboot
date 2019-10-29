@@ -418,10 +418,10 @@ int flash_area_read_is_empty(const struct flash_area *fa, uint32_t off,
 
     for (i = 0; i < len; i++) {
         if (mem_dest[i] != flash_area_erased_val(fa)) {
-            return -1;
+            return 0;
         }
     }
-    return 0;
+    return 1;
 }
 
 int flash_area_get_sectors(int idx, uint32_t *cnt, struct flash_sector *ret)
