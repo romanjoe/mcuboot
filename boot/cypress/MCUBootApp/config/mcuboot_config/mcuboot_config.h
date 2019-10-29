@@ -20,7 +20,7 @@
  */
 /* Default maximum number of flash sectors per image slot; change
  * as desirable. */
-#define MCUBOOT_MAX_IMG_SECTORS 128
+#define MCUBOOT_MAX_IMG_SECTORS 512
 
 /*
  * Signature types
@@ -63,7 +63,7 @@
  */
 
 /* Uncomment to use ARM's mbedTLS cryptographic primitives */
-#define MCUBOOT_USE_MBED_TLS
+//#define MCUBOOT_USE_MBED_TLS
 /* Uncomment to use Tinycrypt's. */
 /* #define MCUBOOT_USE_TINYCRYPT */
 

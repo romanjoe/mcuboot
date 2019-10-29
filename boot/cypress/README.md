@@ -35,5 +35,6 @@ Instructions on how to build and upload Bootloader and sample image are located 
 Root directory for build is **boot/cypress.**
 
 **Currently supportred targets:**
-* CY8CPROTO_062_4343W
+
+`* CY8CPROTO-062-4343W`
 
