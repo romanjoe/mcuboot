@@ -32,6 +32,8 @@ MAKEINFO ?= 1
 # Application name by default
 APP_NAME ?= MCUBootApp
 
+SIGN_KEY_FILE ?= cypress-test-ec-p256
+
 BUILDCFG ?= Debug
 
 # Set of supported applications
@@ -137,9 +139,7 @@ endif
 
 IMGTOOL_PATH ?=	../../scripts/imgtool.py
 
-SIGN_KEY_FILE ?= cypress-test-ec-p256
 SIGN_ARGS := sign -H 1024 --pad-header --align 8 -v "2.0" -S 65536 -M 512 --overwrite-only -R 0 -k keys/$(SIGN_KEY_FILE).pem
-SIGN_KEY_FLAGS := -DECC256_KEY_FILE="\"keys/$(SIGN_KEY_FILE).pub\""
 
 ifeq ($(IMG_TYPE), UPGRADE)
 	SIGN_ARGS += --pad
@@ -183,9 +183,9 @@ endif
 $(OUT_OBJ)/%.o: %.c
 	@echo "CC $<"
 ifeq ($(MAKEINFO), 1)
-	@echo $(CC) $(CFLAGS) $(INCLUDE_DIRS) $(SIGN_KEY_FLAGS) $(CC_DEPEND) $(@:.o=.d) -c $< -o $@
+	@echo $(CC) $(CFLAGS) $(INCLUDE_DIRS) $(CC_DEPEND) $(@:.o=.d) -c $< -o $@
 endif
-	@$(CC) $(CFLAGS) $(INCLUDE_DIRS) $(SIGN_KEY_FLAGS) $(CC_DEPEND) $(@:.o=.d) -c $< -o $@
+	@$(CC) $(CFLAGS) $(INCLUDE_DIRS) $(CC_DEPEND) $(@:.o=.d) -c $< -o $@
 ifeq ($(MAKEINFO), 1)
 	@echo
 endif
