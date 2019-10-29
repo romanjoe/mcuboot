@@ -24,7 +24,6 @@ from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey,
 
 from .rsa import RSA, RSAPublic, RSAUsageError, RSA_KEY_SIZES
 from .ecdsa import ECDSA256P1, ECDSA256P1Public, ECDSAUsageError
-from .ecdsa_p224 import ECDSA224P1, ECDSA224P1Public, ECDSAUsageError
 from .ed25519 import Ed25519, Ed25519Public, Ed25519UsageError
 
 class PasswordRequired(Exception):
@@ -64,9 +63,9 @@ def load(path, passwd=None):
             raise Exception("Unsupported RSA key size: " + pk.key_size)
         return RSAPublic(pk)
     elif isinstance(pk, EllipticCurvePrivateKey):
-        if (pk.curve.name != 'secp256r1') and (pk.curve.name != 'secp224r1') :
+        if pk.curve.name != 'secp256r1':
             raise Exception("Unsupported EC curve: " + pk.curve.name)
-        if (pk.key_size != 256) and (pk.key_size != 224):
+        if pk.key_size != 256:
             raise Exception("Unsupported EC size: " + pk.key_size)
         return ECDSA256P1(pk)
     elif isinstance(pk, EllipticCurvePublicKey):

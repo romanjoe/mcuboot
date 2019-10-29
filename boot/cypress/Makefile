@@ -231,11 +231,6 @@ else
 	cp $(OUT)/$(TARGET)/$(BUILDCFG)/$(APP_NAME)_signed_upgrade.hex /Volumes/DAPLINK
 endif
 
-gen_key_rsa2048:
-	@echo Generate RSA-2048 keys: $(SIGN_KEY_FILE).pem and $(SIGN_KEY_FILE).pub
-	../../scripts/imgtool.py keygen -k keys/$(SIGN_KEY_FILE).pem -t rsa-2048
-	../../scripts/imgtool.py getpub -k keys/$(SIGN_KEY_FILE).pem > keys/$(SIGN_KEY_FILE).pub
-
 gen_key_ecc256:
 	@echo Generate ECC256 keys: $(SIGN_KEY_FILE).pem and $(SIGN_KEY_FILE).pub
 	../../scripts/imgtool.py keygen -k keys/$(SIGN_KEY_FILE).pem -t ecdsa-p256
