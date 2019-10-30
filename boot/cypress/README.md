@@ -1,6 +1,6 @@
 ### Port of MCUBoot library to be used with Cypress targets
 
-** Solution Description **
+**Solution Description**
 
 Given solution demonstrates operation of MCUBoot on Cypress' PSoC6 device.
 
