@@ -177,7 +177,7 @@ sign: $(OUT_APP)/$(APP_NAME).hex
 
 build: $(OUT_APP)/$(APP_NAME).hex
 	$(GCC_PATH)/bin/arm-none-eabi-objdump $(OUT_APP)/$(APP_NAME).hex -s > $(OUT_APP)/$(APP_NAME).lst
-	$(GCC_PATH)/bin/arm-none-eabi-size --format=berkeley $(OUT_APP)/$(APP_NAME).elf
+	$(GCC_PATH)/bin/arm-none-eabi-size --format=SysV $(OUT_APP)/$(APP_NAME).elf
 
 $(OUT_APP)/$(APP_NAME).hex: $(OUT_APP)/$(APP_NAME).elf
 	$(GCC_PATH)/bin/arm-none-eabi-objcopy --change-addresses=$(HEADER_OFFSET) -O ihex $(OUT_APP)/$(APP_NAME).elf $(OUT_APP)/$(APP_NAME).hex
