@@ -21,6 +21,8 @@ Features implemented:
 
 Size of slots `0x10000` - 64kb
 
+**Important**: make sure primary, secondary slot and bootloader app sizes are appropriate and correspond to flash area size defined in Applications' linker files.
+
 **How to modify Flash map:**
 
 __Option 1.__

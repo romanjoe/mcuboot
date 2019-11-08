@@ -51,3 +51,30 @@ Flags defaults:
 - `IMG_TYPE` - `BOOT` (default) - build image for BOOT slot of MCUBoot Bootloader, `UPGRADE` - build image for `UPGRADE` slot of MCUBoot Bootloader.
 
 **NOTE**: In case of `UPGRADE` image `HEADER_OFFSET` should be set to MCUBoot Bootloader slot size
+
+**Example terminal output:**
+
+When user application programmed in BOOT slot:
+
+`===========================`
+`[BlinkyApp] BlinkyApp v1.0`
+`===========================`
+
+`[BlinkyApp] GPIO initialized`
+`[BlinkyApp] UART initialized`
+`[BlinkyApp] Retarget I/O set to 115200 baudrate`
+`[BlinkyApp] Red led blinks with 1 sec period`
+
+When user application programmed in UPRADE slot and upgrade procedure was successful:
+
+`===========================`
+`[BlinkyApp] BlinkyApp v2.0`
+`===========================`
+
+`[BlinkyApp] GPIO initialized`
+`[BlinkyApp] UART initialized`
+`[BlinkyApp] Retarget I/O set to 115200 baudrate`
+`[BlinkyApp] Red led blinks with 0.25 sec period`
+
+**Important**: make sure primary and secondary slot sizes are appropriate and correspond to flash area size defined in BlinkyApp linker file.
+**Important**: make sure primary and secondary slot sizes are appropriate and correspond to flash area size defined in BlinkyApp linker file.

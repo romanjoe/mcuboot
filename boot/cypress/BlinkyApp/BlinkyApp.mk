@@ -40,6 +40,9 @@ endif
 
 CUR_APP_PATH = $(CURDIR)/$(APP_NAME)
 
+# Specify linker script to use
+LINKER_SCRIPT = $(CUR_APP_PATH)/$(APP_NAME).ld
+
 include $(CUR_APP_PATH)/targets.mk
 include $(CUR_APP_PATH)/libs.mk
 include $(CUR_APP_PATH)/toolchains.mk
@@ -59,10 +62,5 @@ SOURCES_APP += $(SOURCES_APP_SRC)
 # Collect includes for BlinkyApp
 INCLUDE_DIRS_APP := $(addprefix -I, $(CURDIR))
 INCLUDE_DIRS_APP += $(addprefix -I, $(CUR_APP_PATH))
-
-# Specify linker script to use
-APP_LD ?= $(CUR_APP_PATH)/Application.ld
-
-LDFLAGS += -T $(APP_LD)
 
 ASM_FILES_APP :=

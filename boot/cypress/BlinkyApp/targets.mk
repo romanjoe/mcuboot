@@ -78,6 +78,9 @@ ifneq ($(DEFINES),)
 	DEFINES_BSP :=$(addprefix -D, $(subst -,_,$(DEFINES)))
 endif
 
+ifneq ($(COMPILER), GCC_ARM)
+$(error Only GCC ARM is supported at this moment)
+endif
 ifeq ($(MAKEINFO) , 1)
 $(info ==============================================================================)
 $(info = BSP files =)

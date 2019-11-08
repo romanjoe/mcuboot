@@ -33,6 +33,9 @@ endif
 
 CUR_APP_PATH = $(CURDIR)/$(APP_NAME)
 
+# Specify linker script to use
+LINKER_SCRIPT = $(CUR_APP_PATH)/$(APP_NAME).ld
+
 include $(CUR_APP_PATH)/targets.mk
 include $(CUR_APP_PATH)/libs.mk
 include $(CUR_APP_PATH)/toolchains.mk
