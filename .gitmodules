@@ -16,3 +16,6 @@
 [submodule "boot/cypress/libs/bsp/psoc6hal"]
 	path = boot/cypress/libs/bsp/psoc6hal
 	url = https://github.com/cypresssemiconductorco/psoc6hal.git
+[submodule "boot/cypress/libs/pdl/psoc6pdl"]
+	path = boot/cypress/libs/pdl/psoc6pdl
+	url = https://github.com/cypresssemiconductorco/psoc6pdl.git
