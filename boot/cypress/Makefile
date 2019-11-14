@@ -67,6 +67,7 @@ O_FILES := $(notdir $(C_FILES:.c=.o)) $(addsuffix .o, $(notdir $(basename $(ASM_
 
 DEFINES := $(DEFINES_APP)
 DEFINES += $(DEFINES_LIBS)
+AS_FLAGS += $(DEFINES)
 
 ifeq ($(MAKEINFO), 1)
 $(info ==============================================================================)
@@ -85,43 +86,6 @@ DEFINES +=
 CFLAGS += $(DEFINES)
 
 VPATH = $(dir $(C_FILES) $(ASM_FILES))
-
-## Set colors for unix compatible terminals, otherwise comment this code
-#ifeq ($(JENKINS), yes)
-#	COLOR_RESET    = \033[0m
-#	COLOR_make_std = \033[3$1m      # defined for 1 through 7
-#	COLOR_make     = \033[38;5;$1m  # defined for 1 through 255
-#	COLOR_WRN = $(strip $(call COLOR_make,11))
-#	COLOR_ERR = $(strip $(call COLOR_make,9))
-#	COLOR_STD = $(strip $(call COLOR_make,243))
-#
-#	COLOR_OUTPUT = 2>&1 |                                         \
-#		while IFS='' read -r line; do                             \
-#			if  [[ $$line == *Error\[* ]]; then                   \
-#				echo -e -n "$(COLOR_ERR)";                        \
-#				echo -n $${line};                                 \
-#				echo -e "$(COLOR_RESET)";                         \
-#			elif [[ $$line == *Warning\[* ]]; then                \
-#				echo -e -n "$(COLOR_WRN)";                        \
-#				echo -n $${line};                                 \
-#				echo -e "$(COLOR_RESET)";                         \
-#			else                                                  \
-#				echo -e -n "$(COLOR_STD)";                        \
-#				echo -n $${line};                                 \
-#				echo -e "$(COLOR_RESET)";                         \
-#			fi;                                                   \
-#		done; exit $${PIPESTATUS[0]};
-#else
-#	COLOR_RESET    =
-#	COLOR_make_std =
-#	COLOR_make     =
-#	COLOR_WRN =
-#	COLOR_ERR =
-#	COLOR_STD =
-#
-#	COLOR_OUTPUT =
-#endif
-#
 
 #
 # STDE: For cygwin, adjust paths for compiler
@@ -154,14 +118,7 @@ else
 PYTHON_PATH?=python3
 endif
 
-IMGTOOL_PATH ?=	../../scripts/imgtool.py
-
-ifeq ($(IMG_TYPE), UPGRADE)
-	SIGN_ARGS += --pad
-	UPGRADE :=_upgrade
-endif
-
-.PHONY: all app build clean sign upload boot upgrade 
+.PHONY: all app build clean post_build load load_boot load_upgrade
 
 all: clean app
 
@@ -171,9 +128,7 @@ app:
 	@`mkdir -p ./$(OUT_CFG)`
 	@`mkdir -p ./$(OUT_OBJ)`
 	$(MAKE) build -j8
-
-sign: $(OUT_APP)/$(APP_NAME).hex
-	$(PYTHON_PATH) $(IMGTOOL_PATH) $(SIGN_ARGS) $(OUT_APP)/$(APP_NAME).hex $(OUT_APP)/$(APP_NAME)_signed$(UPGRADE).hex
+	$(MAKE) post_build
 
 build: $(OUT_APP)/$(APP_NAME).hex
 	$(GCC_PATH)/bin/arm-none-eabi-objdump $(OUT_APP)/$(APP_NAME).hex -s > $(OUT_APP)/$(APP_NAME).lst
@@ -181,11 +136,6 @@ build: $(OUT_APP)/$(APP_NAME).hex
 
 $(OUT_APP)/$(APP_NAME).hex: $(OUT_APP)/$(APP_NAME).elf
 	$(GCC_PATH)/bin/arm-none-eabi-objcopy --change-addresses=$(HEADER_OFFSET) -O ihex $(OUT_APP)/$(APP_NAME).elf $(OUT_APP)/$(APP_NAME).hex
-
-#ifeq ($(SIGN), 1)
-#	$(PYTHON_PATH) $(IMGTOOL_PATH) $(SIGN_ARGS) $(OUT_APP)/$(APP_NAME).hex $(OUT_APP)/$(APP_NAME)_signed.hex
-#	$(GCC_PATH)/bin/arm-none-eabi-objdump $(OUT_APP)/$(APP_NAME)_signed.hex -s > $(OUT_APP)/$(APP_NAME)_signed.lst
-#endif
 
 $(OUT_APP)/$(APP_NAME).elf: $(addprefix $(OUT_OBJ)/, $(O_FILES))
 	@echo "LD $@"
@@ -232,14 +182,14 @@ else
 	cp $(OUT)/$(TARGET)/$(BUILDCFG)/$(APP_NAME).hex /Volumes/DAPLINK 
 endif
 
-boot:
+load_boot:
 ifeq ($(HOST_OS), win)
 	cp $(OUT)/$(TARGET)/$(BUILDCFG)/$(APP_NAME)_signed.hex /d/
 else
 	cp $(OUT)/$(TARGET)/$(BUILDCFG)/$(APP_NAME)_signed.hex /Volumes/DAPLINK 
 endif
 
-upgrade:
+load_upgrade:
 ifeq ($(HOST_OS), win)
 	cp $(OUT)/$(TARGET)/$(BUILDCFG)/$(APP_NAME)_signed_upgrade.hex /d/
 else

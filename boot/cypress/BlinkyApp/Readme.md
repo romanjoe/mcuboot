@@ -14,36 +14,45 @@ It is started by MCUBoot Application which is running on CM0p.
 
 The following command will build regular HEX file of a Blinky Application:
 
-`make app APP_NAME=BlinkyApp TARGET=CY8CPROTO-062-4343W`
+The following command will build regular HEX file of a Blinky Application, BOOT slot:
+
+    make app APP_NAME=BlinkyApp TARGET=CY8CPROTO-062-4343W IMG_TYPE=BOOT
 
 This have following defaults suggested:
 
-`BUILDCFG=Debug`
+    BUILDCFG=Debug
+    IMG_TYPE=BOOT
+
+To build UPGRADE image use following command:
+
+    make app APP_NAME=BlinkyApp TARGET=CY8CPROTO-062-4343W IMG_TYPE=UPGRADE HEADER_OFFSET=0x10000
 
 **How to sign an image:**
 
 To sign obtained image use following command:
 
-`make sign APP_NAME=BlinkyApp TARGET=CY8CPROTO-062-4343W`
+    make sign APP_NAME=BlinkyApp TARGET=CY8CPROTO-062-4343W IMG_TYPE=BOOT
+
+    make sign APP_NAME=BlinkyApp TARGET=CY8CPROTO-062-4343W IMG_TYPE=UPGRADE
 
 Flags defaults:
 
-`BUILDCFG=Debug`
-`IMG_TYPE=BOOT`
+    BUILDCFG=Debug
+    IMG_TYPE=BOOT
 
 **How to program an application:**
 
 To program BOOT image:
 
-`make boot APP_NAME=BlinkyApp TARGET=CY8CPROTO-062-4343W`
+    make load_boot APP_NAME=BlinkyApp TARGET=CY8CPROTO-062-4343W
 
 To program UPGRADE image:
 
-`make upgrade APP_NAME=BlinkyApp TARGET=CY8CPROTO-062-4343W`
+    make load_upgrade APP_NAME=BlinkyApp TARGET=CY8CPROTO-062-4343W
 
 Flags defaults:
 
-`BUILDCFG=Debug`
+    BUILDCFG=Debug
 
 **Flags:**
 - `MAKEINFO` - 0 (default) - silent build, 1 - verbose output of complilation, .
@@ -56,25 +65,24 @@ Flags defaults:
 
 When user application programmed in BOOT slot:
 
-`===========================`
-`[BlinkyApp] BlinkyApp v1.0`
-`===========================`
-
-`[BlinkyApp] GPIO initialized`
-`[BlinkyApp] UART initialized`
-`[BlinkyApp] Retarget I/O set to 115200 baudrate`
-`[BlinkyApp] Red led blinks with 1 sec period`
+    ===========================
+    [BlinkyApp] BlinkyApp v1.0
+    ===========================
+    [BlinkyApp] GPIO initialized
+    [BlinkyApp] UART initialized
+    [BlinkyApp] Retarget I/O set to 115200 baudrate
+    [BlinkyApp] Red led blinks with 1 sec period
 
 When user application programmed in UPRADE slot and upgrade procedure was successful:
 
-`===========================`
-`[BlinkyApp] BlinkyApp v2.0`
-`===========================`
+===========================
+[BlinkyApp] BlinkyApp v2.0
+===========================
 
-`[BlinkyApp] GPIO initialized`
-`[BlinkyApp] UART initialized`
-`[BlinkyApp] Retarget I/O set to 115200 baudrate`
-`[BlinkyApp] Red led blinks with 0.25 sec period`
+[BlinkyApp] GPIO initialized
+[BlinkyApp] UART initialized
+[BlinkyApp] Retarget I/O set to 115200 baudrate
+[BlinkyApp] Red led blinks with 0.25 sec period
 
 **Important**: make sure primary and secondary slot sizes are appropriate and correspond to flash area size defined in BlinkyApp linker file.
 **Important**: make sure primary and secondary slot sizes are appropriate and correspond to flash area size defined in BlinkyApp linker file.

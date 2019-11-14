@@ -32,7 +32,7 @@
 # default TARGET
 TARGET ?= CY8CPROTO-062-4343W-M0
 #
-TARGETS := CY8CPROTO-062-4343W-M0 CY8CKIT-062-WIFI-BT-M0
+TARGETS := CY8CPROTO-062-4343W-M0
 
 CUR_LIBS_PATH := $(CURDIR)/libs
 BSP_PATH  := $(CUR_LIBS_PATH)/bsp/TARGET_$(TARGET)
@@ -75,7 +75,9 @@ ifneq ($(DEFINES),)
 	DEFINES_BSP :=$(addprefix -D, $(subst -,_,$(DEFINES)))
 endif
 
-ifneq ($(COMPILER), GCC_ARM)
+ifeq ($(COMPILER), GCC_ARM)
+LINKER_SCRIPT := $(BSP_PATH)/linker/TOOLCHAIN_GCC_ARM/*_cm0plus.ld
+else
 $(error Only GCC ARM is supported at this moment)
 endif
 

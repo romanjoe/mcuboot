@@ -43,14 +43,14 @@ Update this line and or add similar for flash map parameters to override.
 
 The possible list could be:
 
-* `CY_FLASH_MAP_EXT_DESC`
-* `MCUBOOT_MAX_IMG_SECTORS`
-* `CY_BOOT_SCRATCH_SIZE`
-* `CY_BOOT_BOOTLOADER_SIZE`
-* `CY_BOOT_PRIMARY_1_SIZE`
-* `CY_BOOT_SECONDARY_1_SIZE`
-* `CY_BOOT_PRIMARY_2_SIZE`
-* `CY_BOOT_SECONDARY_2_SIZE`
+* CY_FLASH_MAP_EXT_DESC
+* MCUBOOT_MAX_IMG_SECTORS
+* CY_BOOT_SCRATCH_SIZE
+* CY_BOOT_BOOTLOADER_SIZE
+* CY_BOOT_PRIMARY_1_SIZE
+* CY_BOOT_SECONDARY_1_SIZE
+* CY_BOOT_PRIMARY_2_SIZE
+* CY_BOOT_SECONDARY_2_SIZE
 
 As an example in a makefile it should look like following:
 
@@ -66,12 +66,12 @@ Root directory for build is **boot/cypress**.
 
 The following command will build MCUBoot Bootloader HEX file:
 
-`make app APP_NAME=MCUBootApp TARGET=CY8CPROTO-062-4343W-M0`
+    make app APP_NAME=MCUBootApp TARGET=CY8CPROTO-062-4343W-M0
 
 Flags by defalt:
 
-`BUILDCFG=Debug`
-`MAKEINFO=0`
+    BUILDCFG=Debug
+    MAKEINFO=0
 
 **How to program MCUBoot Bootloader:**
 
@@ -81,14 +81,14 @@ Currently implemented makefile jobs use DAPLINK interface for programming.
 
 To program Bootloader image use following command:
 
-`make load APP_NAME=MCUBootApp TARGET=CY8CPROTO-062-4343W-M0`
+    make load APP_NAME=MCUBootApp TARGET=CY8CPROTO-062-4343W-M0
 
 **Example terminal output:**
 
 When user application programmed in BOOT slot:
 
-`[INF] MCUBoot Bootloader Started`
+    [INF] MCUBoot Bootloader Started
 
-`[INF] User Application validated successfully`
+    [INF] User Application validated successfully
 
-`[INF] Starting User Application on CM4 (wait)…`
+    [INF] Starting User Application on CM4 (wait)…
