@@ -73,6 +73,21 @@ SOURCES_MBEDTLS += $(wildcard $(CUR_LIBS_PATH)/mbedtls/crypto/library/*.c)
 SOURCES_LIBS += $(SOURCES_MBEDTLS)
 ## mbedTLS settings
 
+################################################################################
+# mbedTLS acceleration settings
+################################################################################
+ifeq ($(USE_CRYPTO_HW), 1)
+# cy-mbedtls-acceleration related include directories
+INCLUDE_DIRS_MBEDTLS_MXCRYPTO := $(CUR_LIBS_PATH)/cy-mbedtls-acceleration/mbedtls_MXCRYPTO
+# Collect source files for MbedTLS acceleration
+SOURCES_MBEDTLS_MXCRYPTO := $(wildcard $(CUR_LIBS_PATH)/cy-mbedtls-acceleration/mbedtls_MXCRYPTO/*.c)
+#
+INCLUDE_DIRS_LIBS += $(addprefix -I,$(INCLUDE_DIRS_MBEDTLS_MXCRYPTO))
+# Collected source files for libraries
+SOURCES_LIBS += $(SOURCES_MBEDTLS_MXCRYPTO)
+endif
+## mbedTLS acceleration settings
+
 ASM_FILES_PDL :=
 ifeq ($(COMPILER), GCC_ARM)
 ASM_FILES_PDL += $(CUR_LIBS_PATH)/pdl/psoc6pdl/drivers/source/TOOLCHAIN_GCC_ARM/cy_syslib_gcc.S
