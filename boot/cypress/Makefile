@@ -31,6 +31,8 @@ MAKEINFO ?= 1
 APP_NAME ?= MCUBootApp
 
 SIGN_KEY_FILE ?= cypress-test-ec-p256
+ENC_KEY_FILE ?= enc-ec256-pub
+ENC_IMG ?= 0
 
 BUILDCFG ?= Debug
 

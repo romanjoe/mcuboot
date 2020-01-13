@@ -142,4 +142,7 @@
         /* TODO: to be implemented */   \
     } while (0)
 
+#define MCUBOOT_ENC_IMAGES
+#define MCUBOOT_ENCRYPT_EC256
+
 #endif /* MCUBOOT_CONFIG_H */
