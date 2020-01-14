@@ -263,7 +263,7 @@ def sign(ctx, key, align, version, header_size, pad_header, slot_size, pad,
             # FIXME
             raise Exception("Signing and encryption must use the same type of key")
 			
-	# Find custom TLVs in the command-line arguments
+    # Find custom TLVs in the command-line arguments
     custom_tlv = {}
     for i in range(0, len(ctx.args), 3):
         tag = ctx.args[i][2:].upper()
