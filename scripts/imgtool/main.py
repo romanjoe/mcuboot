@@ -17,6 +17,7 @@
 
 import re
 import click
+import struct
 import getpass
 import imgtool.keys as keys
 import sys
@@ -239,8 +240,10 @@ class BasedIntParamType(click.ParamType):
 @click.option('-k', '--key', metavar='filename')
 @click.command(help='''Create a signed or unsigned image\n
                INFILE and OUTFILE are parsed as Intel HEX if the params have
-               .hex extension, otherwise binary format is used''')
-def sign(key, align, version, header_size, pad_header, slot_size, pad,
+               .hex extension, otherwise binary format is used''',
+               context_settings=dict(ignore_unknown_options=True, allow_extra_args=True,))
+@click.pass_context
+def sign(ctx, key, align, version, header_size, pad_header, slot_size, pad,
          max_sectors, overwrite_only, endian, encrypt, infile, outfile,
          dependencies, load_addr, hex_addr, erased_val, save_enctlv):
     img = image.Image(version=decode_version(version), header_size=header_size,
@@ -258,9 +261,16 @@ def sign(key, align, version, header_size, pad_header, slot_size, pad,
                 or (isinstance(key, keys.RSA) and
                     not isinstance(enckey, keys.RSAPublic))):
             # FIXME
-            raise click.UsageError("Signing and encryption must use the same "
-                                   "type of key")
-    img.create(key, enckey, dependencies)
+            raise Exception("Signing and encryption must use the same type of key")
+			
+	# Find custom TLVs in the command-line arguments
+    custom_tlv = {}
+    for i in range(0, len(ctx.args), 3):
+        tag = ctx.args[i][2:].upper()
+        if tag in image.TLV_VALUES.keys():
+            custom_tlv[tag] = struct.pack(ctx.args[i + 1], int(ctx.args[i + 2]))
+
+    img.create(key, enckey, dependencies, custom_tlv)
     img.save(outfile, hex_addr)
 
 

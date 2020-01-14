@@ -61,7 +61,9 @@ TLV_VALUES = {
         'ENCRSA2048': 0x30,
         'ENCKW128': 0x31,
         'ENCEC256': 0x32,
-        'DEPENDENCY': 0x40
+        'DEPENDENCY': 0x40,
+        'IMAGEID': 0x81,
+        'ROLLBACKCOUNTER': 0x82,
 }
 
 TLV_SIZE = 4
@@ -243,17 +245,23 @@ class Image():
             format=PublicFormat.UncompressedPoint)
         return cipherkey, ciphermac, pubk
 
-    def create(self, key, enckey, dependencies=None):
+    def create(self, key, enckey, dependencies=None, custom_protected_tlv=None):
         self.enckey = enckey
 
-        if dependencies is None:
-            dependencies_num = 0
-            protected_tlv_size = 0
-        else:
+        dependencies_num = 0
+        protected_tlv_size = 0
+
+        if dependencies:
             # Size of a Dependency TLV = Header ('BBH') + Payload('IBBHI')
             # = 16 Bytes
             dependencies_num = len(dependencies[DEP_IMAGES_KEY])
             protected_tlv_size = (dependencies_num * 16) + TLV_INFO_SIZE
+
+        if custom_protected_tlv:
+            if protected_tlv_size == 0:
+                protected_tlv_size = TLV_INFO_SIZE
+            for tag, value in custom_protected_tlv.items():
+                protected_tlv_size += TLV_SIZE + len(value)
 
         # At this point the image is already on the payload, this adds
         # the header to the payload as well
@@ -276,6 +284,9 @@ class Image():
                                 dependencies[DEP_VERSIONS_KEY][i].build
                                 )
                 prot_tlv.add('DEPENDENCY', payload)
+
+            for tag, value in custom_protected_tlv.items():
+                prot_tlv.add(tag, value)
 
             protected_tlv_off = len(self.payload)
             self.payload += prot_tlv.get()
