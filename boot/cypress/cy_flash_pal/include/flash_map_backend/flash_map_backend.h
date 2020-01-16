@@ -39,7 +39,7 @@
 #endif
 
 #ifndef CY_BOOT_BOOTLOADER_SIZE
-#define CY_BOOT_BOOTLOADER_SIZE             (0x18000)
+#define CY_BOOT_BOOTLOADER_SIZE             (0x20000)
 #endif
 
 #ifndef CY_BOOT_PRIMARY_1_SIZE

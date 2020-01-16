@@ -51,6 +51,8 @@ endif
 # TODO: MCUBoot library
 # Collect MCUBoot sourses
 SOURCES_MCUBOOT := $(wildcard $(CURDIR)/../bootutil/src/*.c)
+# Exclude encrypted.c file
+SOURCES_MCUBOOT := $(filter-out $(CURDIR)/../bootutil/src/encrypted.c, $(SOURCES_MCUBOOT))
 # Collect MCUBoot Application sources
 SOURCES_APP_SRC := $(wildcard $(CUR_APP_PATH)/*.c)
 # Collect Flash Layer port sources

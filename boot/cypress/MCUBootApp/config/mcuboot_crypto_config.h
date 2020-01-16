@@ -3598,4 +3598,7 @@
 
 #include "mbedtls/check_config.h"
 
+#define MBEDTLS_SHA256_DIGEST_SIZE (32)
+#define MBEDTLS_AES_KEY_SIZE 16
+
 #endif /* MBEDTLS_CONFIG_H */

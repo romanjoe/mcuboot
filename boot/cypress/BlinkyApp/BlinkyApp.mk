@@ -55,7 +55,7 @@ endif
 ifeq ($(TARGET), CY8CKIT-064S2-4343W)
 DEFINES_APP += -DUSER_APP_START=0x10000000
 else
-DEFINES_APP += -DUSER_APP_START=0x10018000
+DEFINES_APP += -DUSER_APP_START=0x10020000
 endif
 # Collect Test Application sources
 SOURCES_APP_SRC := $(wildcard $(CUR_APP_PATH)/*.c)
@@ -93,7 +93,7 @@ endif
 
 pre_build:
 	$(info [PRE_BUILD] - Generating linker script for application $(CUR_APP_PATH)/linker/$(APP_NAME).ld)
-	@$(CC) -E -x c $(CFLAGS) $(INCLUDE_DIRS) $(CUR_APP_PATH)/linker/$(APP_NAME)_template.ld | grep -v '^#' >$(CUR_APP_PATH)/linker/$(APP_NAME).ld
+	@$(CC) -E -x c $(CFLAGS) $(INCLUDE_DIRS) $(APP_NAME)/linker/$(APP_NAME)_template.ld | grep -v '^#' >$(CUR_APP_PATH)/linker/$(APP_NAME).ld
 
 # Post build action to execute after main build job
 post_build: $(OUT_APP)/$(APP_NAME).hex
