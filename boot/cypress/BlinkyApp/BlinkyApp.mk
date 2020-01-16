@@ -93,7 +93,7 @@ endif
 
 pre_build:
 	$(info [PRE_BUILD] - Generating linker script for application $(CUR_APP_PATH)/linker/$(APP_NAME).ld)
-	@$(CC) -E -x c $(CFLAGS) $(INCLUDE_DIRS) $(APP_NAME)/linker/$(APP_NAME)_template.ld | grep -v '^#' >$(CUR_APP_PATH)/linker/$(APP_NAME).ld
+	@$(CC) -E -x c $(CFLAGS) $(INCLUDE_DIRS) $(CUR_APP_PATH)/linker/$(APP_NAME)_template.ld | grep -v '^#' >$(CUR_APP_PATH)/linker/$(APP_NAME).ld
 
 # Post build action to execute after main build job
 post_build: $(OUT_APP)/$(APP_NAME).hex
