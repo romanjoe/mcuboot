@@ -79,10 +79,6 @@ IMGTOOL_PATH ?=	../../scripts/imgtool.py
 
 SIGN_ARGS := sign -H 1024 --pad-header --align 8 -v "2.0" -S 65536 -M 512 --overwrite-only -R 0 -k keys/$(SIGN_KEY_FILE).pem
 
-ifeq ($(ENC_IMG), 1)
-    ENC_ARGS := --encrypt keys/$(ENC_KEY_FILE).pem
-endif
-
 ifeq ($(IMG_TYPE), UPGRADE)
     ifeq ($(ENC_IMG), 1)    
         SIGN_ARGS += --encrypt keys/$(ENC_KEY_FILE).pem
