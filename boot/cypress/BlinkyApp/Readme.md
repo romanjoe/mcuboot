@@ -27,6 +27,12 @@ To build UPGRADE image use following command:
 
     make app APP_NAME=BlinkyApp TARGET=CY8CPROTO-062-4343W IMG_TYPE=UPGRADE HEADER_OFFSET=0x10000
 
+To build UPGRADE encrypted image use following command:
+
+    make app APP_NAME=BlinkyApp TARGET=CY8CPROTO-062-4343W IMG_TYPE=UPGRADE HEADER_OFFSET=0x10000 ENC_IMG=1
+
+*Note:* the image is signed also.
+
 **How to sign an image:**
 
 To sign obtained image use following command:
@@ -44,7 +50,7 @@ Flags defaults:
 
 **How to program an application:**
 
-Use any preffered tool for programming hex files.
+Use any preferred tool for programming hex files.
 
 Currently implemented makefile jobs use DAPLINK interface for programming.
 
@@ -61,15 +67,16 @@ Flags defaults:
     BUILDCFG=Debug
 
 **Flags:**
-- `BUILDCFG` - configation **Release** of **Debug**
-- `MAKEINFO` - 0 (default) - less build info, 1 - verbose output of complilation.
+- `BUILDCFG` - configuration **Release** of **Debug**
+- `MAKEINFO` - 0 (default) - less build info, 1 - verbose output of compilation.
 - `HEADER_OFFSET` - 0 (default) - no offset of output hex file, 0x%VALUE% - offset for output hex file. Value 0x10000 is slot size MCUBoot Bootloader in this example
 - `IMG_TYPE` - `BOOT` (default) - build image for BOOT slot of MCUBoot Bootloader, `UPGRADE` - build image for `UPGRADE` slot of MCUBoot Bootloader.
 - `ENC_IMG` - 0 (default) - build unencrypted image, 1 - build encrypted image.
+- `ENC_KEY_FILE` - name of file (w/o extension) with public key for encrypting image. File should be located in 'keys' folder.
 
-**NOTE**: In case of `UPGRADE` image `HEADER_OFFSET` should be set to MCUBoot Bootloader slot size.
-
-**NOTE2**: The `ENC_IMG=1` can be used ONLY with `UPGRADE` image type.
+**NOTE**: 
+- In case of `UPGRADE` image `HEADER_OFFSET` should be set to MCUBoot Bootloader slot size.
+- The `ENC_IMG=1` can be used ONLY with `UPGRADE` image type.
 
 **Example terminal output:**
 

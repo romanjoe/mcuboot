@@ -43,8 +43,6 @@
 
 #include "bootutil_priv.h"
 
-#include "bootutil/bootutil_log.h"
-
 #include "mcuboot_config/mcuboot_config.h"
 
 static const uint8_t ec_pubkey_oid[] = MBEDTLS_OID_EC_ALG_UNRESTRICTED;
@@ -124,12 +122,14 @@ parse_ec256_enckey(uint8_t **p, uint8_t *end, uint8_t *pk)
 }
 
 int
-boot_enc_set_key(struct enc_key_data *enc_state, uint8_t slot, uint8_t *enckey)
+boot_enc_set_key(struct enc_key_data *enc_state, uint8_t slot,
+        const struct boot_status *bs)
 {
     int rc;
 
     mbedtls_aes_init(&enc_state[slot].aes);
-    rc = mbedtls_aes_setkey_enc(&enc_state[slot].aes, enckey, BOOT_ENC_KEY_SIZE_BITS);
+    rc = mbedtls_aes_setkey_enc(&enc_state[slot].aes, bs->enckey[slot],
+            BOOT_ENC_KEY_SIZE_BITS);
     if (rc) {
         mbedtls_aes_free(&enc_state[slot].aes);
         return -1;
@@ -140,19 +140,23 @@ boot_enc_set_key(struct enc_key_data *enc_state, uint8_t slot, uint8_t *enckey)
     return 0;
 }
 
-#define EXPECTED_ENC_TLV    IMAGE_TLV_ENC_EC256
 #define EXPECTED_ENC_LEN    (65 + 32 + 16)
+
+#define EXPECTED_ENC_TLV    IMAGE_TLV_ENC_EC256
 #define EC_PUBK_INDEX       (1)
 #define EC_TAG_INDEX        (65)
 #define EC_CIPHERKEY_INDEX  (65 + 32)
+_Static_assert(EC_CIPHERKEY_INDEX + 16 == EXPECTED_ENC_LEN,
+        "Please fix ECIES-P256 component indexes");
 
 /*
- * Load encryption key.
+ * Decrypt an encryption key TLV.
+ *
+ * @param buf An encryption TLV read from flash (build time fixed length)
+ * @param enckey An AES-128 key sized buffer to store to plain key.
  */
 int
-boot_enc_load(struct enc_key_data *enc_state, int image_index,
-        const struct image_header *hdr, const struct flash_area *fap,
-        uint8_t *enckey)
+boot_enc_decrypt(const uint8_t *buf, uint8_t *enckey)
 {
     mbedtls_aes_context aes_ctx;
     mbedtls_ecp_group grp;
@@ -167,51 +171,20 @@ boot_enc_load(struct enc_key_data *enc_state, int image_index,
     uint8_t counter[MBEDTLS_AES_BLOCK_SIZE];
     unsigned char stream_block[MBEDTLS_AES_KEY_SIZE];
     size_t nc_off = 0;
-    uint32_t off;
+    //uint32_t off;
     uint16_t len;
-
-    struct image_tlv_iter it;
-    uint8_t buf[EXPECTED_ENC_LEN];
-    uint8_t slot;
+    //struct image_tlv_iter it;
+    //uint8_t buf[EXPECTED_ENC_LEN];
+    //uint8_t slot;
     int rc;
     
-
-    rc = flash_area_id_to_multi_image_slot(image_index, fap->fa_id);
-    if (rc < 0) {
-        return rc;
-    }
-    slot = rc;
-
-    /* Already loaded... */
-    if (enc_state[slot].valid) {
-        return 1;
-    }
-
-    rc = bootutil_tlv_iter_begin(&it, hdr, fap, EXPECTED_ENC_TLV, false);
-    if (rc != 0) {
-        return -1;
-    }
-
-    rc = bootutil_tlv_iter_next(&it, &off, &len, NULL);
-    if (rc != 0) {
-        return rc;
-    }
-
-    if (len != EXPECTED_ENC_LEN) {
-        return -1;
-    }
-
-    rc = flash_area_read(fap, off, buf, EXPECTED_ENC_LEN);
-    if (rc != 0) {
-        return -1;
-    }
-
     cp = (uint8_t *)bootutil_enc_key.key;
     cpend = cp + *bootutil_enc_key.len;
 
     /*
      * Load the stored EC256 decryption private key
      */
+
     rc = parse_ec256_enckey(&cp, cpend, pk);
     if (rc != 0) {
         return rc;
@@ -325,7 +298,69 @@ boot_enc_load(struct enc_key_data *enc_state, int image_index,
     mbedtls_aes_free( &aes_ctx );
     
     rc = 0;
+
     return rc;
+}
+
+/*
+ * Load encryption key.
+ */
+int
+boot_enc_load(struct enc_key_data *enc_state, int image_index,
+        const struct image_header *hdr, const struct flash_area *fap,
+        struct boot_status *bs)
+{
+    // mbedtls_aes_context aes_ctx;
+    // mbedtls_ecp_group grp;
+    // mbedtls_ecp_point P;
+    // mbedtls_mpi z, d;
+    // uint8_t tag[MBEDTLS_SHA256_DIGEST_SIZE];
+    // uint8_t shared[NUM_ECC_BYTES];
+    // uint8_t derived_key[MBEDTLS_AES_KEY_SIZE + MBEDTLS_SHA256_DIGEST_SIZE];
+    // uint8_t *cp;
+    // uint8_t *cpend;
+    // uint8_t pk[NUM_ECC_BYTES];
+    // uint8_t counter[MBEDTLS_AES_BLOCK_SIZE];
+    // unsigned char stream_block[MBEDTLS_AES_KEY_SIZE];
+    // size_t nc_off = 0;
+    uint32_t off;
+    uint16_t len;
+    struct image_tlv_iter it;
+    uint8_t buf[EXPECTED_ENC_LEN];
+    uint8_t slot;
+    int rc;
+    
+    rc = flash_area_id_to_multi_image_slot(image_index, fap->fa_id);
+    if (rc < 0) {
+        return rc;
+    }
+    slot = rc;
+
+    /* Already loaded... */
+    if (enc_state[slot].valid) {
+        return 1;
+    }
+
+    rc = bootutil_tlv_iter_begin(&it, hdr, fap, EXPECTED_ENC_TLV, false);
+    if (rc != 0) {
+        return -1;
+    }
+
+    rc = bootutil_tlv_iter_next(&it, &off, &len, NULL);
+    if (rc != 0) {
+        return rc;
+    }
+
+    if (len != EXPECTED_ENC_LEN) {
+        return -1;
+    }
+
+    rc = flash_area_read(fap, off, buf, EXPECTED_ENC_LEN);
+    if (rc != 0) {
+        return -1;
+    }
+
+    return boot_enc_decrypt(buf, bs->enckey[slot]);
 }
 
 bool

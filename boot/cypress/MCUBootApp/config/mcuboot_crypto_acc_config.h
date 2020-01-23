@@ -35,7 +35,7 @@
 // #define MBEDTLS_CIPHER_MODE_CBC
 // #define MBEDTLS_CIPHER_MODE_CFB
 // #define MBEDTLS_CIPHER_MODE_OFB
-// #define MBEDTLS_CIPHER_MODE_CTR
+#define MBEDTLS_CIPHER_MODE_CTR
 // #define MBEDTLS_CIPHER_MODE_XTS
 
 /* Only NIST-P curves are currently supported */

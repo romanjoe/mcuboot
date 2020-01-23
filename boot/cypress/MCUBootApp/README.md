@@ -106,6 +106,8 @@ Flags by defalt:
 
     BUILDCFG=Debug
     MAKEINFO=0
+    
+*Note:* When encrypted image feature will be used the private key of key pair for encrypting image should be placed to 'enc_priv_key' array in 'keys.c' file.
 
 **How to program MCUBoot Bootloader:**
 
