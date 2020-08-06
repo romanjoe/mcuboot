@@ -554,6 +554,8 @@ boot_write_trailer(const struct flash_area *fap, uint32_t off,
 }
 #endif
 
+#endif /* MCUBOOT_SWAP_USING_STATUS */
+
 #ifdef MCUBOOT_ENC_IMAGES
 int
 boot_write_enc_key(const struct flash_area *fap, uint8_t slot,
