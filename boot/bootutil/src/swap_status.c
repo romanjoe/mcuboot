@@ -328,39 +328,39 @@ boot_swap_sectors(int idx, uint32_t sz, struct boot_loader_state *state,
         struct boot_status *bs, const struct flash_area *fap_pri,
         const struct flash_area *fap_sec)
 {
-//    uint32_t pri_off;
-//    uint32_t pri_up_off;
-//    uint32_t sec_off;
-//    int rc;
-//
-//    pri_up_off = boot_img_sector_off(state, BOOT_PRIMARY_SLOT, idx);
-//    pri_off = boot_img_sector_off(state, BOOT_PRIMARY_SLOT, idx - 1);
-//    sec_off = boot_img_sector_off(state, BOOT_SECONDARY_SLOT, idx - 1);
-//
-//    if (bs->state == BOOT_STATUS_STATE_0) {
-//        rc = boot_erase_region(fap_pri, pri_off, sz);
-//        assert(rc == 0);
-//
-//        rc = boot_copy_region(state, fap_sec, fap_pri, sec_off, pri_off, sz);
-//        assert(rc == 0);
-//
+    uint32_t pri_off;
+    uint32_t pri_up_off;
+    uint32_t sec_off;
+    int rc;
+
+    pri_up_off = boot_img_sector_off(state, BOOT_PRIMARY_SLOT, idx);
+    pri_off = boot_img_sector_off(state, BOOT_PRIMARY_SLOT, idx - 1);
+    sec_off = boot_img_sector_off(state, BOOT_SECONDARY_SLOT, idx - 1);
+
+    if (bs->state == BOOT_STATUS_STATE_0) {
+        rc = boot_erase_region(fap_pri, pri_off, sz);
+        assert(rc == 0);
+
+        rc = boot_copy_region(state, fap_sec, fap_pri, sec_off, pri_off, sz);
+        assert(rc == 0);
+        // TODO: need to implement this one for SWAP status
 //        rc = boot_write_status(state, bs);
-//        bs->state = BOOT_STATUS_STATE_1;
-//        BOOT_STATUS_ASSERT(rc == 0);
-//    }
-//
-//    if (bs->state == BOOT_STATUS_STATE_1) {
-//        rc = boot_erase_region(fap_sec, sec_off, sz);
-//        assert(rc == 0);
-//
-//        rc = boot_copy_region(state, fap_pri, fap_sec, pri_up_off, sec_off, sz);
-//        assert(rc == 0);
-//
+        bs->state = BOOT_STATUS_STATE_1;
+        BOOT_STATUS_ASSERT(rc == 0);
+    }
+
+    if (bs->state == BOOT_STATUS_STATE_1) {
+        rc = boot_erase_region(fap_sec, sec_off, sz);
+        assert(rc == 0);
+
+        rc = boot_copy_region(state, fap_pri, fap_sec, pri_up_off, sec_off, sz);
+        assert(rc == 0);
+        // TODO: need to implement this one for SWAP status
 //        rc = boot_write_status(state, bs);
-//        bs->idx++;
-//        bs->state = BOOT_STATUS_STATE_0;
-//        BOOT_STATUS_ASSERT(rc == 0);
-//    }
+        bs->idx++;
+        bs->state = BOOT_STATUS_STATE_0;
+        BOOT_STATUS_ASSERT(rc == 0);
+}
 }
 
 /*
@@ -377,38 +377,39 @@ void
 fixup_revert(const struct boot_loader_state *state, struct boot_status *bs,
         const struct flash_area *fap_sec, uint8_t sec_id)
 {
-//    struct boot_swap_state swap_state;
-//    int rc;
-//
-//#if (BOOT_IMAGE_NUMBER == 1)
-//    (void)state;
-//#endif
-//
-//    /* No fixup required */
-//    if (bs->swap_type != BOOT_SWAP_TYPE_REVERT ||
-//        bs->op != BOOT_STATUS_OP_MOVE ||
-//        bs->idx != BOOT_STATUS_IDX_0) {
-//        return;
-//    }
-//
-//    rc = boot_read_swap_state_by_id(sec_id, &swap_state);
-//    assert(rc == 0);
-//
-//    BOOT_LOG_SWAP_STATE("Secondary image", &swap_state);
-//
-//    if (swap_state.magic == BOOT_MAGIC_UNSET) {
-//        rc = swap_erase_trailer_sectors(state, fap_sec);
-//        assert(rc == 0);
-//
-//        rc = boot_write_image_ok(fap_sec);
-//        assert(rc == 0);
-//
-//        rc = boot_write_swap_size(fap_sec, bs->swap_size);
-//        assert(rc == 0);
-//
-//        rc = boot_write_magic(fap_sec);
-//        assert(rc == 0);
-//    }
+    struct boot_swap_state swap_state;
+    int rc;
+
+#if (BOOT_IMAGE_NUMBER == 1)
+    (void)state;
+#endif
+
+    /* No fixup required */
+    if (bs->swap_type != BOOT_SWAP_TYPE_REVERT ||
+        bs->op != BOOT_STATUS_OP_MOVE ||
+        bs->idx != BOOT_STATUS_IDX_0) {
+        return;
+    }
+
+    rc = boot_read_swap_state_by_id(sec_id, &swap_state);
+    assert(rc == 0);
+
+    BOOT_LOG_SWAP_STATE("Secondary image", &swap_state);
+
+    if (swap_state.magic == BOOT_MAGIC_UNSET) {
+        rc = swap_erase_trailer_sectors(state, fap_sec);
+        assert(rc == 0);
+
+        rc = boot_write_image_ok(fap_sec);
+        assert(rc == 0);
+
+        rc = boot_write_swap_size(fap_sec, bs->swap_size);
+        assert(rc == 0);
+
+        // TODO: implement for SWAP status
+        rc = boot_write_magic(fap_sec);
+        assert(rc == 0);
+    }
 }
 
 void
@@ -555,35 +556,6 @@ boot_enc_key_off(const struct flash_area *fap, uint8_t slot)
 //#endif
 }
 #endif
-
-/* Write Section */
-__attribute__ ((weak)) int
-boot_write_magic(const struct flash_area *fap)
-{
-    uint32_t off;
-    int rc;
-    const struct flash_area *fap_status;
-
-    /* function interface suppose flash_area would be of primary/secondary
-        type, but for swap with status partition dedicated area is used*/
-    if(fap->fa_id != FLASH_AREA_IMAGE_SWAP_STATUS) {
-        rc = flash_area_open(FLASH_AREA_IMAGE_SWAP_STATUS, &fap_status);
-        assert (rc == 0);
-    }
-
-    off = boot_magic_off(fap_status);
-
-    BOOT_LOG_DBG("writing magic; fa_id=%d off=0x%lx (0x%lx)",
-                 fap_status->fa_id, (unsigned long)off,
-                 (unsigned long)(fap_status->fa_off + off));
-    rc = flash_area_write(fap_status, off, boot_img_magic, BOOT_MAGIC_SZ);
-    if (rc != 0) {
-        return BOOT_EFLASH;
-    }
-
-    flash_area_close(fap_status);
-    return 0;
-}
 
 /**
  * Write trailer data; status bytes, swap_size, etc

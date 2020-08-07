@@ -254,6 +254,7 @@ boot_enc_key_off(const struct flash_area *fap, uint8_t slot)
 }
 #endif
 
+#ifndef MCUBOOT_SWAP_USING_STATUS
 int
 boot_read_swap_state(const struct flash_area *fap,
                      struct boot_swap_state *state)
@@ -315,6 +316,7 @@ boot_read_swap_state(const struct flash_area *fap,
 
     return 0;
 }
+#endif /* not MCUBOOT_SWAP_USING_STATUS */
 
 /**
  * Reads the image trailer from the scratch area.

@@ -49,6 +49,99 @@ boot_status_sector_off(const struct boot_loader_state *state,
            state->status.sectors[0].fs_off;
 }
 
+// TODO: implement it for SWAP status
+/* Write Section */
+__attribute__ ((weak)) int
+boot_write_magic(const struct flash_area *fap)
+{
+    uint32_t off;
+    int rc;
+    const struct flash_area *fap_status;
+
+    /* function interface suppose flash_area would be of primary/secondary
+        type, but for swap with status partition dedicated area is used*/
+    if(fap->fa_id != FLASH_AREA_IMAGE_SWAP_STATUS) {
+        rc = flash_area_open(FLASH_AREA_IMAGE_SWAP_STATUS, &fap_status);
+        assert (rc == 0);
+    }
+
+    off = boot_magic_off(fap_status);
+
+    BOOT_LOG_DBG("writing magic; fa_id=%d off=0x%lx (0x%lx)",
+                 fap_status->fa_id, (unsigned long)off,
+                 (unsigned long)(fap_status->fa_off + off));
+    rc = flash_area_write(fap_status, off, boot_img_magic, BOOT_MAGIC_SZ);
+    if (rc != 0) {
+        return BOOT_EFLASH;
+    }
+
+    flash_area_close(fap_status);
+    return 0;
+}
+
+// TODO: implement it for SWAP status
+int
+boot_read_swap_state(const struct flash_area *fap,
+                     struct boot_swap_state *state)
+{
+//    uint32_t magic[BOOT_MAGIC_ARR_SZ];
+//    uint32_t off;
+//    uint8_t swap_info;
+//    int rc;
+//
+//    off = boot_magic_off(fap);
+//    rc = flash_area_read_is_empty(fap, off, magic, BOOT_MAGIC_SZ);
+//    if (rc < 0) {
+//        return BOOT_EFLASH;
+//    }
+//    if (rc == 1) {
+//        state->magic = BOOT_MAGIC_UNSET;
+//    } else {
+//        state->magic = boot_magic_decode(magic);
+//    }
+//
+//    off = boot_swap_info_off(fap);
+//    rc = flash_area_read_is_empty(fap, off, &swap_info, sizeof swap_info);
+//    if (rc < 0) {
+//        return BOOT_EFLASH;
+//    }
+//
+//    /* Extract the swap type and image number */
+//    state->swap_type = BOOT_GET_SWAP_TYPE(swap_info);
+//    state->image_num = BOOT_GET_IMAGE_NUM(swap_info);
+//
+//    if (rc == 1 || state->swap_type > BOOT_SWAP_TYPE_REVERT) {
+//        state->swap_type = BOOT_SWAP_TYPE_NONE;
+//        state->image_num = 0;
+//    }
+//
+//    off = boot_copy_done_off(fap);
+//    rc = flash_area_read_is_empty(fap, off, &state->copy_done,
+//            sizeof state->copy_done);
+//    if (rc < 0) {
+//        return BOOT_EFLASH;
+//    }
+//    if (rc == 1) {
+//        state->copy_done = BOOT_FLAG_UNSET;
+//    } else {
+//        state->copy_done = boot_flag_decode(state->copy_done);
+//    }
+//
+//    off = boot_image_ok_off(fap);
+//    rc = flash_area_read_is_empty(fap, off, &state->image_ok,
+//                                  sizeof state->image_ok);
+//    if (rc < 0) {
+//        return BOOT_EFLASH;
+//    }
+//    if (rc == 1) {
+//        state->image_ok = BOOT_FLAG_UNSET;
+//    } else {
+//        state->image_ok = boot_flag_decode(state->image_ok);
+//    }
+
+    return 0;
+}
+
 int32_t swap_status_init_offset(uint32_t area_id)
 {
     int32_t offset;
