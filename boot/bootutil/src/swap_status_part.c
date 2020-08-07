@@ -5,6 +5,7 @@
  *      Author: bohd
  */
 #include <assert.h>
+#include <string.h>
 #include "swap_status.h"
 
 uint32_t calc_rec_idx(uint32_t value)
@@ -16,30 +17,6 @@ uint32_t calc_rec_idx(uint32_t value)
     return rec_idx;
 }
 
-int32_t calc_init_offset(uint32_t area_id)
-{
-    int32_t offset;
-    /* calculate an offset caused by area type: primary_x/secondary_x */
-    switch (area_id) {
-    case FLASH_AREA_IMAGE_0:
-        offset = 0x00;
-        break;
-    case FLASH_AREA_IMAGE_1:
-        offset = BOOT_SWAP_STATUS_SIZE;
-        break;
-    case FLASH_AREA_IMAGE_2:
-        offset = 2*BOOT_SWAP_STATUS_SIZE;
-        break;
-    case FLASH_AREA_IMAGE_3:
-        offset = 3*BOOT_SWAP_STATUS_SIZE;
-        break;
-    default:
-        offset = -1;
-        break;
-    }
-    return offset;
-}
-
 uint32_t calc_record_offs(uint32_t offs)
 {
     uint32_t rec_offs;
@@ -49,7 +26,7 @@ uint32_t calc_record_offs(uint32_t offs)
     return 0;
 }
 
-uint32_t calc_record_crc(uint8_t data, uint8_t length)
+uint32_t calc_record_crc(uint8_t *data, uint8_t length)
 {
     uint32_t crc;
 
@@ -137,7 +114,7 @@ int swap_status_write_record(uint32_t rec_offset, uint32_t copy_num, uint32_t co
     memcpy(buff, data, BOOT_SWAP_STATUS_PAYLD_SZ);
     /* append next counter to whole record row */
     memcpy(&buff[BOOT_SWAP_STATUS_ROW_SZ-BOOT_SWAP_STATUS_CNT_SZ-BOOT_SWAP_STATUS_CRC_SZ], \
-            next_counter, \
+            &next_counter, \
             BOOT_SWAP_STATUS_CNT_SZ);
 
     /* calculate CRC field*/
@@ -145,7 +122,7 @@ int swap_status_write_record(uint32_t rec_offset, uint32_t copy_num, uint32_t co
 
     /* append new CRC to whole record row */
     memcpy(&buff[BOOT_SWAP_STATUS_ROW_SZ-BOOT_SWAP_STATUS_CRC_SZ], \
-            next_crc, \
+            &next_crc, \
             BOOT_SWAP_STATUS_CRC_SZ);
 
     /* we already know what copy number was last and correct */
@@ -179,7 +156,7 @@ int swap_status_update(uint32_t area_id, uint32_t offs, uint8_t *data, uint32_t 
     uint8_t buff[BOOT_SWAP_STATUS_PAYLD_SZ];
 
     /* pre-calculate sub-area offset */
-    init_offs = calc_init_offset(area_id);
+    init_offs = swap_status_init_offset(area_id);
     assert (init_offs < 0);
 
     /* will start from it
@@ -197,7 +174,7 @@ int swap_status_update(uint32_t area_id, uint32_t offs, uint8_t *data, uint32_t 
             break;
         }
         /* update record data */
-        if (length > BOOT_SWAP_STATUS_PAYLD_SZ)
+        if (length > (int)BOOT_SWAP_STATUS_PAYLD_SZ)
         {
             copy_sz = BOOT_SWAP_STATUS_PAYLD_SZ - buff_idx;
         }
@@ -237,7 +214,7 @@ int swap_status_retrieve(uint32_t area_id, uint32_t offs, uint8_t *data, uint32_
     uint8_t buff[BOOT_SWAP_STATUS_PAYLD_SZ];
 
     /* pre-calculate sub-area offset */
-    init_offs = calc_init_offset(area_id);
+    init_offs = swap_status_init_offset(area_id);
     assert (init_offs < 0);
 
     /* will start from it
@@ -255,7 +232,7 @@ int swap_status_retrieve(uint32_t area_id, uint32_t offs, uint8_t *data, uint32_
             break;
         }
         /* update record data */
-        if (length > BOOT_SWAP_STATUS_PAYLD_SZ)
+        if (length > (int)BOOT_SWAP_STATUS_PAYLD_SZ)
         {
             copy_sz = BOOT_SWAP_STATUS_PAYLD_SZ - buff_idx;
         }

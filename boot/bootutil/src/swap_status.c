@@ -59,7 +59,7 @@ boot_read_image_header(struct boot_loader_state *state, int slot,
 //    uint32_t off;
 //    uint32_t sz;
 //    int area_id;
-    int rc;
+    int rc = 0;
 //
 //#if (BOOT_IMAGE_NUMBER == 1)
 //    (void)state;
@@ -279,7 +279,7 @@ swap_status_source(struct boot_loader_state *state)
 //    }
 //
 //    BOOT_LOG_INF("Boot source: none");
-//    return BOOT_STATUS_SOURCE_NONE;
+    return BOOT_STATUS_SOURCE_NONE;
 }
 
 /*
@@ -292,11 +292,7 @@ boot_move_sector_up(int idx, uint32_t sz, struct boot_loader_state *state,
 {
     uint32_t new_off;
     uint32_t old_off;
-//    const struct flash_area *fap_stat;
     int rc;
-
-//    rc = flash_area_open(FLASH_AREA_IMAGE_SWAP_STATUS, &fap_stat);
-//    assert (rc == 0);
 
     /* Calculate offset from start of image area. */
     new_off = boot_img_sector_off(state, BOOT_PRIMARY_SLOT, idx);
@@ -427,7 +423,6 @@ swap_run(struct boot_loader_state *state, struct boot_status *bs,
     uint8_t image_index;
     const struct flash_area *fap_pri;
     const struct flash_area *fap_sec;
-//    const struct flash_area *fap_stat;
     int rc;
 
     sz = 0;
@@ -473,9 +468,6 @@ swap_run(struct boot_loader_state *state, struct boot_status *bs,
 
     rc = flash_area_open(FLASH_AREA_IMAGE_SECONDARY(image_index), &fap_sec);
     assert (rc == 0);
-
-//    rc = flash_area_open(FLASH_AREA_IMAGE_SWAP_STATUS, &fap_stat);
-//    assert (rc == 0);
 
     // TODO: skipping revert in early development
 //    fixup_revert(state, bs, fap_sec, FLASH_AREA_IMAGE_SECONDARY(image_index));
@@ -589,6 +581,7 @@ boot_write_magic(const struct flash_area *fap)
         return BOOT_EFLASH;
     }
 
+    flash_area_close(fap_status);
     return 0;
 }
 
@@ -602,32 +595,13 @@ int
 boot_write_trailer(const struct flash_area *fap, uint32_t off,
         const uint8_t *inbuf, uint8_t inlen)
 {
-    // TODO: add call to swap_status_update() here ?
     int rc;
 
-    rc = swap_status_update(fap->fa_id, off, inbuf, inlen);
+    rc = swap_status_update(fap->fa_id, off, (uint8_t *)inbuf, inlen);
 
-//    uint8_t buf[BOOT_MAX_ALIGN];
-//    uint8_t align;
-//    uint8_t erased_val;
-//    int rc;
-//
-//    align = flash_area_align(fap);
-//    if (inlen > BOOT_MAX_ALIGN || align > BOOT_MAX_ALIGN) {
-//        return -1;
-//    }
-//    erased_val = flash_area_erased_val(fap);
-//    if (align < inlen) {
-//        align = inlen;
-//    }
-//    memcpy(buf, inbuf, inlen);
-//    memset(&buf[inlen], erased_val, align - inlen);
-//
-//    rc = flash_area_write(fap, off, buf, align);
     if (rc != 0) {
         return BOOT_EFLASH;
     }
-
     return rc;
 }
 #endif

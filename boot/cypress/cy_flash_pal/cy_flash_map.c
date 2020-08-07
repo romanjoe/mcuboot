@@ -207,7 +207,7 @@ struct flash_area *boot_area_descs[] =
 #endif
 #ifdef MCUBOOT_SWAP_USING_STATUS
     &status,
-#endif,
+#endif
     NULL
 };
 #endif

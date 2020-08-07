@@ -49,11 +49,40 @@ boot_status_sector_off(const struct boot_loader_state *state,
            state->status.sectors[0].fs_off;
 }
 
+int32_t swap_status_init_offset(uint32_t area_id)
+{
+    int32_t offset;
+    /* calculate an offset caused by area type: primary_x/secondary_x */
+    switch (area_id) {
+    case FLASH_AREA_IMAGE_0:
+        offset = 0x00;
+        break;
+    case FLASH_AREA_IMAGE_1:
+        offset = BOOT_SWAP_STATUS_SIZE;
+        break;
+    case FLASH_AREA_IMAGE_2:
+        offset = 2*BOOT_SWAP_STATUS_SIZE;
+        break;
+    case FLASH_AREA_IMAGE_3:
+        offset = 3*BOOT_SWAP_STATUS_SIZE;
+        break;
+    default:
+        offset = -1;
+        break;
+    }
+    return offset;
+}
+
+int boot_status_num_sectors(const struct boot_loader_state *state)
+{
+    return (int)(BOOT_SWAP_STATUS_SIZE / boot_status_sector_size(state, 0));
+}
+
+
 int
 swap_erase_trailer_sectors(const struct boot_loader_state *state,
                            const struct flash_area *fap)
 {
-//    uint8_t slot;
     uint32_t sector;
     uint32_t trailer_sz;
     uint32_t total_sz;
@@ -65,7 +94,7 @@ swap_erase_trailer_sectors(const struct boot_loader_state *state,
     int rc;
 
     BOOT_LOG_DBG("Erasing trailer; fa_id=%d", fap->fa_id);
-
+    /* trailer is located in status-partition */
     const struct flash_area *fap_stat;
 
     rc = flash_area_open(FLASH_AREA_IMAGE_SWAP_STATUS, &fap_stat);
@@ -77,27 +106,21 @@ swap_erase_trailer_sectors(const struct boot_loader_state *state,
     fa_id_secondary = flash_area_id_from_multi_image_slot(image_index,
             BOOT_SECONDARY_SLOT);
 
-    if (fap->fa_id == fa_id_primary) {
-//        slot = BOOT_PRIMARY_SLOT;
-    } else if (fap->fa_id == fa_id_secondary) {
-//        slot = BOOT_SECONDARY_SLOT;
-    } else {
+    /* skip if Flash Area is not recognizable */
+    if ((fap->fa_id != fa_id_primary) && (fap->fa_id != fa_id_secondary)) {
         return BOOT_EFLASH;
     }
 
-    sub_offs = BOOT_SWAP_STATUS_SIZE*(fap->fa_id);
+    sub_offs = swap_status_init_offset(fap->fa_id);
 
     /* delete starting from last sector and moving to beginning */
-    // TODO: calculate last sector of status sub-area
-//    sector = boot_img_num_sectors(state, slot) - 1;
+    /* calculate last sector of status sub-area */
     sector = boot_status_num_sectors(state) - 1;
-//    trailer_sz = boot_trailer_sz(BOOT_WRITE_SZ(state));
+    /* whole status area size to be erased */
     trailer_sz = BOOT_SWAP_STATUS_SIZE;
     total_sz = 0;
     do {
-//        sz = boot_img_sector_size(state, slot, sector);
         sz = boot_status_sector_size(state, sector);
-//        off = boot_img_sector_off(state, slot, sector);
         off = boot_status_sector_off(state, sector) + sub_offs;
         rc = boot_erase_region(fap_stat, off, sz);
         assert(rc == 0);
@@ -116,35 +139,35 @@ swap_status_init(const struct boot_loader_state *state,
                  const struct flash_area *fap,
                  const struct boot_status *bs)
 {
-//    struct boot_swap_state swap_state;
-//    uint8_t image_index;
+    struct boot_swap_state swap_state;
+    uint8_t image_index;
     int rc;
-//
-//#if (BOOT_IMAGE_NUMBER == 1)
-//    (void)state;
-//#endif
-//
-//    image_index = BOOT_CURR_IMG(state);
-//
-//    BOOT_LOG_DBG("initializing status; fa_id=%d", fap->fa_id);
-//
+
+#if (BOOT_IMAGE_NUMBER == 1)
+    (void)state;
+#endif
+
+    image_index = BOOT_CURR_IMG(state);
+
+    BOOT_LOG_DBG("initializing status; fa_id=%d", fap->fa_id);
+
 //    rc = boot_read_swap_state_by_id(FLASH_AREA_IMAGE_SECONDARY(image_index),
 //            &swap_state);
 //    assert(rc == 0);
-//
-//    if (bs->swap_type != BOOT_SWAP_TYPE_NONE) {
-//        rc = boot_write_swap_info(fap, bs->swap_type, image_index);
-//        assert(rc == 0);
-//    }
-//
-//    if (swap_state.image_ok == BOOT_FLAG_SET) {
-//        rc = boot_write_image_ok(fap);
-//        assert(rc == 0);
-//    }
-//
-//    rc = boot_write_swap_size(fap, bs->swap_size);
-//    assert(rc == 0);
-//
+
+    if (bs->swap_type != BOOT_SWAP_TYPE_NONE) {
+        rc = boot_write_swap_info(fap, bs->swap_type, image_index);
+        assert(rc == 0);
+    }
+
+    if (swap_state.image_ok == BOOT_FLAG_SET) {
+        rc = boot_write_image_ok(fap);
+        assert(rc == 0);
+    }
+
+    rc = boot_write_swap_size(fap, bs->swap_size);
+    assert(rc == 0);
+
 //#ifdef MCUBOOT_ENC_IMAGES
 //    rc = boot_write_enc_key(fap, 0, bs);
 //    assert(rc == 0);
@@ -152,7 +175,7 @@ swap_status_init(const struct boot_loader_state *state,
 //    rc = boot_write_enc_key(fap, 1, bs);
 //    assert(rc == 0);
 //#endif
-//
+
 //    rc = boot_write_magic(fap);
 //    assert(rc == 0);
 
@@ -166,7 +189,7 @@ swap_read_status(struct boot_loader_state *state, struct boot_status *bs)
 //    uint32_t off;
 //    uint8_t swap_info;
 //    int area_id;
-    int rc;
+    int rc = 0;
 //
 //    bs->source = swap_status_source(state);
 //    switch (bs->source) {
@@ -209,11 +232,6 @@ swap_read_status(struct boot_loader_state *state, struct boot_status *bs)
 //    flash_area_close(fap);
 //
     return rc;
-}
-
-int boot_status_num_sectors(const struct boot_loader_state *state)
-{
-    return (int)(BOOT_SWAP_STATUS_SIZE / boot_status_sector_size(state, 0));
 }
 
 #endif /* defined(MCUBOOT_SWAP_USING_MOVE) */
