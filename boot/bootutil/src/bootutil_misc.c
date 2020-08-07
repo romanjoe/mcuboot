@@ -446,6 +446,7 @@ boot_read_enc_key(int image_index, uint8_t slot, struct boot_status *bs)
 }
 #endif
 
+#ifndef MCUBOOT_SWAP_USING_STATUS
 int
 boot_write_magic(const struct flash_area *fap)
 {
@@ -465,7 +466,6 @@ boot_write_magic(const struct flash_area *fap)
     return 0;
 }
 
-#ifndef MCUBOOT_SWAP_USING_STATUS
 /**
  * Write trailer data; status bytes, swap_size, etc
  *
