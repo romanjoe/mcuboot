@@ -140,7 +140,7 @@ boot_write_enc_key(const struct flash_area *fap, uint8_t slot,
 //#if MCUBOOT_SWAP_SAVE_ENCTLV
 //    rc = flash_area_write(fap, off, bs->enctlv[slot], BOOT_ENC_TLV_ALIGN_SIZE);
 //#else
-    rc = swap_status_update((uint32_t) FLASH_AREA_IMAGE_SWAP_STATUS, off,
+    rc = swap_status_update(fap->fa_id, off,
                             (uint8_t *) bs->enckey[slot], BOOT_ENC_KEY_SIZE);
 //#endif
    if (rc != 0) {
@@ -164,7 +164,7 @@ boot_write_magic(const struct flash_area *fap)
 
     off = boot_magic_off(fap);
 
-    rc = swap_status_update((uint32_t) FLASH_AREA_IMAGE_SWAP_STATUS, off,
+    rc = swap_status_update(fap->fa_id, off,
                             (uint8_t *) boot_img_magic, BOOT_MAGIC_SZ);
 
     if (rc != 0) {

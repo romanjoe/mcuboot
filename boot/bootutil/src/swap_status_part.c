@@ -139,7 +139,8 @@ int swap_status_write_record(uint32_t rec_offset, uint32_t copy_num, uint32_t co
     return rc;
 }
 
-int swap_status_update(uint32_t area_id, uint32_t offs, uint8_t *data, uint32_t len)
+// TODO: add argument usage
+int swap_status_update(uint32_t targ_area_id, uint32_t offs, uint8_t *data, uint32_t len)
 {
     int rc = -1;
 
@@ -156,7 +157,7 @@ int swap_status_update(uint32_t area_id, uint32_t offs, uint8_t *data, uint32_t 
     uint8_t buff[BOOT_SWAP_STATUS_PAYLD_SZ];
 
     /* pre-calculate sub-area offset */
-    init_offs = swap_status_init_offset(area_id);
+    init_offs = swap_status_init_offset(targ_area_id);
     assert (init_offs < 0);
 
     /* will start from it
@@ -197,7 +198,8 @@ int swap_status_update(uint32_t area_id, uint32_t offs, uint8_t *data, uint32_t 
     return rc;
 }
 
-int swap_status_retrieve(uint32_t area_id, uint32_t offs, uint8_t *data, uint32_t len)
+// TODO: add argument usage
+int swap_status_retrieve(uint32_t target_area_id, uint32_t offs, uint8_t *data, uint32_t len)
 {
     int rc = 0;
 
@@ -214,7 +216,7 @@ int swap_status_retrieve(uint32_t area_id, uint32_t offs, uint8_t *data, uint32_
     uint8_t buff[BOOT_SWAP_STATUS_PAYLD_SZ];
 
     /* pre-calculate sub-area offset */
-    init_offs = swap_status_init_offset(area_id);
+    init_offs = swap_status_init_offset(target_area_id);
     assert (init_offs >= 0);
 
     /* will start from it

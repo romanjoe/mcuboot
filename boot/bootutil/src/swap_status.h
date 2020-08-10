@@ -107,7 +107,8 @@ struct image_status_trailer {
                                     BOOT_SWAP_STATUS_SZ_PRIM)
 
 int32_t swap_status_init_offset(uint32_t area_id);
-int swap_status_update(uint32_t area_id, uint32_t offs, uint8_t *data, uint32_t len);
+int swap_status_update(uint32_t target_area_id, uint32_t offs, uint8_t *data, uint32_t len);
+int swap_status_retrieve(uint32_t target_area_id, uint32_t offs, uint8_t *data, uint32_t len);
 
 int boot_write_trailer(const struct flash_area *fap, uint32_t off,
                         const uint8_t *inbuf, uint8_t inlen);
