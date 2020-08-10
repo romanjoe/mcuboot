@@ -244,9 +244,9 @@ swap_status_init(const struct boot_loader_state *state,
 
     BOOT_LOG_DBG("initializing status; fa_id=%d", fap->fa_id);
 
-//    rc = boot_read_swap_state_by_id(FLASH_AREA_IMAGE_SECONDARY(image_index),
-//            &swap_state);
-//    assert(rc == 0);
+    rc = boot_read_swap_state_by_id(FLASH_AREA_IMAGE_SECONDARY(image_index),
+            &swap_state);
+    assert(rc == 0);
 
     if (bs->swap_type != BOOT_SWAP_TYPE_NONE) {
         rc = boot_write_swap_info(fap, bs->swap_type, image_index);
@@ -269,8 +269,8 @@ swap_status_init(const struct boot_loader_state *state,
 //    assert(rc == 0);
 //#endif
 
-//    rc = boot_write_magic(fap);
-//    assert(rc == 0);
+    rc = boot_write_magic(fap);
+    assert(rc == 0);
 
     return 0;
 }
@@ -278,52 +278,59 @@ swap_status_init(const struct boot_loader_state *state,
 int
 swap_read_status(struct boot_loader_state *state, struct boot_status *bs)
 {
-//    const struct flash_area *fap;
-//    uint32_t off;
-//    uint8_t swap_info;
-//    int area_id;
+    const struct flash_area *fap;
+    uint32_t off;
+    uint8_t swap_info;
+    int area_id;
     int rc = 0;
-//
+
 //    bs->source = swap_status_source(state);
-//    switch (bs->source) {
-//    case BOOT_STATUS_SOURCE_NONE:
-//        return 0;
-//
+    switch (bs->source) {
+    case BOOT_STATUS_SOURCE_NONE:
+        return 0;
+
 //#if MCUBOOT_SWAP_USING_SCRATCH
 //    case BOOT_STATUS_SOURCE_SCRATCH:
 //        area_id = FLASH_AREA_IMAGE_SCRATCH;
 //        break;
 //#endif
-//
-//    case BOOT_STATUS_SOURCE_PRIMARY_SLOT:
-//        area_id = FLASH_AREA_IMAGE_PRIMARY(BOOT_CURR_IMG(state));
-//        break;
-//
-//    default:
-//        assert(0);
-//        return BOOT_EBADARGS;
-//    }
-//
+
+    case BOOT_STATUS_SOURCE_PRIMARY_SLOT:
+        area_id = FLASH_AREA_IMAGE_PRIMARY(BOOT_CURR_IMG(state));
+        break;
+
+    default:
+        assert(0);
+        return BOOT_EBADARGS;
+    }
+
 //    rc = flash_area_open(area_id, &fap);
 //    if (rc != 0) {
 //        return BOOT_EFLASH;
 //    }
-//
+
 //    rc = swap_read_status_bytes(fap, state, bs);
-//    if (rc == 0) {
-//        off = boot_swap_info_off(fap);
+    if (rc == 0) {
+        off = boot_swap_info_off(fap);
 //        rc = flash_area_read_is_empty(fap, off, &swap_info, sizeof swap_info);
-//        if (rc == 1) {
-//            BOOT_SET_SWAP_INFO(swap_info, 0, BOOT_SWAP_TYPE_NONE);
-//            rc = 0;
-//        }
-//
-//        /* Extract the swap type info */
-//        bs->swap_type = BOOT_GET_SWAP_TYPE(swap_info);
+        rc = swap_status_retrieve(area_id, off, &swap_info, sizeof swap_info);
+    // TODO: add memcmp with erased_val;
+//        for (uint8_t i = 0; i < sizeof swap_info; i++) {
+//            if (mem_dest[i] != flash_area_erased_val(fa)) {
+//                rc = 0;
+//            }
 //    }
-//
+        if (rc == 1) {
+            BOOT_SET_SWAP_INFO(swap_info, 0, BOOT_SWAP_TYPE_NONE);
+            rc = 0;
+        }
+
+        /* Extract the swap type info */
+        bs->swap_type = BOOT_GET_SWAP_TYPE(swap_info);
+    }
+
 //    flash_area_close(fap);
-//
+
     return rc;
 }
 

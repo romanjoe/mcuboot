@@ -307,20 +307,20 @@ boot_move_sector_up(int idx, uint32_t sz, struct boot_loader_state *state,
             assert(rc == 0);
         }
 
-//        rc = swap_erase_trailer_sectors(state, fap_sec);
-//        assert(rc == 0);
+        rc = swap_erase_trailer_sectors(state, fap_sec);
+        assert(rc == 0);
     }
-//
-//    rc = boot_erase_region(fap_pri, new_off, sz);
-//    assert(rc == 0);
-//
-//    rc = boot_copy_region(state, fap_pri, fap_pri, old_off, new_off, sz);
-//    assert(rc == 0);
-//
+
+    rc = boot_erase_region(fap_pri, new_off, sz);
+    assert(rc == 0);
+
+    rc = boot_copy_region(state, fap_pri, fap_pri, old_off, new_off, sz);
+    assert(rc == 0);
+
 //    rc = boot_write_status(state, bs);
-//
-//    bs->idx++;
-//    BOOT_STATUS_ASSERT(rc == 0);
+
+    bs->idx++;
+    BOOT_STATUS_ASSERT(rc == 0);
 }
 
 static void
@@ -439,29 +439,6 @@ swap_run(struct boot_loader_state *state, struct boot_status *bs,
         }
     }
 
-    /*
-     * When starting a new swap upgrade, check that there is enough space.
-     */
-//    if (boot_status_is_reset(bs)) {
-//        sz = 0;
-//        trailer_sz = boot_trailer_sz(BOOT_WRITE_SZ(state));
-//        first_trailer_idx = boot_img_num_sectors(state, BOOT_PRIMARY_SLOT) - 1;
-//
-//        while (1) {
-//            sz += sector_sz;
-//            if  (sz >= trailer_sz) {
-//                break;
-//            }
-//            first_trailer_idx--;
-//        }
-//
-//        if (g_last_idx >= first_trailer_idx) {
-//            BOOT_LOG_WRN("Not enough free space to run swap upgrade");
-//            bs->swap_type = BOOT_SWAP_TYPE_NONE;
-//            return;
-//        }
-//    }
-
     image_index = BOOT_CURR_IMG(state);
 
     rc = flash_area_open(FLASH_AREA_IMAGE_PRIMARY(image_index), &fap_pri);
@@ -471,7 +448,7 @@ swap_run(struct boot_loader_state *state, struct boot_status *bs,
     assert (rc == 0);
 
     // TODO: skipping revert in early development
-//    fixup_revert(state, bs, fap_sec, FLASH_AREA_IMAGE_SECONDARY(image_index));
+    fixup_revert(state, bs, fap_sec, FLASH_AREA_IMAGE_SECONDARY(image_index));
 
     if (bs->op == BOOT_STATUS_OP_MOVE) {
         idx = g_last_idx;
@@ -496,7 +473,6 @@ swap_run(struct boot_loader_state *state, struct boot_status *bs,
 
     flash_area_close(fap_pri);
     flash_area_close(fap_sec);
-//    flash_area_close(fap_stat);
 }
 
 

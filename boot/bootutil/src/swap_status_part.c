@@ -215,7 +215,7 @@ int swap_status_retrieve(uint32_t area_id, uint32_t offs, uint8_t *data, uint32_
 
     /* pre-calculate sub-area offset */
     init_offs = swap_status_init_offset(area_id);
-    assert (init_offs < 0);
+    assert (init_offs >= 0);
 
     /* will start from it
      * this will be write-aligned */
