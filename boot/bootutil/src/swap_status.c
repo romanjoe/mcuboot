@@ -252,33 +252,33 @@ boot_slots_compatible(struct boot_loader_state *state)
 int
 swap_status_source(struct boot_loader_state *state)
 {
-//    struct boot_swap_state state_primary_slot;
-//    int rc;
-//    uint8_t source;
-//    uint8_t image_index;
-//
-//#if (BOOT_IMAGE_NUMBER == 1)
-//    (void)state;
-//#endif
-//
-//    image_index = BOOT_CURR_IMG(state);
-//
+    struct boot_swap_state state_primary_slot;
+    int rc;
+    uint8_t source;
+    uint8_t image_index;
+
+#if (BOOT_IMAGE_NUMBER == 1)
+    (void)state;
+#endif
+
+    image_index = BOOT_CURR_IMG(state);
+
 //    rc = boot_read_swap_state_by_id(FLASH_AREA_IMAGE_PRIMARY(image_index),
 //            &state_primary_slot);
 //    assert(rc == 0);
-//
-//    BOOT_LOG_SWAP_STATE("Primary image", &state_primary_slot);
-//
-//    if (state_primary_slot.magic == BOOT_MAGIC_GOOD &&
-//            state_primary_slot.copy_done == BOOT_FLAG_UNSET) {
-//
-//        source = BOOT_STATUS_SOURCE_PRIMARY_SLOT;
-//
-//        BOOT_LOG_INF("Boot source: primary slot");
-//        return source;
-//    }
-//
-//    BOOT_LOG_INF("Boot source: none");
+
+    BOOT_LOG_SWAP_STATE("Primary image", &state_primary_slot);
+
+    if (state_primary_slot.magic == BOOT_MAGIC_GOOD &&
+            state_primary_slot.copy_done == BOOT_FLAG_UNSET) {
+
+        source = BOOT_STATUS_SOURCE_PRIMARY_SLOT;
+
+        BOOT_LOG_INF("Boot source: primary slot");
+        return source;
+    }
+
+    BOOT_LOG_INF("Boot source: none");
     return BOOT_STATUS_SOURCE_NONE;
 }
 

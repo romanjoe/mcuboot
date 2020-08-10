@@ -247,6 +247,7 @@ int32_t swap_status_init_offset(uint32_t area_id)
     case FLASH_AREA_IMAGE_1:
         offset = BOOT_SWAP_STATUS_SIZE;
         break;
+    // TODO: add multi-image conditional compilation here
     case FLASH_AREA_IMAGE_2:
         offset = 2*BOOT_SWAP_STATUS_SIZE;
         break;
@@ -373,6 +374,7 @@ int
 swap_read_status(struct boot_loader_state *state, struct boot_status *bs)
 {
     const struct flash_area *fap;
+    const struct flash_area *fap_stat;
     uint32_t off;
     uint8_t swap_info;
     int area_id;
@@ -398,22 +400,31 @@ swap_read_status(struct boot_loader_state *state, struct boot_status *bs)
         return BOOT_EBADARGS;
     }
 
-//    rc = flash_area_open(area_id, &fap);
-//    if (rc != 0) {
-//        return BOOT_EFLASH;
-//    }
+    rc = flash_area_open(area_id, &fap);
+    if (rc != 0) {
+        return BOOT_EFLASH;
+    }
+
+    rc = flash_area_open(FLASH_AREA_IMAGE_SWAP_STATUS, &fap_stat);
+    if (rc != 0) {
+        return BOOT_EFLASH;
+    }
 
 //    rc = swap_read_status_bytes(fap, state, bs);
     if (rc == 0) {
         off = boot_swap_info_off(fap);
 //        rc = flash_area_read_is_empty(fap, off, &swap_info, sizeof swap_info);
         rc = swap_status_retrieve(area_id, off, &swap_info, sizeof swap_info);
-    // TODO: add memcmp with erased_val;
-//        for (uint8_t i = 0; i < sizeof swap_info; i++) {
-//            if (mem_dest[i] != flash_area_erased_val(fa)) {
-//                rc = 0;
-//            }
-//    }
+        if (rc == 0) {
+            rc = 1;
+            for (uint8_t i = 0; i < sizeof swap_info; i++) {
+                /* compare with erased_val */
+                if (((uint8_t *)&swap_info)[i] != flash_area_erased_val(fap_stat)) {
+                    rc = 0;
+                    break;
+                }
+            }
+        }
         if (rc == 1) {
             BOOT_SET_SWAP_INFO(swap_info, 0, BOOT_SWAP_TYPE_NONE);
             rc = 0;
@@ -423,7 +434,8 @@ swap_read_status(struct boot_loader_state *state, struct boot_status *bs)
         bs->swap_type = BOOT_GET_SWAP_TYPE(swap_info);
     }
 
-//    flash_area_close(fap);
+    flash_area_close(fap);
+    flash_area_close(fap_stat);
 
     return rc;
 }
