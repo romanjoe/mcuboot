@@ -54,28 +54,17 @@ boot_status_sector_off(const struct boot_loader_state *state,
 int
 boot_write_magic(const struct flash_area *fap)
 {
-//    uint32_t off;
-//    int rc;
-//    const struct flash_area *fap_status;
-//
-//    /* function interface suppose flash_area would be of primary/secondary
-//        type, but for swap with status partition dedicated area is used*/
-//    if(fap->fa_id != FLASH_AREA_IMAGE_SWAP_STATUS) {
-//        rc = flash_area_open(FLASH_AREA_IMAGE_SWAP_STATUS, &fap_status);
-//        assert (rc == 0);
-//    }
-//
-//    off = boot_magic_off(fap_status);
-//
-//    BOOT_LOG_DBG("writing magic; fa_id=%d off=0x%lx (0x%lx)",
-//                 fap_status->fa_id, (unsigned long)off,
-//                 (unsigned long)(fap_status->fa_off + off));
-//    rc = flash_area_write(fap_status, off, boot_img_magic, BOOT_MAGIC_SZ);
-//    if (rc != 0) {
-//        return BOOT_EFLASH;
-//    }
-//
-//    flash_area_close(fap_status);
+    uint32_t off;
+    int rc;
+
+    off = boot_magic_off(fap);
+
+    rc = swap_status_update((uint32_t) FLASH_AREA_IMAGE_SWAP_STATUS, off,
+                            (uint8_t *) boot_img_magic, BOOT_MAGIC_SZ);
+
+    if (rc != 0) {
+        return BOOT_EFLASH;
+    }
     return 0;
 }
 

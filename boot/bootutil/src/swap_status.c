@@ -479,8 +479,6 @@ swap_run(struct boot_loader_state *state, struct boot_status *bs,
 /* MISC - section, early development */
 /* Offset Section */
 
-/*rnok: this function can be reused from bootutil_misc.c, 
-        if not defined as static there */
 static inline uint32_t
 boot_magic_off(const struct flash_area *fap)
 {
@@ -563,23 +561,13 @@ boot_write_enc_key(const struct flash_area *fap, uint8_t slot,
 {
     uint32_t off;
     int rc;
-    const struct flash_area *fap_status;
 
-    /* function interface suppose flash_area would be of primary/secondary
-        type, but for swap with status partition dedicated area is used*/
-    if(fap->id != FLASH_AREA_IMAGE_SWAP_STATUS) {
-        rc = flash_area_open(FLASH_AREA_IMAGE_SWAP_STATUS, &fap_status);
-        assert (rc == 0);
-    }
-
-    off = boot_enc_key_off(fap_status, slot);
-    BOOT_LOG_DBG("writing enc_key; fa_id=%d off=0x%lx (0x%lx)",
-                 fap_status->fa_id, (unsigned long)off,
-                 (unsigned long)fap_status->fa_off + off);
+    off = boot_enc_key_off(fap, slot);
 //#if MCUBOOT_SWAP_SAVE_ENCTLV
 //    rc = flash_area_write(fap, off, bs->enctlv[slot], BOOT_ENC_TLV_ALIGN_SIZE);
 //#else
-    rc = flash_area_write(fap_status, off, bs->enckey[slot], BOOT_ENC_KEY_SIZE);
+    rc = swap_status_update((uint32_t) FLASH_AREA_IMAGE_SWAP_STATUS, off,
+                            (uint8_t *) bs->enckey[slot], BOOT_ENC_KEY_SIZE);
 //#endif
    if (rc != 0) {
        return BOOT_EFLASH;
@@ -589,4 +577,4 @@ boot_write_enc_key(const struct flash_area *fap, uint8_t slot,
 }
 #endif
 
-#endif
+//#endif
