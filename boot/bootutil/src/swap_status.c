@@ -193,6 +193,8 @@ swap_read_status_bytes(const struct flash_area *fap,
     return 0;
 }
 
+// rnok - implement for boot_write_status implementation
+// this is internal offset in swap status area
 uint32_t
 boot_status_internal_off(const struct boot_status *bs, int elem_sz)
 {
