@@ -263,6 +263,7 @@ swap_status_source(struct boot_loader_state *state)
 
     image_index = BOOT_CURR_IMG(state);
 
+    // TODO: uncomment when ready
 //    rc = boot_read_swap_state_by_id(FLASH_AREA_IMAGE_PRIMARY(image_index),
 //            &state_primary_slot);
 //    assert(rc == 0);
@@ -317,6 +318,7 @@ boot_move_sector_up(int idx, uint32_t sz, struct boot_loader_state *state,
     rc = boot_copy_region(state, fap_pri, fap_pri, old_off, new_off, sz);
     assert(rc == 0);
 
+    // TODO: implement for SWAP status
 //    rc = boot_write_status(state, bs);
 
     bs->idx++;
@@ -406,7 +408,6 @@ fixup_revert(const struct boot_loader_state *state, struct boot_status *bs,
         rc = boot_write_swap_size(fap_sec, bs->swap_size);
         assert(rc == 0);
 
-        // TODO: implement for SWAP status
         rc = boot_write_magic(fap_sec);
         assert(rc == 0);
     }
@@ -447,7 +448,6 @@ swap_run(struct boot_loader_state *state, struct boot_status *bs,
     rc = flash_area_open(FLASH_AREA_IMAGE_SECONDARY(image_index), &fap_sec);
     assert (rc == 0);
 
-    // TODO: skipping revert in early development
     fixup_revert(state, bs, fap_sec, FLASH_AREA_IMAGE_SECONDARY(image_index));
 
     if (bs->op == BOOT_STATUS_OP_MOVE) {

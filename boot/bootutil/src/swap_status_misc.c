@@ -173,6 +173,11 @@ boot_write_magic(const struct flash_area *fap)
     return 0;
 }
 
+int boot_status_num_sectors(const struct boot_loader_state *state)
+{
+    return (int)(BOOT_SWAP_STATUS_SIZE / boot_status_sector_size(state, 0));
+}
+
 // TODO: implement it for SWAP status
 int
 boot_read_swap_state(const struct flash_area *fap,
@@ -260,12 +265,6 @@ int32_t swap_status_init_offset(uint32_t area_id)
     }
     return offset;
 }
-
-int boot_status_num_sectors(const struct boot_loader_state *state)
-{
-    return (int)(BOOT_SWAP_STATUS_SIZE / boot_status_sector_size(state, 0));
-}
-
 
 int
 swap_erase_trailer_sectors(const struct boot_loader_state *state,
@@ -380,16 +379,11 @@ swap_read_status(struct boot_loader_state *state, struct boot_status *bs)
     int area_id;
     int rc = 0;
 
+    // TODO: uncomment when ready
 //    bs->source = swap_status_source(state);
     switch (bs->source) {
     case BOOT_STATUS_SOURCE_NONE:
         return 0;
-
-//#if MCUBOOT_SWAP_USING_SCRATCH
-//    case BOOT_STATUS_SOURCE_SCRATCH:
-//        area_id = FLASH_AREA_IMAGE_SCRATCH;
-//        break;
-//#endif
 
     case BOOT_STATUS_SOURCE_PRIMARY_SLOT:
         area_id = FLASH_AREA_IMAGE_PRIMARY(BOOT_CURR_IMG(state));
@@ -410,10 +404,10 @@ swap_read_status(struct boot_loader_state *state, struct boot_status *bs)
         return BOOT_EFLASH;
     }
 
+    // TODO: uncomment when ready
 //    rc = swap_read_status_bytes(fap, state, bs);
     if (rc == 0) {
         off = boot_swap_info_off(fap);
-//        rc = flash_area_read_is_empty(fap, off, &swap_info, sizeof swap_info);
         rc = swap_status_retrieve(area_id, off, &swap_info, sizeof swap_info);
         if (rc == 0) {
             rc = 1;
