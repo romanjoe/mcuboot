@@ -49,6 +49,111 @@ boot_status_sector_off(const struct boot_loader_state *state,
            state->status.sectors[0].fs_off;
 }
 
+
+/* MISC - section, early development */
+/* Offset Section */
+
+static inline uint32_t
+boot_magic_off(const struct flash_area *fap)
+{
+    (void)fap;
+    return BOOT_SWAP_STATUS_D_SIZE_RAW - BOOT_MAGIC_SZ;
+}
+
+static inline uint32_t
+boot_image_ok_off(const struct flash_area *fap)
+{
+    return boot_magic_off(fap) - 1;
+}
+
+static inline uint32_t
+boot_copy_done_off(const struct flash_area *fap)
+{
+    return boot_image_ok_off(fap) - 1;
+}
+
+uint32_t
+boot_swap_info_off(const struct flash_area *fap)
+{
+    return boot_copy_done_off(fap) - 1;
+}
+
+static inline uint32_t
+boot_swap_size_off(const struct flash_area *fap)
+{
+    return boot_swap_info_off(fap) - 4;
+}
+
+uint32_t
+boot_status_off(const struct flash_area *fap)
+{   
+    /* this offset is equal to 0, because swap status fields
+       in this implementation count from the start of partion */
+    return 0;
+}
+
+#ifdef MCUBOOT_ENC_IMAGES
+static inline uint32_t
+boot_enc_key_off(const struct flash_area *fap, uint8_t slot)
+{
+//#if MCUBOOT_SWAP_SAVE_ENCTLV
+//    return boot_swap_size_off(fap) - ((slot + 1) *
+//            ((((BOOT_ENC_TLV_SIZE - 1) / BOOT_MAX_ALIGN) + 1) * BOOT_MAX_ALIGN));
+//#else
+    return boot_swap_size_off(fap) - ((slot + 1) * BOOT_ENC_KEY_SIZE);
+//#endif
+}
+#endif
+
+/**
+ * Write trailer data; status bytes, swap_size, etc
+ *
+ * @returns 0 on success, != 0 on error.
+ */
+#ifdef MCUBOOT_SWAP_USING_STATUS
+int
+boot_write_trailer(const struct flash_area *fap, uint32_t off,
+        const uint8_t *inbuf, uint8_t inlen)
+{
+    int rc;
+
+    rc = swap_status_update(fap->fa_id, off, (uint8_t *)inbuf, inlen);
+
+    if (rc != 0) {
+        return BOOT_EFLASH;
+    }
+    return rc;
+}
+#endif
+
+#endif /* MCUBOOT_SWAP_USING_STATUS */
+
+#ifdef MCUBOOT_ENC_IMAGES
+int
+boot_write_enc_key(const struct flash_area *fap, uint8_t slot,
+        const struct boot_status *bs)
+{
+    uint32_t off;
+    int rc;
+
+    off = boot_enc_key_off(fap, slot);
+//#if MCUBOOT_SWAP_SAVE_ENCTLV
+//    rc = flash_area_write(fap, off, bs->enctlv[slot], BOOT_ENC_TLV_ALIGN_SIZE);
+//#else
+    rc = swap_status_update((uint32_t) FLASH_AREA_IMAGE_SWAP_STATUS, off,
+                            (uint8_t *) bs->enckey[slot], BOOT_ENC_KEY_SIZE);
+//#endif
+   if (rc != 0) {
+       return BOOT_EFLASH;
+   }
+
+    return 0;
+}
+#endif
+
+//#endif
+
+
 // TODO: implement it for SWAP status
 /* Write Section */
 int
@@ -322,5 +427,3 @@ swap_read_status(struct boot_loader_state *state, struct boot_status *bs)
 
     return rc;
 }
-
-#endif /* defined(MCUBOOT_SWAP_USING_MOVE) */

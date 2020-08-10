@@ -197,6 +197,7 @@ boot_status_entries(int image_index, const struct flash_area *fap)
     return -1;
 }
 
+#ifndef MCUBOOT_SWAP_USING_STATUS
 uint32_t
 boot_status_off(const struct flash_area *fap)
 {
@@ -210,6 +211,7 @@ boot_status_off(const struct flash_area *fap)
     assert(off_from_end <= fap->fa_size);
     return fap->fa_size - off_from_end;
 }
+#endif /* not MCUBOOT_SWAP_USING_STATUS */
 
 static inline uint32_t
 boot_magic_off(const struct flash_area *fap)
@@ -229,11 +231,13 @@ boot_copy_done_off(const struct flash_area *fap)
     return boot_image_ok_off(fap) - BOOT_MAX_ALIGN;
 }
 
+#ifndef MCUBOOT_SWAP_USING_STATUS
 uint32_t
 boot_swap_info_off(const struct flash_area *fap)
 {
     return boot_copy_done_off(fap) - BOOT_MAX_ALIGN;
 }
+#endif /* not MCUBOOT_SWAP_USING_STATUS */
 
 static inline uint32_t
 boot_swap_size_off(const struct flash_area *fap)
