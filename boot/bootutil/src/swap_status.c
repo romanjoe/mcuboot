@@ -199,16 +199,21 @@ uint32_t
 boot_status_internal_off(const struct boot_status *bs, int elem_sz)
 {
     uint32_t off;
-//    int idx_sz;
-//
-//    idx_sz = elem_sz * ((bs->op == BOOT_STATUS_OP_MOVE) ?
-//            BOOT_STATUS_MOVE_STATE_COUNT : BOOT_STATUS_SWAP_STATE_COUNT);
-//
-//    off = ((bs->op == BOOT_STATUS_OP_MOVE) ?
-//               0 : (BOOT_MAX_IMG_SECTORS * BOOT_STATUS_MOVE_STATE_COUNT * elem_sz)) +
-//           (bs->idx - BOOT_STATUS_IDX_0) * idx_sz +
-//           (bs->state - BOOT_STATUS_STATE_0) * elem_sz;
-//
+    int idx_sz;
+
+    idx_sz = elem_sz;
+
+    off = bs->idx * idx_sz;
+
+// rnok: possible implementation, need to debug actual values if bs->idx
+//    off = (bs->op == BOOT_STATUS_OP_MOVE) ?
+//                    0 : (bs->idx - BOOT_STATUS_IDX_0) * idx_sz;
+
+    // off = ((bs->op == BOOT_STATUS_OP_MOVE) ?
+    //           0 : (BOOT_MAX_IMG_SECTORS * BOOT_STATUS_MOVE_STATE_COUNT * elem_sz)) +
+    //       (bs->idx - BOOT_STATUS_IDX_0) * idx_sz +
+    //       (bs->state - BOOT_STATUS_STATE_0) * elem_sz;
+
     return off;
 }
 

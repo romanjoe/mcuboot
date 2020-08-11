@@ -320,6 +320,8 @@ boot_status_is_reset(const struct boot_status *bs)
             bs->state == BOOT_STATUS_STATE_0);
 }
 
+#ifndef MCUBOOT_SWAP_USING_STATUS
+
 /**
  * Writes the supplied boot status to the flash file system.  The boot status
  * contains the current state of an in-progress image copy operation.
@@ -382,6 +384,8 @@ done:
     flash_area_close(fap);
     return rc;
 }
+
+#endif /* MCUBOOT_SWAP_USING_STATUS */
 
 /*
  * Validate image hash/signature and optionally the security counter in a slot.

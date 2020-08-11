@@ -178,6 +178,66 @@ int boot_status_num_sectors(const struct boot_loader_state *state)
     return (int)(BOOT_SWAP_STATUS_SIZE / boot_status_sector_size(state, 0));
 }
 
+/**
+ * Writes the supplied boot status to the flash file system.  The boot status
+ * contains the current state of an in-progress image copy operation.
+ *
+ * @param bs                    The boot status to write.
+ *
+ * @return                      0 on success; nonzero on failure.
+ */
+int
+boot_write_status(const struct boot_loader_state *state, struct boot_status *bs)
+{
+    const struct flash_area *fap;
+    uint32_t off;
+    int area_id;
+    int rc;
+
+    /* NOTE: The first sector copied (that is the last sector on slot) contains
+     *       the trailer. Since in the last step the primary slot is erased, the
+     *       first two status writes go to the scratch which will be copied to
+     *       the primary slot!
+     */
+
+#if MCUBOOT_SWAP_USING_SCRATCH
+    if (bs->use_scratch) {
+        /* Write to scratch. */
+        area_id = FLASH_AREA_IMAGE_SCRATCH;
+    } else {
+#endif
+        /* Write to the primary slot. */
+        area_id = FLASH_AREA_IMAGE_PRIMARY(BOOT_CURR_IMG(state));
+#if MCUBOOT_SWAP_USING_SCRATCH
+    }
+#endif
+
+    rc = flash_area_open(area_id, &fap);
+    if (rc != 0) {
+        rc = BOOT_EFLASH;
+        goto done;
+    }
+
+    off = boot_status_off(fap)
+             + boot_status_internal_off(bs, 1);
+    // align = flash_area_align(fap);
+    // erased_val = flash_area_erased_val(fap);
+    // memset(buf, erased_val, BOOT_MAX_ALIGN);
+    // buf[0] = bs->state;
+
+    rc = swap_status_update(fap->fa_id, off, &(bs->state), 1);
+    //rc = flash_area_write(fap, off, buf, align);
+    if (rc != 0) {
+        rc = BOOT_EFLASH;
+        goto done;
+    }
+
+done:
+    flash_area_close(fap);
+
+    return rc;
+}
+
 // TODO: implement it for SWAP status
 int
 boot_read_swap_state(const struct flash_area *fap,

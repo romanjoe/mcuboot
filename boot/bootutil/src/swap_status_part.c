@@ -140,7 +140,7 @@ int swap_status_write_record(uint32_t rec_offset, uint32_t copy_num, uint32_t co
 }
 
 // TODO: add argument usage
-int swap_status_update(uint32_t targ_area_id, uint32_t offs, uint8_t *data, uint32_t len)
+int swap_status_update(uint32_t targ_area_id, uint32_t offs, void *data, uint32_t len)
 {
     int rc = -1;
 
@@ -199,7 +199,7 @@ int swap_status_update(uint32_t targ_area_id, uint32_t offs, uint8_t *data, uint
 }
 
 // TODO: add argument usage
-int swap_status_retrieve(uint32_t target_area_id, uint32_t offs, uint8_t *data, uint32_t len)
+int swap_status_retrieve(uint32_t target_area_id, uint32_t offs, void *data, uint32_t len)
 {
     int rc = 0;
 
