@@ -121,28 +121,36 @@ int
 swap_read_status_bytes(const struct flash_area *fap,
         struct boot_loader_state *state, struct boot_status *bs)
 {
-//    uint32_t off;
-//    uint8_t status;
-//    int max_entries;
-//    int found_idx;
-//    uint8_t write_sz;
-//    int move_entries;
-//    int rc;
-//    int last_rc;
-//    int erased_sections;
-//    int i;
-//
+    uint32_t off;
+    uint8_t status;
+    int max_entries;
+    int found_idx;
+    uint8_t write_sz;
+    int move_entries;
+    int rc;
+    int last_rc;
+    int erased_sections;
+    int i;
+
 //    max_entries = boot_status_entries(BOOT_CURR_IMG(state), fap);
+
+    if (fap->fa_id != FLASH_AREA_IMAGE_SCRATCH) {
+        max_entries = BOOT_STATUS_MAX_ENTRIES;
+    } else {
+        return BOOT_EBADARGS;
+    }
+
 //    if (max_entries < 0) {
 //        return BOOT_EBADARGS;
 //    }
-//
+
 //    erased_sections = 0;
 //    found_idx = -1;
 //    /* skip erased sectors at the end */
 //    last_rc = 1;
 //    write_sz = BOOT_WRITE_SZ(state);
 //    off = boot_status_off(fap);
+
 //    for (i = max_entries; i > 0; i--) {
 //        rc = flash_area_read_is_empty(fap, off + (i - 1) * write_sz, &status, 1);
 //        if (rc < 0) {
@@ -160,23 +168,23 @@ swap_read_status_bytes(const struct flash_area *fap,
 //        }
 //        last_rc = rc;
 //    }
-//
-//    if (erased_sections > 1) {
-//        /* This means there was an error writing status on the last
-//         * swap. Tell user and move on to validation!
-//         */
-//#if !defined(__BOOTSIM__)
-//        BOOT_LOG_ERR("Detected inconsistent status!");
-//#endif
-//
-//#if !defined(MCUBOOT_VALIDATE_PRIMARY_SLOT)
-//        /* With validation of the primary slot disabled, there is no way
-//         * to be sure the swapped primary slot is OK, so abort!
-//         */
-//        assert(0);
-//#endif
-//    }
-//
+
+    if (erased_sections > 1) {
+        /* This means there was an error writing status on the last
+         * swap. Tell user and move on to validation!
+         */
+#if !defined(__BOOTSIM__)
+        BOOT_LOG_ERR("Detected inconsistent status!");
+#endif
+
+#if !defined(MCUBOOT_VALIDATE_PRIMARY_SLOT)
+        /* With validation of the primary slot disabled, there is no way
+         * to be sure the swapped primary slot is OK, so abort!
+         */
+        assert(0);
+#endif
+    }
+
 //    move_entries = BOOT_MAX_IMG_SECTORS * BOOT_STATUS_MOVE_STATE_COUNT;
 //    if (found_idx == -1) {
 //        /* no swap status found; nothing to do */
