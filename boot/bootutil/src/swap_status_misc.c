@@ -35,6 +35,27 @@ MCUBOOT_LOG_MODULE_DECLARE(mcuboot);
 
 #if defined(MCUBOOT_SWAP_USING_STATUS)
 
+#define BOOT_MAGIC_ARR_SZ \
+    (sizeof boot_img_magic / sizeof boot_img_magic[0])
+
+static int
+boot_magic_decode(const uint32_t *magic)
+{
+    if (memcmp(magic, boot_img_magic, BOOT_MAGIC_SZ) == 0) {
+        return BOOT_MAGIC_GOOD;
+    }
+    return BOOT_MAGIC_BAD;
+}
+
+static int
+boot_flag_decode(uint8_t flag)
+{
+    if (flag != BOOT_FLAG_SET) {
+        return BOOT_FLAG_BAD;
+    }
+    return BOOT_FLAG_SET;
+}
+
 static inline size_t
 boot_status_sector_size(const struct boot_loader_state *state, size_t sector)
 {
@@ -243,60 +264,77 @@ int
 boot_read_swap_state(const struct flash_area *fap,
                      struct boot_swap_state *state)
 {
-//    uint32_t magic[BOOT_MAGIC_ARR_SZ];
-//    uint32_t off;
-//    uint8_t swap_info;
-//    int rc;
-//
-//    off = boot_magic_off(fap);
+    uint32_t magic[BOOT_MAGIC_ARR_SZ];
+    uint32_t off;
+    uint8_t swap_info;
+    int rc;
+
+    off = boot_magic_off(fap);
+    /* retrieve value for magic field from status partition area */
+    rc = swap_status_retrieve(fap->fa_id, off, &magic, BOOT_MAGIC_SZ);
 //    rc = flash_area_read_is_empty(fap, off, magic, BOOT_MAGIC_SZ);
-//    if (rc < 0) {
-//        return BOOT_EFLASH;
-//    }
-//    if (rc == 1) {
-//        state->magic = BOOT_MAGIC_UNSET;
-//    } else {
-//        state->magic = boot_magic_decode(magic);
-//    }
-//
-//    off = boot_swap_info_off(fap);
-//    rc = flash_area_read_is_empty(fap, off, &swap_info, sizeof swap_info);
-//    if (rc < 0) {
-//        return BOOT_EFLASH;
-//    }
-//
-//    /* Extract the swap type and image number */
-//    state->swap_type = BOOT_GET_SWAP_TYPE(swap_info);
-//    state->image_num = BOOT_GET_IMAGE_NUM(swap_info);
-//
-//    if (rc == 1 || state->swap_type > BOOT_SWAP_TYPE_REVERT) {
-//        state->swap_type = BOOT_SWAP_TYPE_NONE;
-//        state->image_num = 0;
-//    }
-//
-//    off = boot_copy_done_off(fap);
+    if (rc < 0) {
+        return BOOT_EFLASH;
+    }
+    /* check if magic is set */
+    if (rc == 0) {
+        rc = 1;
+        for (uint8_t i = 0; i < sizeof magic; i++) {
+            /* compare with erased_val */
+            if (((uint8_t *)&magic)[i] != flash_area_erased_val(fap)) {
+                rc = 0;
+                break;
+            }
+        }
+    }
+    /* fill magic number value if equal to expected */
+    if (rc == 1) {
+        state->magic = BOOT_MAGIC_UNSET;
+    } else {
+        state->magic = boot_magic_decode(magic);
+    }
+
+    off = boot_swap_info_off(fap);
+    rc = swap_status_retrieve(fap->fa_id, off, &swap_info, sizeof swap_info);
+    //rc = flash_area_read_is_empty(fap, off, &swap_info, sizeof swap_info);
+    if (rc < 0) {
+        return BOOT_EFLASH;
+    }
+
+    /* Extract the swap type and image number */
+    state->swap_type = BOOT_GET_SWAP_TYPE(swap_info);
+    state->image_num = BOOT_GET_IMAGE_NUM(swap_info);
+
+    if (rc == 1 || state->swap_type > BOOT_SWAP_TYPE_REVERT) {
+        state->swap_type = BOOT_SWAP_TYPE_NONE;
+        state->image_num = 0;
+    }
+
+    off = boot_copy_done_off(fap);
+    rc = swap_status_retrieve(fap->fa_id, off, &state->copy_done, sizeof state->copy_done);
 //    rc = flash_area_read_is_empty(fap, off, &state->copy_done,
 //            sizeof state->copy_done);
-//    if (rc < 0) {
-//        return BOOT_EFLASH;
-//    }
-//    if (rc == 1) {
-//        state->copy_done = BOOT_FLAG_UNSET;
-//    } else {
-//        state->copy_done = boot_flag_decode(state->copy_done);
-//    }
-//
-//    off = boot_image_ok_off(fap);
+   if (rc < 0) {
+       return BOOT_EFLASH;
+   }
+   if (rc == 1) {
+       state->copy_done = BOOT_FLAG_UNSET;
+   } else {
+       state->copy_done = boot_flag_decode(state->copy_done);
+   }
+
+   off = boot_image_ok_off(fap);
+   rc = swap_status_retrieve(fap->fa_id, off, &state->image_ok, sizeof state->image_ok);
 //    rc = flash_area_read_is_empty(fap, off, &state->image_ok,
 //                                  sizeof state->image_ok);
-//    if (rc < 0) {
-//        return BOOT_EFLASH;
-//    }
-//    if (rc == 1) {
-//        state->image_ok = BOOT_FLAG_UNSET;
-//    } else {
-//        state->image_ok = boot_flag_decode(state->image_ok);
-//    }
+   if (rc < 0) {
+       return BOOT_EFLASH;
+   }
+   if (rc == 1) {
+       state->image_ok = BOOT_FLAG_UNSET;
+   } else {
+       state->image_ok = boot_flag_decode(state->image_ok);
+   }
 
     return 0;
 }
