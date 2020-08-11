@@ -55,65 +55,65 @@ int
 boot_read_image_header(struct boot_loader_state *state, int slot,
                        struct image_header *out_hdr, struct boot_status *bs)
 {
-//    const struct flash_area *fap;
-//    uint32_t off;
-//    uint32_t sz;
-//    int area_id;
+    const struct flash_area *fap;
+    uint32_t off;
+    uint32_t sz;
+    int area_id;
     int rc = 0;
-//
-//#if (BOOT_IMAGE_NUMBER == 1)
-//    (void)state;
-//#endif
-//
-//    off = 0;
-//    if (bs) {
-//        sz = boot_img_sector_size(state, BOOT_PRIMARY_SLOT, 0);
-//        if (bs->op == BOOT_STATUS_OP_MOVE) {
-//            if (slot == 0 && bs->idx > g_last_idx) {
-//                /* second sector */
-//                off = sz;
-//            }
-//        } else if (bs->op == BOOT_STATUS_OP_SWAP) {
-//            if (bs->idx > 1 && bs->idx <= g_last_idx) {
-//                if (slot == 0) {
-//                    slot = 1;
-//                } else {
-//                    slot = 0;
-//                }
-//            } else if (bs->idx == 1) {
-//                if (slot == 0) {
-//                    off = sz;
-//                }
-//                if (slot == 1 && bs->state == 2) {
-//                    slot = 0;
-//                }
-//            }
-//        }
-//    }
-//
-//    area_id = flash_area_id_from_multi_image_slot(BOOT_CURR_IMG(state), slot);
-//    rc = flash_area_open(area_id, &fap);
-//    if (rc != 0) {
-//        rc = BOOT_EFLASH;
-//        goto done;
-//    }
-//
-//    rc = flash_area_read(fap, off, out_hdr, sizeof *out_hdr);
-//    if (rc != 0) {
-//        rc = BOOT_EFLASH;
-//        goto done;
-//    }
-//
-//    /* We only know where the headers are located when bs is valid */
-//    if (bs != NULL && out_hdr->ih_magic != IMAGE_MAGIC) {
-//        rc = -1;
-//        goto done;
-//    }
-//
-//    rc = 0;
-//
-//done:
-//    flash_area_close(fap);
+
+#if (BOOT_IMAGE_NUMBER == 1)
+    (void)state;
+#endif
+
+    off = 0;
+    if (bs) {
+        sz = boot_img_sector_size(state, BOOT_PRIMARY_SLOT, 0);
+        if (bs->op == BOOT_STATUS_OP_MOVE) {
+            if (slot == 0 && bs->idx > g_last_idx) {
+                /* second sector */
+                off = sz;
+            }
+        } else if (bs->op == BOOT_STATUS_OP_SWAP) {
+            if (bs->idx > 1 && bs->idx <= g_last_idx) {
+                if (slot == 0) {
+                    slot = 1;
+                } else {
+                    slot = 0;
+                }
+            } else if (bs->idx == 1) {
+                if (slot == 0) {
+                    off = sz;
+                }
+                if (slot == 1 && bs->state == 2) {
+                    slot = 0;
+                }
+            }
+        }
+    }
+
+    area_id = flash_area_id_from_multi_image_slot(BOOT_CURR_IMG(state), slot);
+    rc = flash_area_open(area_id, &fap);
+    if (rc != 0) {
+        rc = BOOT_EFLASH;
+        goto done;
+    }
+
+    rc = flash_area_read(fap, off, out_hdr, sizeof *out_hdr);
+    if (rc != 0) {
+        rc = BOOT_EFLASH;
+        goto done;
+    }
+
+    /* We only know where the headers are located when bs is valid */
+    if (bs != NULL && out_hdr->ih_magic != IMAGE_MAGIC) {
+        rc = -1;
+        goto done;
+    }
+
+    rc = 0;
+
+done:
+    flash_area_close(fap);
     return rc;
 }
 
