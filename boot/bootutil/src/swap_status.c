@@ -158,24 +158,14 @@ swap_read_status_bytes(const struct flash_area *fap,
         }
 
         if (status != flash_area_erased_val(fa)) {
-            rc = 0;
+            if (found_idx == -1) {
+                found_idx = i;
+            }
         }
         else
         {
-            rc = 1;
-        }
-//        rc = flash_area_read_is_empty(fap, off + (i - 1) * write_sz, &status, 1);
-//        if (rc < 0) {
-//            return BOOT_EFLASH;
-//        }
-
-        if (rc == 1) {
             if (rc != last_rc) {
                 erased_sections++;
-            }
-        } else {
-            if (found_idx == -1) {
-                found_idx = i;
             }
         }
         last_rc = rc;
