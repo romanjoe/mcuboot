@@ -378,6 +378,7 @@ swap_erase_trailer_sectors(const struct boot_loader_state *state,
     uint8_t image_index;
     int rc;
 
+    // TODO: add initialization of CRC ?
     BOOT_LOG_DBG("Erasing trailer; fa_id=%d", fap->fa_id);
     /* trailer is located in status-partition */
     const struct flash_area *fap_stat;

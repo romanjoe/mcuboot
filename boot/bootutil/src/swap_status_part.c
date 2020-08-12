@@ -68,7 +68,7 @@ int swap_status_read_record(uint32_t rec_offset, uint8_t *data, uint32_t *copy_c
                                   BOOT_SWAP_STATUS_CRC_SZ]);
 
         /* check record data integrity first */
-        if(crc != calc_record_crc(buff, BOOT_SWAP_STATUS_ROW_SZ-BOOT_SWAP_STATUS_CRC_SZ))
+        if(crc == calc_record_crc(buff, BOOT_SWAP_STATUS_ROW_SZ-BOOT_SWAP_STATUS_CRC_SZ))
         {
             /* look for counter */
             counter = *((uint32_t *)&buff[BOOT_SWAP_STATUS_ROW_SZ -\
@@ -83,6 +83,7 @@ int swap_status_read_record(uint32_t rec_offset, uint8_t *data, uint32_t *copy_c
             }
         }
     }
+    // TODO: add error-handling
     *copy_counter = max_cnt;
     /* read payload data */
     rc = flash_area_read(fap_stat, data_offset, data, BOOT_SWAP_STATUS_PAYLD_SZ);
