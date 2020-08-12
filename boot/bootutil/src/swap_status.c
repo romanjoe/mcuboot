@@ -144,30 +144,42 @@ swap_read_status_bytes(const struct flash_area *fap,
 //        return BOOT_EBADARGS;
 //    }
 
-//    erased_sections = 0;
-//    found_idx = -1;
-//    /* skip erased sectors at the end */
-//    last_rc = 1;
+    erased_sections = 0;
+    found_idx = -1;
+    /* skip erased sectors at the end */
+    last_rc = 1;
 //    write_sz = BOOT_WRITE_SZ(state);
-//    off = boot_status_off(fap);
+    off = boot_status_off(fap);
 
-//    for (i = max_entries; i > 0; i--) {
+    for (i = max_entries; i > 0; i--) {
+        rc = swap_status_retrieve(fap->fa_id, off + (i - 1), &status, 1);
+        if (rc < 0) {
+            return BOOT_EFLASH;
+        }
+
+        if (status != flash_area_erased_val(fa)) {
+            rc = 0;
+        }
+        else
+        {
+            rc = 1;
+        }
 //        rc = flash_area_read_is_empty(fap, off + (i - 1) * write_sz, &status, 1);
 //        if (rc < 0) {
 //            return BOOT_EFLASH;
 //        }
-//
-//        if (rc == 1) {
-//            if (rc != last_rc) {
-//                erased_sections++;
-//            }
-//        } else {
-//            if (found_idx == -1) {
-//                found_idx = i;
-//            }
-//        }
-//        last_rc = rc;
-//    }
+
+        if (rc == 1) {
+            if (rc != last_rc) {
+                erased_sections++;
+            }
+        } else {
+            if (found_idx == -1) {
+                found_idx = i;
+            }
+        }
+        last_rc = rc;
+    }
 
     if (erased_sections > 1) {
         /* This means there was an error writing status on the last
