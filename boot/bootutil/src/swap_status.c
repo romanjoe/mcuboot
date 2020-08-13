@@ -123,6 +123,7 @@ swap_read_status_bytes(const struct flash_area *fap,
 {
     uint32_t off;
     uint8_t status;
+    uint8_t last_status;
     int max_entries;
     int found_idx;
     uint8_t write_sz;
@@ -160,6 +161,7 @@ swap_read_status_bytes(const struct flash_area *fap,
         if (status != flash_area_erased_val(fap)) {
             if (found_idx == -1) {
                 found_idx = i;
+                last_status = status;
             }
         }
         else
@@ -197,14 +199,16 @@ swap_read_status_bytes(const struct flash_area *fap,
 //        bs->state = (found_idx % BOOT_STATUS_MOVE_STATE_COUNT) + BOOT_STATUS_STATE_0;
         /* BOOT_STATUS_MOVE_STATE_COUNT = 1 for SWAP MOVE with STATUS */
         bs->idx = found_idx + BOOT_STATUS_IDX_0;
-        bs->state = found_idx + BOOT_STATUS_STATE_0;
+        // TODO state is translated from index, for status partition it is NOT TRUE
+        bs->state = last_status;//found_idx + BOOT_STATUS_STATE_0;
     } else {
         bs->op = BOOT_STATUS_OP_SWAP;
 //        bs->idx = ((found_idx - move_entries) / BOOT_STATUS_SWAP_STATE_COUNT) + BOOT_STATUS_IDX_0;
 //        bs->state = ((found_idx - move_entries) % BOOT_STATUS_SWAP_STATE_COUNT) + BOOT_STATUS_STATE_0;
         /* BOOT_STATUS_MOVE_STATE_COUNT = 1 for SWAP MOVE with STATUS */
         bs->idx = (found_idx - move_entries) + BOOT_STATUS_IDX_0;
-        bs->state = (found_idx - move_entries) + BOOT_STATUS_STATE_0;
+        // TODO state is translated from index, for status partition it is NOT TRUE
+        bs->state = last_status;// (found_idx - move_entries) + BOOT_STATUS_STATE_0;
     }
 
     return 0;
@@ -301,9 +305,9 @@ swap_status_source(struct boot_loader_state *state)
     image_index = BOOT_CURR_IMG(state);
 
     // TODO: uncomment when ready
-//    rc = boot_read_swap_state_by_id(FLASH_AREA_IMAGE_PRIMARY(image_index),
-//            &state_primary_slot);
-//    assert(rc == 0);
+    rc = boot_read_swap_state_by_id(FLASH_AREA_IMAGE_PRIMARY(image_index),
+            &state_primary_slot);
+    assert(rc == 0);
 
     BOOT_LOG_SWAP_STATE("Primary image", &state_primary_slot);
 
