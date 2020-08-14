@@ -185,7 +185,8 @@ static struct flash_area status =
                 CY_BOOT_PRIMARY_2_SIZE +\
                 CY_BOOT_SECONDARY_2_SIZE,
 #endif
-    .fa_size = CY_BOOT_SWAP_STATUS_SIZE
+    // TODO: think of multi-image case as well
+    .fa_size = (BOOT_SWAP_STATUS_SZ_PRIM + BOOT_SWAP_STATUS_SZ_SEC)
 };
 #endif
 
