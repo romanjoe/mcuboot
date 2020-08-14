@@ -129,6 +129,10 @@ int swap_status_write_record(uint32_t rec_offset, uint32_t copy_num, uint32_t co
     /* we already know what copy number was last and correct */
     /* increment duplicate index */
     /* calculate final duplicate offset */
+    if(copy_num == (BOOT_SWAP_STATUS_MULT-1))
+    {
+        copy_num = 0;
+    }
     fin_offset = rec_offset + (copy_num+1)*BOOT_SWAP_STATUS_D_SIZE;
 
     /* write prepared record into flash */
@@ -159,7 +163,7 @@ int swap_status_update(uint32_t targ_area_id, uint32_t offs, void *data, uint32_
 
     /* pre-calculate sub-area offset */
     init_offs = swap_status_init_offset(targ_area_id);
-    assert (init_offs < 0);
+    assert (init_offs >= 0);
 
     /* will start from it
      * this will be write-aligned */
