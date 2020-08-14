@@ -133,7 +133,11 @@ int swap_status_write_record(uint32_t rec_offset, uint32_t copy_num, uint32_t co
     {
         copy_num = 0;
     }
-    fin_offset = rec_offset + (copy_num+1)*BOOT_SWAP_STATUS_D_SIZE;
+    else
+    {
+        copy_num++;
+    }
+    fin_offset = rec_offset + copy_num*BOOT_SWAP_STATUS_D_SIZE;
 
     /* write prepared record into flash */
     rc = flash_area_write(fap_stat, fin_offset, buff, sizeof(buff));
