@@ -43,6 +43,7 @@ int swap_status_read_record(uint32_t rec_offset, uint8_t *data, uint32_t *copy_c
 
     uint32_t fin_offset, data_offset;
     uint32_t counter, crc;
+    uint32_t crc_fail = 0;
     uint32_t max_cnt = 0;
 
     int32_t max_idx = 0;
@@ -82,12 +83,24 @@ int swap_status_read_record(uint32_t rec_offset, uint8_t *data, uint32_t *copy_c
                 data_offset = fin_offset;
             }
         }
+        /* if crc != calculated() */
+        else
+        {
+            crc_fail++;
+        }
     }
-    // TODO: add error-handling
-    *copy_counter = max_cnt;
-    /* read payload data */
-    rc = flash_area_read(fap_stat, data_offset, data, BOOT_SWAP_STATUS_PAYLD_SZ);
-    assert (rc == 0);
+    /* no valid CRC found - status pre-read failure */
+    if(crc_fail == BOOT_SWAP_STATUS_MULT)
+    {
+        max_idx = -1;
+    }
+    else
+    {
+        *copy_counter = max_cnt;
+        /* read payload data */
+        rc = flash_area_read(fap_stat, data_offset, data, BOOT_SWAP_STATUS_PAYLD_SZ);
+        assert (rc == 0);
+    }
 
     flash_area_close(fap_stat);
 
@@ -148,7 +161,17 @@ int swap_status_write_record(uint32_t rec_offset, uint32_t copy_num, uint32_t co
     return rc;
 }
 
-// TODO: add argument usage
+/**
+ * Updates len bytes of status partition with values from *data-pointer.
+ *
+ * @param targ_area_id  Target area id for which status is being written.
+ *                      Not a status-partition area id.
+ * @param offset        Status byte offset inside status table. Should not include CRC and CNT.
+ * @param data          Pointer to data status table to needs to be updated with.
+ * @param len           Number of bytes to be written
+ *
+ * @return              0 on success; nonzero on failure.
+ */
 int swap_status_update(uint32_t targ_area_id, uint32_t offs, void *data, uint32_t len)
 {
     int rc = -1;
@@ -207,7 +230,17 @@ int swap_status_update(uint32_t targ_area_id, uint32_t offs, void *data, uint32_
     return rc;
 }
 
-// TODO: add argument usage
+/**
+ * Reads len bytes of status partition with values from *data-pointer.
+ *
+ * @param targ_area_id  Target area id for which status is being read.
+ *                      Not a status-partition area id.
+ * @param offset        Status byte offset inside status table. Should not include CRC and CNT.
+ * @param data          Pointer to data where status table values will be written.
+ * @param len           Number of bytes to be read from status table.
+ *
+ * @return              0 on success; nonzero on failure.
+ */
 int swap_status_retrieve(uint32_t target_area_id, uint32_t offs, void *data, uint32_t len)
 {
     int rc = 0;
