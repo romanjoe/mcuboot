@@ -294,9 +294,13 @@ boot_read_swap_state(const struct flash_area *fap,
         state->magic = boot_magic_decode(magic);
     }
 
+    // TODO: debug workaround
+    state->magic = BOOT_MAGIC_GOOD;
+
     off = boot_swap_info_off(fap);
     rc = swap_status_retrieve(fap->fa_id, off, &swap_info, sizeof swap_info);
     //rc = flash_area_read_is_empty(fap, off, &swap_info, sizeof swap_info);
+    // TODO: needs to check swap_info was empty !!!
     if (rc < 0) {
         return BOOT_EFLASH;
     }
@@ -314,6 +318,7 @@ boot_read_swap_state(const struct flash_area *fap,
     rc = swap_status_retrieve(fap->fa_id, off, &state->copy_done, sizeof state->copy_done);
 //    rc = flash_area_read_is_empty(fap, off, &state->copy_done,
 //            sizeof state->copy_done);
+    // TODO: needs to check swap_info was empty !!!
    if (rc < 0) {
        return BOOT_EFLASH;
    }
@@ -327,6 +332,7 @@ boot_read_swap_state(const struct flash_area *fap,
    rc = swap_status_retrieve(fap->fa_id, off, &state->image_ok, sizeof state->image_ok);
 //    rc = flash_area_read_is_empty(fap, off, &state->image_ok,
 //                                  sizeof state->image_ok);
+   // TODO: needs to check swap_info was empty !!!
    if (rc < 0) {
        return BOOT_EFLASH;
    }
@@ -479,7 +485,7 @@ swap_read_status(struct boot_loader_state *state, struct boot_status *bs)
     int rc = 0;
 
     // TODO: uncomment when ready
-//    bs->source = swap_status_source(state);
+    bs->source = swap_status_source(state);
     switch (bs->source) {
     case BOOT_STATUS_SOURCE_NONE:
         return 0;
@@ -504,7 +510,7 @@ swap_read_status(struct boot_loader_state *state, struct boot_status *bs)
     }
 
     // TODO: uncomment when ready
-//    rc = swap_read_status_bytes(fap, state, bs);
+    rc = swap_read_status_bytes(fap, state, bs);
     if (rc == 0) {
         off = boot_swap_info_off(fap);
         rc = swap_status_retrieve(area_id, off, &swap_info, sizeof swap_info);
