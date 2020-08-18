@@ -259,6 +259,20 @@ done:
     return rc;
 }
 
+int
+boot_read_data_empty(const struct flash_area *fap, void *data, uint32_t len)
+{
+    uint8_t *buf;
+
+    buf = (uint8_t *)data;
+    for (uint8_t i = 0; i < len; i++) {
+        if (buf[i] != flash_area_erased_val(fap)) {
+            return 0;
+        }
+    }
+    return 1;
+}
+
 // TODO: implement it for SWAP status
 int
 boot_read_swap_state(const struct flash_area *fap,
@@ -269,23 +283,21 @@ boot_read_swap_state(const struct flash_area *fap,
     uint8_t swap_info;
     int rc;
 
+    const struct flash_area *fap_stat;
+
+    rc = flash_area_open(FLASH_AREA_IMAGE_SWAP_STATUS, &fap_stat);
+    assert (rc == 0);
+
     off = boot_magic_off(fap);
     /* retrieve value for magic field from status partition area */
-    rc = swap_status_retrieve(fap->fa_id, off, &magic, BOOT_MAGIC_SZ);
-//    rc = flash_area_read_is_empty(fap, off, magic, BOOT_MAGIC_SZ);
+    rc = swap_status_retrieve(fap->fa_id, off, magic, BOOT_MAGIC_SZ);
     if (rc < 0) {
         return BOOT_EFLASH;
     }
-    /* check if magic is set */
-    if (rc == 0) {
-        rc = 1;
-        for (uint8_t i = 0; i < sizeof magic; i++) {
-            /* compare with erased_val */
-            if (((uint8_t *)&magic)[i] != flash_area_erased_val(fap)) {
-                rc = 0;
-                break;
-            }
-        }
+//    rc = flash_area_read_is_empty(fap, off, magic, BOOT_MAGIC_SZ);
+    rc = boot_read_data_empty(fap_stat, magic, BOOT_MAGIC_SZ);
+    if (rc < 0) {
+        return BOOT_EFLASH;
     }
     /* fill magic number value if equal to expected */
     if (rc == 1) {
@@ -299,12 +311,14 @@ boot_read_swap_state(const struct flash_area *fap,
 
     off = boot_swap_info_off(fap);
     rc = swap_status_retrieve(fap->fa_id, off, &swap_info, sizeof swap_info);
-    //rc = flash_area_read_is_empty(fap, off, &swap_info, sizeof swap_info);
-    // TODO: needs to check swap_info was empty !!!
     if (rc < 0) {
         return BOOT_EFLASH;
     }
-
+    //rc = flash_area_read_is_empty(fap, off, &swap_info, sizeof swap_info);
+    rc = boot_read_data_empty(fap_stat, &swap_info, sizeof swap_info);
+    if (rc < 0) {
+        return BOOT_EFLASH;
+    }
     /* Extract the swap type and image number */
     state->swap_type = BOOT_GET_SWAP_TYPE(swap_info);
     state->image_num = BOOT_GET_IMAGE_NUM(swap_info);
@@ -316,12 +330,29 @@ boot_read_swap_state(const struct flash_area *fap,
 
     off = boot_copy_done_off(fap);
     rc = swap_status_retrieve(fap->fa_id, off, &state->copy_done, sizeof state->copy_done);
+    if (rc < 0) {
+        return BOOT_EFLASH;
+    }
 //    rc = flash_area_read_is_empty(fap, off, &state->copy_done,
 //            sizeof state->copy_done);
+    rc = boot_read_data_empty(fap_stat, &state->copy_done, sizeof state->copy_done);
     // TODO: needs to check swap_info was empty !!!
    if (rc < 0) {
        return BOOT_EFLASH;
    }
+
+//   /* check if copy_done is set */
+//   if (rc == 0) {
+//       rc = 1;
+//       for (uint8_t i = 0; i < sizeof state->copy_done; i++) {
+//           /* compare with erased_val */
+//           if (((uint8_t *)&state->copy_done)[i] != flash_area_erased_val(fap)) {
+//               rc = 0;
+//               break;
+//           }
+//       }
+//   }
+
    if (rc == 1) {
        state->copy_done = BOOT_FLAG_UNSET;
    } else {
@@ -330,12 +361,28 @@ boot_read_swap_state(const struct flash_area *fap,
 
    off = boot_image_ok_off(fap);
    rc = swap_status_retrieve(fap->fa_id, off, &state->image_ok, sizeof state->image_ok);
+   if (rc < 0) {
+       return BOOT_EFLASH;
+   }
 //    rc = flash_area_read_is_empty(fap, off, &state->image_ok,
 //                                  sizeof state->image_ok);
+   rc = boot_read_data_empty(fap_stat, &state->image_ok, sizeof state->image_ok);
    // TODO: needs to check swap_info was empty !!!
    if (rc < 0) {
        return BOOT_EFLASH;
    }
+   /* check if image_ok is set */
+//   if (rc == 0) {
+//       rc = 1;
+//       for (uint8_t i = 0; i < sizeof state->image_ok; i++) {
+//           /* compare with erased_val */
+//           if (((uint8_t *)&state->image_ok)[i] != flash_area_erased_val(fap)) {
+//               rc = 0;
+//               break;
+//           }
+//       }
+//   }
+
    if (rc == 1) {
        state->image_ok = BOOT_FLAG_UNSET;
    } else {
@@ -514,16 +561,12 @@ swap_read_status(struct boot_loader_state *state, struct boot_status *bs)
     if (rc == 0) {
         off = boot_swap_info_off(fap);
         rc = swap_status_retrieve(area_id, off, &swap_info, sizeof swap_info);
-        if (rc == 0) {
-            rc = 1;
-            for (uint8_t i = 0; i < sizeof swap_info; i++) {
-                /* compare with erased_val */
-                if (((uint8_t *)&swap_info)[i] != flash_area_erased_val(fap_stat)) {
-                    rc = 0;
-                    break;
-                }
-            }
+
+        rc = boot_read_data_empty(fap_stat, &swap_info, sizeof swap_info);
+        if (rc < 0) {
+            return BOOT_EFLASH;
         }
+
         if (rc == 1) {
             BOOT_SET_SWAP_INFO(swap_info, 0, BOOT_SWAP_TYPE_NONE);
             rc = 0;
