@@ -336,58 +336,33 @@ boot_read_swap_state(const struct flash_area *fap,
 //    rc = flash_area_read_is_empty(fap, off, &state->copy_done,
 //            sizeof state->copy_done);
     rc = boot_read_data_empty(fap_stat, &state->copy_done, sizeof state->copy_done);
-    // TODO: needs to check swap_info was empty !!!
-   if (rc < 0) {
+    /* need to check swap_info was empty */
+    if (rc < 0) {
        return BOOT_EFLASH;
-   }
-
-//   /* check if copy_done is set */
-//   if (rc == 0) {
-//       rc = 1;
-//       for (uint8_t i = 0; i < sizeof state->copy_done; i++) {
-//           /* compare with erased_val */
-//           if (((uint8_t *)&state->copy_done)[i] != flash_area_erased_val(fap)) {
-//               rc = 0;
-//               break;
-//           }
-//       }
-//   }
-
-   if (rc == 1) {
+    }
+    if (rc == 1) {
        state->copy_done = BOOT_FLAG_UNSET;
-   } else {
+    } else {
        state->copy_done = boot_flag_decode(state->copy_done);
-   }
+    }
 
-   off = boot_image_ok_off(fap);
-   rc = swap_status_retrieve(fap->fa_id, off, &state->image_ok, sizeof state->image_ok);
-   if (rc < 0) {
+    off = boot_image_ok_off(fap);
+    rc = swap_status_retrieve(fap->fa_id, off, &state->image_ok, sizeof state->image_ok);
+    if (rc < 0) {
        return BOOT_EFLASH;
-   }
+    }
 //    rc = flash_area_read_is_empty(fap, off, &state->image_ok,
 //                                  sizeof state->image_ok);
-   rc = boot_read_data_empty(fap_stat, &state->image_ok, sizeof state->image_ok);
-   // TODO: needs to check swap_info was empty !!!
-   if (rc < 0) {
+    rc = boot_read_data_empty(fap_stat, &state->image_ok, sizeof state->image_ok);
+    /* need to check swap_info was empty */s
+    if (rc < 0) {
        return BOOT_EFLASH;
-   }
-   /* check if image_ok is set */
-//   if (rc == 0) {
-//       rc = 1;
-//       for (uint8_t i = 0; i < sizeof state->image_ok; i++) {
-//           /* compare with erased_val */
-//           if (((uint8_t *)&state->image_ok)[i] != flash_area_erased_val(fap)) {
-//               rc = 0;
-//               break;
-//           }
-//       }
-//   }
-
-   if (rc == 1) {
+    }
+    if (rc == 1) {
        state->image_ok = BOOT_FLAG_UNSET;
-   } else {
+    } else {
        state->image_ok = boot_flag_decode(state->image_ok);
-   }
+    }
 
     return 0;
 }
