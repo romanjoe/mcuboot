@@ -16,6 +16,10 @@
 
 #ifdef MCUBOOT_SWAP_USING_STATUS
 
+extern const uint32_t stat_part_magic[1];
+
+#define BOOT_SWAP_STATUS_MAGIC       (0xDEADBEAF)
+
 #define BOOT_SWAP_STATUS_ENCK1_SZ       16UL
 #define BOOT_SWAP_STATUS_ENCK2_SZ       16UL
 
@@ -36,6 +40,7 @@ struct image_status_trailer {
 
 #define BOOT_SWAP_STATUS_MAGIC_SZ       BOOT_MAGIC_SZ
 
+#define BOOT_SWAP_STATUS_MGCREC_SZ      4UL
 #define BOOT_SWAP_STATUS_CNT_SZ         4UL
 #define BOOT_SWAP_STATUS_CRC_SZ         4UL
 
@@ -43,9 +48,18 @@ struct image_status_trailer {
 
 /* agreed to name it "a record" */
 #define BOOT_SWAP_STATUS_PAYLD_SZ       (BOOT_SWAP_STATUS_ROW_SZ -\
+                                            BOOT_SWAP_STATUS_MGCREC_SZ - \
                                             BOOT_SWAP_STATUS_CNT_SZ - \
                                             BOOT_SWAP_STATUS_CRC_SZ)
 #define BOOT_SWAP_STATUS_ROW_SZ_MIN     16UL
+
+/* INFO: defining record structure for better understanding */
+struct status_part_record{
+    uint8_t payload[BOOT_SWAP_STATUS_PAYLD_SZ];
+    uint8_t magic[BOOT_SWAP_STATUS_MGCREC_SZ];
+    uint8_t counter[BOOT_SWAP_STATUS_CNT_SZ];
+    uint8_t crc[BOOT_SWAP_STATUS_CRC_SZ];
+};
 
 #if (BOOT_SWAP_STATUS_ROW_SZ % BOOT_SWAP_STATUS_ROW_SZ_MIN != 0)
     #error "BOOT_SWAP_STATUS_ROW_SZ size is less then min value of 16 bytes"

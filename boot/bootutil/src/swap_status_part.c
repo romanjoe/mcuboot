@@ -42,8 +42,9 @@ int swap_status_read_record(uint32_t rec_offset, uint8_t *data, uint32_t *copy_c
     int rc = -1;
 
     uint32_t fin_offset, data_offset;
-    uint32_t counter, crc;
+    uint32_t counter, crc, magic;
     uint32_t crc_fail = 0;
+    uint32_t magic_fail = 0;
     uint32_t max_cnt = 0;
 
     int32_t max_idx = 0;
@@ -63,45 +64,62 @@ int swap_status_read_record(uint32_t rec_offset, uint8_t *data, uint32_t *copy_c
 
         rc = flash_area_read(fap_stat, fin_offset, buff, sizeof(buff));
         assert (rc == 0);
-
-        /* read CRC */
-        crc = *((uint32_t *)&buff[BOOT_SWAP_STATUS_ROW_SZ -\
+        /* read magic value to know if area was pre-erased */
+        magic = *((uint32_t *)&buff[BOOT_SWAP_STATUS_ROW_SZ -\
+                                  BOOT_SWAP_STATUS_MGCREC_SZ -\
                                   BOOT_SWAP_STATUS_CRC_SZ]);
-
-        /* check record data integrity first */
-        if(crc == calc_record_crc(buff, BOOT_SWAP_STATUS_ROW_SZ-BOOT_SWAP_STATUS_CRC_SZ))
-        {
-            /* look for counter */
-            counter = *((uint32_t *)&buff[BOOT_SWAP_STATUS_ROW_SZ -\
-                                          BOOT_SWAP_STATUS_CNT_SZ - \
-                                          BOOT_SWAP_STATUS_CRC_SZ]);
-            /* find out counter max */
-            if(counter >= max_cnt)
+        if (magic == BOOT_SWAP_STATUS_MAGIC)
+        {   /* read CRC */
+            crc = *((uint32_t *)&buff[BOOT_SWAP_STATUS_ROW_SZ -\
+                                      BOOT_SWAP_STATUS_CRC_SZ]);
+            /* check record data integrity first */
+            if (crc == calc_record_crc(buff, BOOT_SWAP_STATUS_ROW_SZ-BOOT_SWAP_STATUS_CRC_SZ))
             {
-                max_cnt = counter;
-                max_idx = i;
-                data_offset = fin_offset;
+                /* look for counter */
+                counter = *((uint32_t *)&buff[BOOT_SWAP_STATUS_ROW_SZ -\
+                                              BOOT_SWAP_STATUS_CNT_SZ - \
+                                              BOOT_SWAP_STATUS_CRC_SZ]);
+                /* find out counter max */
+                if (counter >= max_cnt)
+                {
+                    max_cnt = counter;
+                    max_idx = i;
+                    data_offset = fin_offset;
+                }
+            }
+            /* if crc != calculated() */
+            else
+            {
+                crc_fail++;
             }
         }
-        /* if crc != calculated() */
         else
         {
-            crc_fail++;
+            magic_fail++;
         }
     }
-    /* no valid CRC found - status pre-read failure */
-    if(crc_fail == BOOT_SWAP_STATUS_MULT)
+    /* no magic found - status area is pre-erased, start from scratch */
+    if (magic_fail == BOOT_SWAP_STATUS_MULT)
     {
-        max_idx = -1;
+        max_idx = 0;
+        *copy_counter = 0;
+        /* return all erased values */
+        memset(data, flash_area_erased_val(fap_stat), BOOT_SWAP_STATUS_PAYLD_SZ);
     }
     else
-    {
-        *copy_counter = max_cnt;
-        /* read payload data */
-        rc = flash_area_read(fap_stat, data_offset, data, BOOT_SWAP_STATUS_PAYLD_SZ);
-        assert (rc == 0);
+    {   /* no valid CRC found - status pre-read failure */
+        if (crc_fail == BOOT_SWAP_STATUS_MULT)
+        {
+            max_idx = -1;
+        }
+        else
+        {
+            *copy_counter = max_cnt;
+            /* read payload data */
+            rc = flash_area_read(fap_stat, data_offset, data, BOOT_SWAP_STATUS_PAYLD_SZ);
+            assert (rc == 0);
+        }
     }
-
     flash_area_close(fap_stat);
 
     /* return back duplicate index */
@@ -131,6 +149,13 @@ int swap_status_write_record(uint32_t rec_offset, uint32_t copy_num, uint32_t co
             &next_counter, \
             BOOT_SWAP_STATUS_CNT_SZ);
 
+    memcpy(&buff[BOOT_SWAP_STATUS_ROW_SZ-\
+                    BOOT_SWAP_STATUS_MGCREC_SZ-\
+                    BOOT_SWAP_STATUS_CNT_SZ-\
+                    BOOT_SWAP_STATUS_CRC_SZ], \
+                    stat_part_magic, \
+                    BOOT_SWAP_STATUS_CNT_SZ);
+
     /* calculate CRC field*/
     next_crc = calc_record_crc(buff, BOOT_SWAP_STATUS_ROW_SZ-BOOT_SWAP_STATUS_CRC_SZ);
 
@@ -142,7 +167,7 @@ int swap_status_write_record(uint32_t rec_offset, uint32_t copy_num, uint32_t co
     /* we already know what copy number was last and correct */
     /* increment duplicate index */
     /* calculate final duplicate offset */
-    if(copy_num == (BOOT_SWAP_STATUS_MULT-1))
+    if (copy_num == (BOOT_SWAP_STATUS_MULT-1))
     {
         copy_num = 0;
     }
@@ -201,7 +226,7 @@ int swap_status_update(uint32_t targ_area_id, uint32_t offs, void *data, uint32_
     {   /* preserve record */
         copy_num = swap_status_read_record(rec_offs, buff, &copy_counter);
         /* it returns copy number */
-        if(copy_num < 0)
+        if (copy_num < 0)
         {   /* something went wrong while read, exit */
             rc = -1;
             break;
@@ -270,7 +295,7 @@ int swap_status_retrieve(uint32_t target_area_id, uint32_t offs, void *data, uin
     {   /* preserve record */
         copy_num = swap_status_read_record(rec_offs, buff, &copy_counter);
         /* it returns copy number */
-        if(copy_num < 0)
+        if (copy_num < 0)
         {   /* something went wrong while read, exit */
             rc = -1;
             break;

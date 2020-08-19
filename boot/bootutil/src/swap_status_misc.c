@@ -35,6 +35,10 @@ MCUBOOT_LOG_MODULE_DECLARE(mcuboot);
 
 #if defined(MCUBOOT_SWAP_USING_STATUS)
 
+const uint32_t stat_part_magic[] = {
+    BOOT_SWAP_STATUS_MAGIC
+};
+
 #define BOOT_MAGIC_ARR_SZ \
     (sizeof boot_img_magic / sizeof boot_img_magic[0])
 
@@ -354,7 +358,7 @@ boot_read_swap_state(const struct flash_area *fap,
 //    rc = flash_area_read_is_empty(fap, off, &state->image_ok,
 //                                  sizeof state->image_ok);
     rc = boot_read_data_empty(fap_stat, &state->image_ok, sizeof state->image_ok);
-    /* need to check swap_info was empty */s
+    /* need to check swap_info was empty */
     if (rc < 0) {
        return BOOT_EFLASH;
     }
