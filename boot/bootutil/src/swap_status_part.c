@@ -67,6 +67,7 @@ int swap_status_read_record(uint32_t rec_offset, uint8_t *data, uint32_t *copy_c
         /* read magic value to know if area was pre-erased */
         magic = *((uint32_t *)&buff[BOOT_SWAP_STATUS_ROW_SZ -\
                                   BOOT_SWAP_STATUS_MGCREC_SZ -\
+                                  BOOT_SWAP_STATUS_CNT_SZ-\
                                   BOOT_SWAP_STATUS_CRC_SZ]);
         if (magic == BOOT_SWAP_STATUS_MAGIC)
         {   /* read CRC */
@@ -100,8 +101,8 @@ int swap_status_read_record(uint32_t rec_offset, uint8_t *data, uint32_t *copy_c
     }
     /* no magic found - status area is pre-erased, start from scratch */
     if (magic_fail == BOOT_SWAP_STATUS_MULT)
-    {
-        max_idx = 0;
+    {   /* emulate last index was received, so next will start from beginning */
+        max_idx = BOOT_SWAP_STATUS_MULT-1;
         *copy_counter = 0;
         /* return all erased values */
         memset(data, flash_area_erased_val(fap_stat), BOOT_SWAP_STATUS_PAYLD_SZ);
@@ -154,7 +155,7 @@ int swap_status_write_record(uint32_t rec_offset, uint32_t copy_num, uint32_t co
                     BOOT_SWAP_STATUS_CNT_SZ-\
                     BOOT_SWAP_STATUS_CRC_SZ], \
                     stat_part_magic, \
-                    BOOT_SWAP_STATUS_CNT_SZ);
+                    BOOT_SWAP_STATUS_MGCREC_SZ);
 
     /* calculate CRC field*/
     next_crc = calc_record_crc(buff, BOOT_SWAP_STATUS_ROW_SZ-BOOT_SWAP_STATUS_CRC_SZ);
