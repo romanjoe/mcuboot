@@ -7,6 +7,7 @@
 #include <assert.h>
 #include <string.h>
 #include "swap_status.h"
+#include "libs/crc-lib/cy_crc.h"
 
 uint32_t calc_rec_idx(uint32_t value)
 {
@@ -30,8 +31,7 @@ uint32_t calc_record_crc(uint8_t *data, uint8_t length)
 {
     uint32_t crc;
 
-    // TODO: think of CRC provider - SW library, HW Crypto block on PSoC6, etc
-    crc = 0x00;
+    crc = Cy_CRC_DataChecksum(data, length);
 
     return crc;
 }
