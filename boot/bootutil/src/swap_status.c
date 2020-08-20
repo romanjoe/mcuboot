@@ -360,7 +360,7 @@ boot_move_sector_up(int idx, uint32_t sz, struct boot_loader_state *state,
     assert(rc == 0);
 
     // TODO: implement for SWAP status
-//    rc = boot_write_status(state, bs);
+    rc = boot_write_status(state, bs);
 
     bs->idx++;
     BOOT_STATUS_ASSERT(rc == 0);
@@ -387,7 +387,7 @@ boot_swap_sectors(int idx, uint32_t sz, struct boot_loader_state *state,
         rc = boot_copy_region(state, fap_sec, fap_pri, sec_off, pri_off, sz);
         assert(rc == 0);
         // TODO: need to implement this one for SWAP status
-//        rc = boot_write_status(state, bs);
+        rc = boot_write_status(state, bs);
         bs->state = BOOT_STATUS_STATE_1;
         BOOT_STATUS_ASSERT(rc == 0);
     }
@@ -399,7 +399,7 @@ boot_swap_sectors(int idx, uint32_t sz, struct boot_loader_state *state,
         rc = boot_copy_region(state, fap_pri, fap_sec, pri_up_off, sec_off, sz);
         assert(rc == 0);
         // TODO: need to implement this one for SWAP status
-//        rc = boot_write_status(state, bs);
+        rc = boot_write_status(state, bs);
         bs->idx++;
         bs->state = BOOT_STATUS_STATE_0;
         BOOT_STATUS_ASSERT(rc == 0);
