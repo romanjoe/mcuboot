@@ -341,6 +341,8 @@ boot_read_swap_state_by_id(int flash_area_id, struct boot_swap_state *state)
     return rc;
 }
 
+#ifndef MCUBOOT_SWAP_USING_STATUS
+
 /**
  * This functions tries to locate the status area after an aborted swap,
  * by looking for the magic in the possible locations.
@@ -412,6 +414,8 @@ boot_read_swap_size(int image_index, uint32_t *swap_size)
 
     return rc;
 }
+
+#endif /* not MCUBOOT_SWAP_USING_STATUS */
 
 #ifdef MCUBOOT_ENC_IMAGES
 int

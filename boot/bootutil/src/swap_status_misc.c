@@ -371,6 +371,95 @@ boot_read_swap_state(const struct flash_area *fap,
     return 0;
 }
 
+#if 1
+/**
+ * This functions tries to locate the status area after an aborted swap,
+ * by looking for the magic in the possible locations.
+ *
+ * If the magic is successfully found, a flash_area * is returned and it
+ * is the responsibility of the called to close it.
+ *
+ * @returns 0 on success, -1 on errors
+ */
+static int
+boot_find_status(int image_index, const struct flash_area **fap)
+{
+    uint32_t magic[BOOT_MAGIC_ARR_SZ];
+    
+    // = {
+    //     	    0xf395c277,
+    //     	    0x7fefd260,
+    //     	    0x0f505235,
+    //     	    0x8079b62c,
+    //     };
+    uint32_t off;
+//     uint8_t area[1] = {
+//#if MCUBOOT_SWAP_USING_SCRATCH
+//         FLASH_AREA_IMAGE_SCRATCH,
+//#endif
+//         FLASH_AREA_IMAGE_PRIMARY(image_index),
+//     };
+
+    uint8_t area = FLASH_AREA_IMAGE_PRIMARY(image_index);
+    unsigned int i;
+    int rc;
+
+    /*
+     * In the middle a swap, tries to locate the area that is currently
+     * storing a valid magic, first on the primary slot, then on scratch.
+     * Both "slots" can end up being temporary storage for a swap and it
+     * is assumed that if magic is valid then other metadata is too,
+     * because magic is always written in the last step.
+     */
+
+//    for (i = 0; i < sizeof(areas) / sizeof(areas[0]); i++) {
+        rc = flash_area_open(area, fap);
+        if (rc != 0) {
+             return rc;
+        }
+        
+        off = boot_magic_off(*fap);
+
+        rc = swap_status_retrieve(area, off, magic, BOOT_MAGIC_SZ);
+
+//        rc = flash_area_read(*fap, off, magic, BOOT_MAGIC_SZ);
+        if (rc != 0) {
+//            flash_area_close(*fap);
+            return -1;
+        }
+
+        if (memcmp(magic, boot_img_magic, BOOT_MAGIC_SZ) == 0) {
+            return 0;
+        }
+
+        //flash_area_close(*fap);
+//    }
+
+    /* If we got here, no magic was found */
+    return -1;
+}
+
+int
+boot_read_swap_size(int image_index, uint32_t *swap_size)
+{
+    uint32_t off;
+    const struct flash_area *fap;
+    int rc;
+
+    rc = boot_find_status(image_index, &fap);
+    if (rc == 0) {
+        off = boot_swap_size_off(fap);
+        
+        rc = swap_status_retrieve(fap->fa_id, off, swap_size, sizeof *swap_size);
+
+        //rc = flash_area_read(fap, off, swap_size, sizeof *swap_size);
+        //flash_area_close(fap);
+    }
+
+    return rc;
+}
+#endif /* 0 */
+
 int32_t swap_status_init_offset(uint32_t area_id)
 {
     int32_t offset;
