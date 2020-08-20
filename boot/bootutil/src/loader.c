@@ -280,6 +280,13 @@ boot_read_sectors(struct boot_loader_state *state)
         return BOOT_EFLASH;
     }
 
+#if MCUBOOT_SWAP_USING_STATUS
+    rc = boot_initialize_area(state, FLASH_AREA_IMAGE_SWAP_STATUS);
+    if (rc != 0) {
+        return BOOT_EFLASH;
+    }
+#endif
+
 #if MCUBOOT_SWAP_USING_SCRATCH
     rc = boot_initialize_area(state, FLASH_AREA_IMAGE_SCRATCH);
     if (rc != 0) {
@@ -1623,6 +1630,9 @@ context_boot_go(struct boot_loader_state *state, struct boot_rsp *rsp)
 #if MCUBOOT_SWAP_USING_SCRATCH
     TARGET_STATIC boot_sector_t scratch_sectors[BOOT_MAX_IMG_SECTORS];
 #endif
+#if MCUBOOT_SWAP_USING_STATUS
+    TARGET_STATIC boot_sector_t status_sectors[BOOT_MAX_IMG_SECTORS];
+#endif
 
     memset(state, 0, sizeof(struct boot_loader_state));
     has_upgrade = false;
@@ -1653,6 +1663,9 @@ context_boot_go(struct boot_loader_state *state, struct boot_rsp *rsp)
             secondary_slot_sectors[image_index];
 #if MCUBOOT_SWAP_USING_SCRATCH
         state->scratch.sectors = scratch_sectors;
+#endif
+#if MCUBOOT_SWAP_USING_STATUS
+        state->status.sectors = status_sectors;
 #endif
 
         /* Open primary and secondary image areas for the duration
