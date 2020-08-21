@@ -225,13 +225,13 @@ boot_image_ok_off(const struct flash_area *fap)
     return boot_magic_off(fap) - BOOT_MAX_ALIGN;
 }
 
+#ifndef MCUBOOT_SWAP_USING_STATUS
 static inline uint32_t
 boot_copy_done_off(const struct flash_area *fap)
 {
     return boot_image_ok_off(fap) - BOOT_MAX_ALIGN;
 }
 
-#ifndef MCUBOOT_SWAP_USING_STATUS
 uint32_t
 boot_swap_info_off(const struct flash_area *fap)
 {

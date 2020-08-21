@@ -91,7 +91,7 @@ boot_image_ok_off(const struct flash_area *fap)
     return boot_magic_off(fap) - 1;
 }
 
-static inline uint32_t
+uint32_t
 boot_copy_done_off(const struct flash_area *fap)
 {
     return boot_image_ok_off(fap) - 1;
@@ -111,7 +111,8 @@ boot_swap_size_off(const struct flash_area *fap)
 
 uint32_t
 boot_status_off(const struct flash_area *fap)
-{   
+{
+    (void)fap;
     /* this offset is equal to 0, because swap status fields
        in this implementation count from the start of partion */
     return 0;
@@ -311,7 +312,7 @@ boot_read_swap_state(const struct flash_area *fap,
     }
 
     // TODO: debug workaround
-    state->magic = BOOT_MAGIC_GOOD;
+//    state->magic = BOOT_MAGIC_GOOD;
 
     off = boot_swap_info_off(fap);
     rc = swap_status_retrieve(fap->fa_id, off, &swap_info, sizeof swap_info);
