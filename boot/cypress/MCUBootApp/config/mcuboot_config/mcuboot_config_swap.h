@@ -35,7 +35,7 @@
 //#define MCUBOOT_SIGN_RSA
 
 /* Uncomment for ECDSA signatures using curve P-256. */
-#define MCUBOOT_SIGN_EC256
+//#define MCUBOOT_SIGN_EC256
 #define NUM_ECC_BYTES (256 / 8) 	// P-256 curve size in bytes, rnok: to make compilable
 
 // #define MCUBOOT_SIGN_EC
@@ -50,7 +50,7 @@
 
 /* Uncomment to enable the overwrite-only code path. */
 // TODO: BOHD rev3
-#define MCUBOOT_OVERWRITE_ONLY 1
+// #define MCUBOOT_OVERWRITE_ONLY 1
 
 #ifdef MCUBOOT_OVERWRITE_ONLY
 /* Uncomment to only erase and overwrite those slot 0 sectors needed
