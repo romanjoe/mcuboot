@@ -9,6 +9,8 @@
 #include "swap_status.h"
 #include "libs/crc-lib/cy_crc.h"
 
+#ifdef MCUBOOT_SWAP_USING_STATUS
+
 uint32_t calc_rec_idx(uint32_t value)
 {
     uint32_t rec_idx;
@@ -33,7 +35,8 @@ uint32_t calc_record_crc(uint8_t *data, uint8_t length)
 
     crc = Cy_CRC_DataChecksum(data, length);
 
-    return crc;
+    return 0x00;
+//    return crc;
 }
 
 
@@ -320,3 +323,5 @@ int swap_status_retrieve(uint32_t target_area_id, uint32_t offs, void *data, uin
     }
     return rc;
 }
+
+#endif /* MCUBOOT_SWAP_USING_STATUS */
