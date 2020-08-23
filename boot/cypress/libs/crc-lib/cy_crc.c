@@ -36,7 +36,7 @@
 uint32_t Cy_CRC_DataChecksum(const uint8_t *address, uint32_t length)
 {
     /* Contains generated values to calculate CRC-32C by 4 bits per iteration*/
-    const static uint32_t crcTable[CRC_TABLE_SIZE] = 
+    static const uint32_t crcTable[CRC_TABLE_SIZE] =
     {
         0x00000000u, 0x105ec76fu, 0x20bd8edeu, 0x30e349b1u,
         0x417b1dbcu, 0x5125dad3u, 0x61c69362u, 0x7198540du,

@@ -294,6 +294,8 @@ bool boot_status_is_reset(const struct boot_status *bs);
 
 #ifdef MCUBOOT_SWAP_USING_STATUS
 uint32_t boot_copy_done_off(const struct flash_area *fap);
+uint32_t boot_image_ok_off(const struct flash_area *fap);
+uint32_t boot_swap_size_off(const struct flash_area *fap);
 #endif
 
 

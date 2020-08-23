@@ -85,7 +85,7 @@ boot_magic_off(const struct flash_area *fap)
     return BOOT_SWAP_STATUS_D_SIZE_RAW - BOOT_MAGIC_SZ;
 }
 
-static inline uint32_t
+uint32_t
 boot_image_ok_off(const struct flash_area *fap)
 {
     return boot_magic_off(fap) - 1;
@@ -103,7 +103,7 @@ boot_swap_info_off(const struct flash_area *fap)
     return boot_copy_done_off(fap) - 1;
 }
 
-static inline uint32_t
+uint32_t
 boot_swap_size_off(const struct flash_area *fap)
 {
     return boot_swap_info_off(fap) - 4;

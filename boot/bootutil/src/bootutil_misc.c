@@ -470,7 +470,6 @@ boot_write_magic(const struct flash_area *fap)
     return 0;
 }
 
-#ifndef MCUBOOT_SWAP_USING_STATUS
 /**
  * Write trailer data; status bytes, swap_size, etc
  *
@@ -503,7 +502,6 @@ boot_write_trailer(const struct flash_area *fap, uint32_t off,
 
     return 0;
 }
-#endif
 
 #endif /* MCUBOOT_SWAP_USING_STATUS */
 
