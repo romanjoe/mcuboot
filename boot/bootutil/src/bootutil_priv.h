@@ -67,7 +67,7 @@ struct flash_area;
 #define BOOT_NUM_SLOTS                  2
 
 #if defined(MCUBOOT_OVERWRITE_ONLY) && defined(MCUBOOT_SWAP_USING_MOVE) && defined(MCUBOOT_SWAP_USING_STATUS)
-#error "Please enable only one of MCUBOOT_OVERWRITE_ONLY or MCUBOOT_SWAP_USING_MOVE"
+#error "Please enable only one of MCUBOOT_OVERWRITE_ONLY or MCUBOOT_SWAP_USING_MOVE or MCUBOOT_SWAP_USING_STATUS"
 #endif
 
 #if !defined(MCUBOOT_OVERWRITE_ONLY) && !defined(MCUBOOT_SWAP_USING_MOVE) && !defined(MCUBOOT_SWAP_USING_STATUS)
@@ -268,7 +268,6 @@ uint32_t boot_status_sz(uint32_t min_write_sz);
 uint32_t boot_trailer_sz(uint32_t min_write_sz);
 int boot_status_entries(int image_index, const struct flash_area *fap);
 uint32_t boot_status_off(const struct flash_area *fap);
-uint32_t boot_copy_done_off(const struct flash_area *fap);
 uint32_t boot_swap_info_off(const struct flash_area *fap);
 int boot_read_swap_state(const struct flash_area *fap,
                          struct boot_swap_state *state);
@@ -292,6 +291,11 @@ int boot_copy_region(struct boot_loader_state *state,
                      uint32_t off_src, uint32_t off_dst, uint32_t sz);
 int boot_erase_region(const struct flash_area *fap, uint32_t off, uint32_t sz);
 bool boot_status_is_reset(const struct boot_status *bs);
+
+#ifdef MCUBOOT_SWAP_USING_STATUS
+uint32_t boot_copy_done_off(const struct flash_area *fap);
+#endif
+
 
 #ifdef MCUBOOT_ENC_IMAGES
 int boot_write_enc_key(const struct flash_area *fap, uint8_t slot,
