@@ -113,6 +113,7 @@ static const struct boot_swap_table boot_swap_tables[] = {
 #define BOOT_SWAP_TABLES_COUNT \
     (sizeof boot_swap_tables / sizeof boot_swap_tables[0])
 
+#ifndef MCUBOOT_SWAP_USING_STATUS
 static int
 boot_magic_decode(const uint32_t *magic)
 {
@@ -130,7 +131,7 @@ boot_flag_decode(uint8_t flag)
     }
     return BOOT_FLAG_SET;
 }
-
+#endif /* not defined MCUBOOT_SWAP_USING_STATUS */
 /**
  * Determines if a status source table is satisfied by the specified magic
  * code.

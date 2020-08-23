@@ -400,7 +400,7 @@ boot_find_status(int image_index, const struct flash_area **fap)
 //     };
 
     uint8_t area = FLASH_AREA_IMAGE_PRIMARY(image_index);
-    unsigned int i;
+//    unsigned int i;
     int rc;
 
     /*

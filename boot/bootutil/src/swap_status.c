@@ -126,13 +126,13 @@ swap_read_status_bytes(const struct flash_area *fap,
     uint8_t last_status;
     int max_entries;
     int found_idx;
-    uint8_t write_sz;
+//    uint8_t write_sz;
     int move_entries;
     int rc;
     int last_rc;
     int erased_sections;
     int i;
-
+    (void)state;
 //    max_entries = boot_status_entries(BOOT_CURR_IMG(state), fap);
 
     if (fap->fa_id != FLASH_AREA_IMAGE_SCRATCH) {
@@ -461,8 +461,8 @@ swap_run(struct boot_loader_state *state, struct boot_status *bs,
     uint32_t sz;
     uint32_t sector_sz;
     uint32_t idx;
-    uint32_t trailer_sz;
-    uint32_t first_trailer_idx;
+//    uint32_t trailer_sz;
+//    uint32_t first_trailer_idx;
     uint8_t image_index;
     const struct flash_area *fap_pri;
     const struct flash_area *fap_sec;

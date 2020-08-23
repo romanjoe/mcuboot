@@ -26,7 +26,7 @@ uint32_t calc_record_offs(uint32_t offs)
 
     rec_offs = BOOT_SWAP_STATUS_ROW_SZ*calc_rec_idx(offs);
 
-    return 0;
+    return rec_offs;
 }
 
 uint32_t calc_record_crc(uint8_t *data, uint8_t length)
@@ -244,7 +244,7 @@ int swap_status_update(uint32_t targ_area_id, uint32_t offs, void *data, uint32_
         {
             copy_sz = length;
         }
-        memcpy(&buff[buff_idx], &data[data_idx], copy_sz);
+        memcpy((void *)&buff[buff_idx], &data[data_idx], copy_sz);
         buff_idx = 0;
 
         /* write record back */
