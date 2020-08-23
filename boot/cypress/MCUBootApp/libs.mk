@@ -114,7 +114,5 @@ DEFINES_LIBS += $(DEFINES_PDL)
 ################################################################################
 # CRC Library settings
 ################################################################################
-# Collect source files for DFU
-SOURCES_DFU := $(CUR_LIBS_PATH)/crc-lib/cy_crc.c
-# Collected source files for libraries
-SOURCES_LIBS += $(SOURCES_DFU)
+# Collected source files for СRC library
+SOURCES_LIBS += $(CUR_LIBS_PATH)/crc-lib/cy_crc.c
