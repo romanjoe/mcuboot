@@ -74,10 +74,7 @@ boot_status_sector_off(const struct boot_loader_state *state,
            state->status.sectors[0].fs_off;
 }
 
-
-/* MISC - section, early development */
 /* Offset Section */
-
 static inline uint32_t
 boot_magic_off(const struct flash_area *fap)
 {
@@ -128,7 +125,7 @@ boot_enc_key_off(const struct flash_area *fap, uint8_t slot)
 //            ((((BOOT_ENC_TLV_SIZE - 1) / BOOT_MAX_ALIGN) + 1) * BOOT_MAX_ALIGN));
 //#else
     return boot_swap_size_off(fap) - ((slot + 1) * BOOT_ENC_KEY_SIZE);
-#endif
+//#endif
 }
 #endif
 
@@ -137,7 +134,6 @@ boot_enc_key_off(const struct flash_area *fap, uint8_t slot)
  *
  * @returns 0 on success, != 0 on error.
  */
-#ifdef MCUBOOT_SWAP_USING_STATUS
 int
 boot_write_trailer(const struct flash_area *fap, uint32_t off,
         const uint8_t *inbuf, uint8_t inlen)
@@ -151,7 +147,6 @@ boot_write_trailer(const struct flash_area *fap, uint32_t off,
     }
     return rc;
 }
-#endif
 
 #ifdef MCUBOOT_ENC_IMAGES
 int
@@ -175,8 +170,7 @@ boot_write_enc_key(const struct flash_area *fap, uint8_t slot,
 
     return 0;
 }
-#endif
-
+#endif /* MCUBOOT_ENC_IMAGES */
 /* Write Section */
 int
 boot_write_magic(const struct flash_area *fap)
@@ -350,7 +344,6 @@ boot_read_swap_state(const struct flash_area *fap,
     return 0;
 }
 
-#if 1
 /**
  * This functions tries to locate the status area after an aborted swap,
  * by looking for the magic in the possible locations.
@@ -404,14 +397,9 @@ boot_read_swap_size(int image_index, uint32_t *swap_size)
         off = boot_swap_size_off(fap);
         
         rc = swap_status_retrieve(fap->fa_id, off, swap_size, sizeof *swap_size);
-
-        //rc = flash_area_read(fap, off, swap_size, sizeof *swap_size);
-        //flash_area_close(fap);
     }
-
     return rc;
 }
-#endif /* 0 */
 
 int32_t swap_status_init_offset(uint32_t area_id)
 {
@@ -424,7 +412,7 @@ int32_t swap_status_init_offset(uint32_t area_id)
     case FLASH_AREA_IMAGE_1:
         offset = BOOT_SWAP_STATUS_SIZE;
         break;
-    // TODO: add multi-image conditional compilation here
+// TODO: add multi-image conditional compilation here
     case FLASH_AREA_IMAGE_2:
         offset = 2*BOOT_SWAP_STATUS_SIZE;
         break;
@@ -452,7 +440,6 @@ swap_erase_trailer_sectors(const struct boot_loader_state *state,
     uint8_t image_index;
     int rc;
 
-    // TODO: add initialization of CRC ?
     BOOT_LOG_DBG("Erasing trailer; fa_id=%d", fap->fa_id);
     /* trailer is located in status-partition */
     const struct flash_area *fap_stat;
@@ -465,12 +452,10 @@ swap_erase_trailer_sectors(const struct boot_loader_state *state,
             BOOT_PRIMARY_SLOT);
     fa_id_secondary = flash_area_id_from_multi_image_slot(image_index,
             BOOT_SECONDARY_SLOT);
-
     /* skip if Flash Area is not recognizable */
     if ((fap->fa_id != fa_id_primary) && (fap->fa_id != fa_id_secondary)) {
         return BOOT_EFLASH;
     }
-
     sub_offs = swap_status_init_offset(fap->fa_id);
 
     /* delete starting from last sector and moving to beginning */
@@ -528,6 +513,7 @@ swap_status_init(const struct boot_loader_state *state,
     rc = boot_write_swap_size(fap, bs->swap_size);
     assert(rc == 0);
 
+// TODO:
 //#ifdef MCUBOOT_ENC_IMAGES
 //    rc = boot_write_enc_key(fap, 0, bs);
 //    assert(rc == 0);
@@ -552,7 +538,6 @@ swap_read_status(struct boot_loader_state *state, struct boot_status *bs)
     int area_id;
     int rc = 0;
 
-    // TODO: uncomment when ready
     bs->source = swap_status_source(state);
     switch (bs->source) {
     case BOOT_STATUS_SOURCE_NONE:
@@ -566,7 +551,6 @@ swap_read_status(struct boot_loader_state *state, struct boot_status *bs)
         assert(0);
         return BOOT_EBADARGS;
     }
-
     rc = flash_area_open(area_id, &fap);
     if (rc != 0) {
         return BOOT_EFLASH;
@@ -576,8 +560,6 @@ swap_read_status(struct boot_loader_state *state, struct boot_status *bs)
     if (rc != 0) {
         return BOOT_EFLASH;
     }
-
-    // TODO: uncomment when ready
     rc = swap_read_status_bytes(fap, state, bs);
     if (rc == 0) {
         off = boot_swap_info_off(fap);
