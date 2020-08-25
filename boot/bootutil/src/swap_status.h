@@ -66,14 +66,7 @@ struct status_part_record{
 #endif
 
 /* number of rows sector-status area should fit into */
-#if (BOOT_MAX_IMG_SECTORS % \
-        BOOT_SWAP_STATUS_PAYLD_SZ != 0)
-#define BOOT_SWAP_STATUS_SECT_ROWS_NUM  ((BOOT_MAX_IMG_SECTORS / \
-                                            BOOT_SWAP_STATUS_PAYLD_SZ)+1)
-#else
-#define BOOT_SWAP_STATUS_SECT_ROWS_NUM  (BOOT_MAX_IMG_SECTORS / \
-                                            BOOT_SWAP_STATUS_PAYLD_SZ)
-#endif
+#define BOOT_SWAP_STATUS_SECT_ROWS_NUM  (((BOOT_MAX_IMG_SECTORS-1)/BOOT_SWAP_STATUS_PAYLD_SZ)+1)
 
 /* 
     Number of flash rows used to store swap info. It consists
@@ -91,11 +84,8 @@ struct status_part_record{
  */
 #define BOOT_SWAP_STATUS_TRAILER_SIZE 64UL
 
-#if (BOOT_SWAP_STATUS_MIN_TRAILER_SIZE % BOOT_SWAP_STATUS_PAYLD_SZ != 0)
-    #define BOOT_SWAP_STATUS_TRAIL_ROWS_NUM (BOOT_SWAP_STATUS_TRAILER_SIZE / BOOT_SWAP_STATUS_PAYLD_SZ) + 1
-#else
-    #define BOOT_SWAP_STATUS_TRAIL_ROWS_NUM (BOOT_SWAP_STATUS_TRAILER_SIZE / BOOT_SWAP_STATUS_PAYLD_SZ)
-#endif
+/* number of rows trailer data should fit into */
+#define BOOT_SWAP_STATUS_TRAIL_ROWS_NUM  (((BOOT_SWAP_STATUS_TRAILER_SIZE-1)/BOOT_SWAP_STATUS_PAYLD_SZ)+1)
 
 /* the size of one copy of status area */
 #define BOOT_SWAP_STATUS_D_SIZE     BOOT_SWAP_STATUS_ROW_SZ * \
