@@ -119,13 +119,12 @@ boot_status_off(const struct flash_area *fap)
 static inline uint32_t
 boot_enc_key_off(const struct flash_area *fap, uint8_t slot)
 {
-// TODO:
-//#if MCUBOOT_SWAP_SAVE_ENCTLV
-//    return boot_swap_size_off(fap) - ((slot + 1) *
-//            ((((BOOT_ENC_TLV_SIZE - 1) / BOOT_MAX_ALIGN) + 1) * BOOT_MAX_ALIGN));
-//#else
+#if MCUBOOT_SWAP_SAVE_ENCTLV
+    /* suggest encryption key is also stored in status partition */
+    return boot_swap_size_off(fap) - ((slot + 1) * BOOT_ENC_TLV_SIZE);
+#else
     return boot_swap_size_off(fap) - ((slot + 1) * BOOT_ENC_KEY_SIZE);
-//#endif
+#endif
 }
 #endif
 
@@ -158,8 +157,8 @@ boot_write_enc_key(const struct flash_area *fap, uint8_t slot,
 
     off = boot_enc_key_off(fap, slot);
 #if MCUBOOT_SWAP_SAVE_ENCTLV
-#error "To be implemented for SWAP w/ Status"
-//    rc = flash_area_write(fap, off, bs->enctlv[slot], BOOT_ENC_TLV_ALIGN_SIZE);
+    rc = swap_status_update(fap->fa_id, off,
+                            (uint8_t *) bs->enctlv[slot], BOOT_ENC_TLV_ALIGN_SIZE);
 #else
     rc = swap_status_update(fap->fa_id, off,
                             (uint8_t *) bs->enckey[slot], BOOT_ENC_KEY_SIZE);
@@ -513,14 +512,13 @@ swap_status_init(const struct boot_loader_state *state,
     rc = boot_write_swap_size(fap, bs->swap_size);
     assert(rc == 0);
 
-// TODO:
-//#ifdef MCUBOOT_ENC_IMAGES
-//    rc = boot_write_enc_key(fap, 0, bs);
-//    assert(rc == 0);
-//
-//    rc = boot_write_enc_key(fap, 1, bs);
-//    assert(rc == 0);
-//#endif
+#ifdef MCUBOOT_ENC_IMAGES
+    rc = boot_write_enc_key(fap, 0, bs);
+    assert(rc == 0);
+
+    rc = boot_write_enc_key(fap, 1, bs);
+    assert(rc == 0);
+#endif
 
     rc = boot_write_magic(fap);
     assert(rc == 0);
