@@ -35,7 +35,6 @@ uint32_t calc_record_crc(uint8_t *data, uint8_t length)
 
     crc = Cy_CRC_DataChecksum(data, length);
 
-//    return 0x00;
     return crc;
 }
 

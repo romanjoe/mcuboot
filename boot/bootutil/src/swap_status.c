@@ -126,14 +126,12 @@ swap_read_status_bytes(const struct flash_area *fap,
     uint8_t last_status;
     int max_entries;
     int found_idx;
-//    uint8_t write_sz;
     int move_entries;
     int rc;
     int last_rc;
     int erased_sections;
     int i;
     (void)state;
-//    max_entries = boot_status_entries(BOOT_CURR_IMG(state), fap);
 
     if (fap->fa_id != FLASH_AREA_IMAGE_SCRATCH) {
         max_entries = BOOT_STATUS_MAX_ENTRIES;
@@ -141,15 +139,10 @@ swap_read_status_bytes(const struct flash_area *fap,
         return BOOT_EBADARGS;
     }
 
-//    if (max_entries < 0) {
-//        return BOOT_EBADARGS;
-//    }
-
     erased_sections = 0;
     found_idx = -1;
     /* skip erased sectors at the end */
     last_rc = 1;
-//    write_sz = BOOT_WRITE_SZ(state);
     off = boot_status_off(fap);
 
     for (i = max_entries; i > 0; i--) {
@@ -189,33 +182,25 @@ swap_read_status_bytes(const struct flash_area *fap,
 #endif
     }
 
-//    move_entries = BOOT_MAX_IMG_SECTORS * BOOT_STATUS_MOVE_STATE_COUNT;
     move_entries = BOOT_MAX_IMG_SECTORS;
     if (found_idx == -1) {
         /* no swap status found; nothing to do */
     } else if (found_idx < move_entries) {
         bs->op = BOOT_STATUS_OP_MOVE;
-//        bs->idx = (found_idx  / BOOT_STATUS_MOVE_STATE_COUNT) + BOOT_STATUS_IDX_0;
-//        bs->state = (found_idx % BOOT_STATUS_MOVE_STATE_COUNT) + BOOT_STATUS_STATE_0;
         /* BOOT_STATUS_MOVE_STATE_COUNT = 1 for SWAP MOVE with STATUS */
         bs->idx = found_idx + BOOT_STATUS_IDX_0;
-        // TODO state is translated from index, for status partition it is NOT TRUE
-        bs->state = last_status;//found_idx + BOOT_STATUS_STATE_0;
+        bs->state = last_status;
     } else {
         bs->op = BOOT_STATUS_OP_SWAP;
-//        bs->idx = ((found_idx - move_entries) / BOOT_STATUS_SWAP_STATE_COUNT) + BOOT_STATUS_IDX_0;
-//        bs->state = ((found_idx - move_entries) % BOOT_STATUS_SWAP_STATE_COUNT) + BOOT_STATUS_STATE_0;
         /* BOOT_STATUS_MOVE_STATE_COUNT = 1 for SWAP MOVE with STATUS */
         bs->idx = (found_idx - move_entries) + BOOT_STATUS_IDX_0;
-        // TODO state is translated from index, for status partition it is NOT TRUE
-        bs->state = last_status;// (found_idx - move_entries) + BOOT_STATUS_STATE_0;
+        bs->state = last_status;
     }
 
     return 0;
 }
 
-// rnok - implement for boot_write_status implementation
-// this is internal offset in swap status area
+/* this is internal offset in swap status area */
 uint32_t
 boot_status_internal_off(const struct boot_status *bs, int elem_sz)
 {
@@ -225,15 +210,6 @@ boot_status_internal_off(const struct boot_status *bs, int elem_sz)
     idx_sz = elem_sz;
 
     off = bs->idx * idx_sz;
-
-// rnok: possible implementation, need to debug actual values if bs->idx
-//    off = (bs->op == BOOT_STATUS_OP_MOVE) ?
-//                    0 : (bs->idx - BOOT_STATUS_IDX_0) * idx_sz;
-
-    // off = ((bs->op == BOOT_STATUS_OP_MOVE) ?
-    //           0 : (BOOT_MAX_IMG_SECTORS * BOOT_STATUS_MOVE_STATE_COUNT * elem_sz)) +
-    //       (bs->idx - BOOT_STATUS_IDX_0) * idx_sz +
-    //       (bs->state - BOOT_STATUS_STATE_0) * elem_sz;
 
     return off;
 }
@@ -304,7 +280,6 @@ swap_status_source(struct boot_loader_state *state)
 
     image_index = BOOT_CURR_IMG(state);
 
-    // TODO: uncomment when ready
     rc = boot_read_swap_state_by_id(FLASH_AREA_IMAGE_PRIMARY(image_index),
             &state_primary_slot);
     assert(rc == 0);
@@ -359,7 +334,6 @@ boot_move_sector_up(int idx, uint32_t sz, struct boot_loader_state *state,
     rc = boot_copy_region(state, fap_pri, fap_pri, old_off, new_off, sz);
     assert(rc == 0);
 
-    // TODO: implement for SWAP status
     rc = boot_write_status(state, bs);
 
     bs->idx++;
@@ -386,7 +360,6 @@ boot_swap_sectors(int idx, uint32_t sz, struct boot_loader_state *state,
 
         rc = boot_copy_region(state, fap_sec, fap_pri, sec_off, pri_off, sz);
         assert(rc == 0);
-        // TODO: need to implement this one for SWAP status
         rc = boot_write_status(state, bs);
         bs->state = BOOT_STATUS_STATE_1;
         BOOT_STATUS_ASSERT(rc == 0);
@@ -398,7 +371,6 @@ boot_swap_sectors(int idx, uint32_t sz, struct boot_loader_state *state,
 
         rc = boot_copy_region(state, fap_pri, fap_sec, pri_up_off, sec_off, sz);
         assert(rc == 0);
-        // TODO: need to implement this one for SWAP status
         rc = boot_write_status(state, bs);
         bs->idx++;
         bs->state = BOOT_STATUS_STATE_0;
@@ -461,8 +433,6 @@ swap_run(struct boot_loader_state *state, struct boot_status *bs,
     uint32_t sz;
     uint32_t sector_sz;
     uint32_t idx;
-//    uint32_t trailer_sz;
-//    uint32_t first_trailer_idx;
     uint8_t image_index;
     const struct flash_area *fap_pri;
     const struct flash_area *fap_sec;
