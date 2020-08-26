@@ -83,6 +83,8 @@ struct status_part_record{
     = 55 bytes
  */
 #define BOOT_SWAP_STATUS_TRAILER_SIZE 64UL
+// TODO: check if min write size is 64 or larger
+// TODO: small-magic, coutner and crc aren't coutned here
 
 /* number of rows trailer data should fit into */
 #define BOOT_SWAP_STATUS_TRAIL_ROWS_NUM  (((BOOT_SWAP_STATUS_TRAILER_SIZE-1)/BOOT_SWAP_STATUS_PAYLD_SZ)+1)
