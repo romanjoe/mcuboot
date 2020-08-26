@@ -111,7 +111,7 @@ boot_status_off(const struct flash_area *fap)
 {
     (void)fap;
     /* this offset is equal to 0, because swap status fields
-       in this implementation count from the start of partion */
+       in this implementation count from the start of partition */
     return 0;
 }
 

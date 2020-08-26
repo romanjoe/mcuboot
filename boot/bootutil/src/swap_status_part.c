@@ -29,7 +29,7 @@ uint32_t calc_record_offs(uint32_t offs)
     return rec_offs;
 }
 
-uint32_t calc_record_crc(uint8_t *data, uint8_t length)
+uint32_t calc_record_crc(uint8_t *data, uint32_t length)
 {
     uint32_t crc;
 
@@ -151,7 +151,7 @@ int swap_status_write_record(uint32_t rec_offset, uint32_t copy_num, uint32_t co
     memcpy(&buff[BOOT_SWAP_STATUS_ROW_SZ-BOOT_SWAP_STATUS_CNT_SZ-BOOT_SWAP_STATUS_CRC_SZ], \
             &next_counter, \
             BOOT_SWAP_STATUS_CNT_SZ);
-
+    /* append record magic */
     memcpy(&buff[BOOT_SWAP_STATUS_ROW_SZ-\
                     BOOT_SWAP_STATUS_MGCREC_SZ-\
                     BOOT_SWAP_STATUS_CNT_SZ-\
