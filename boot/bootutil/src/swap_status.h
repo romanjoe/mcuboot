@@ -90,14 +90,14 @@ struct status_part_record{
 #define BOOT_SWAP_STATUS_TRAIL_ROWS_NUM  (((BOOT_SWAP_STATUS_TRAILER_SIZE-1)/BOOT_SWAP_STATUS_PAYLD_SZ)+1)
 
 /* the size of one copy of status area */
-#define BOOT_SWAP_STATUS_D_SIZE     BOOT_SWAP_STATUS_ROW_SZ * \
+#define BOOT_SWAP_STATUS_D_SIZE     (BOOT_SWAP_STATUS_ROW_SZ * \
                                     (BOOT_SWAP_STATUS_SECT_ROWS_NUM + \
-                                    BOOT_SWAP_STATUS_TRAIL_ROWS_NUM)
+                                    BOOT_SWAP_STATUS_TRAIL_ROWS_NUM))
 
 /* the size of one copy of status area without cnt and crc fields */
-#define BOOT_SWAP_STATUS_D_SIZE_RAW BOOT_SWAP_STATUS_PAYLD_SZ * \
+#define BOOT_SWAP_STATUS_D_SIZE_RAW (BOOT_SWAP_STATUS_PAYLD_SZ * \
                                     (BOOT_SWAP_STATUS_SECT_ROWS_NUM + \
-                                    BOOT_SWAP_STATUS_TRAIL_ROWS_NUM)
+                                    BOOT_SWAP_STATUS_TRAIL_ROWS_NUM))
 
 /* multiplier which defines how many blocks will be used to reduce Flash wear
  * 1 is for single write wear, 2 - twice less wear, 3 - three times less wear, etc */

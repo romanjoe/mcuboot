@@ -216,6 +216,10 @@ int swap_status_update(uint32_t targ_area_id, uint32_t offs, void *data, uint32_
 
     uint8_t buff[BOOT_SWAP_STATUS_PAYLD_SZ];
 
+    /* check if end of data is still inside writable area */
+    // TODO: update for multi-image
+    assert ((offs + len) <= BOOT_SWAP_STATUS_D_SIZE_RAW);
+
     /* pre-calculate sub-area offset */
     init_offs = swap_status_init_offset(targ_area_id);
     assert (init_offs >= 0);
@@ -284,6 +288,10 @@ int swap_status_retrieve(uint32_t target_area_id, uint32_t offs, void *data, uin
     uint32_t buff_idx = offs%BOOT_SWAP_STATUS_PAYLD_SZ;
 
     uint8_t buff[BOOT_SWAP_STATUS_PAYLD_SZ];
+
+    /* check if end of data is still inside writable area */
+    // TODO: update for multi-image
+    assert ((offs + len) <= BOOT_SWAP_STATUS_D_SIZE_RAW);
 
     /* pre-calculate sub-area offset */
     init_offs = swap_status_init_offset(target_area_id);
