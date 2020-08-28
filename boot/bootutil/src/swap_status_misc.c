@@ -35,10 +35,6 @@ MCUBOOT_LOG_MODULE_DECLARE(mcuboot);
 
 #if defined(MCUBOOT_SWAP_USING_STATUS)
 
-const uint32_t stat_part_magic[] = {
-    BOOT_SWAP_STATUS_MAGIC
-};
-
 #define BOOT_MAGIC_ARR_SZ \
     (sizeof boot_img_magic / sizeof boot_img_magic[0])
 
@@ -398,31 +394,6 @@ boot_read_swap_size(int image_index, uint32_t *swap_size)
         rc = swap_status_retrieve(fap->fa_id, off, swap_size, sizeof *swap_size);
     }
     return rc;
-}
-
-int32_t swap_status_init_offset(uint32_t area_id)
-{
-    int32_t offset;
-    /* calculate an offset caused by area type: primary_x/secondary_x */
-    switch (area_id) {
-    case FLASH_AREA_IMAGE_0:
-        offset = 0x00;
-        break;
-    case FLASH_AREA_IMAGE_1:
-        offset = BOOT_SWAP_STATUS_SIZE;
-        break;
-// TODO: add multi-image conditional compilation here
-    case FLASH_AREA_IMAGE_2:
-        offset = 2*BOOT_SWAP_STATUS_SIZE;
-        break;
-    case FLASH_AREA_IMAGE_3:
-        offset = 3*BOOT_SWAP_STATUS_SIZE;
-        break;
-    default:
-        offset = -1;
-        break;
-    }
-    return offset;
 }
 
 int

@@ -11,6 +11,10 @@
 
 #ifdef MCUBOOT_SWAP_USING_STATUS
 
+const uint32_t stat_part_magic[] = {
+    BOOT_SWAP_STATUS_MAGIC
+};
+
 uint32_t calc_rec_idx(uint32_t value)
 {
     uint32_t rec_idx;
@@ -38,6 +42,30 @@ uint32_t calc_record_crc(uint8_t *data, uint32_t length)
     return crc;
 }
 
+int32_t swap_status_init_offset(uint32_t area_id)
+{
+    int32_t offset;
+    /* calculate an offset caused by area type: primary_x/secondary_x */
+    switch (area_id) {
+    case FLASH_AREA_IMAGE_0:
+        offset = 0x00;
+        break;
+    case FLASH_AREA_IMAGE_1:
+        offset = BOOT_SWAP_STATUS_SIZE;
+        break;
+// TODO: add multi-image conditional compilation here
+    case FLASH_AREA_IMAGE_2:
+        offset = 2*BOOT_SWAP_STATUS_SIZE;
+        break;
+    case FLASH_AREA_IMAGE_3:
+        offset = 3*BOOT_SWAP_STATUS_SIZE;
+        break;
+    default:
+        offset = -1;
+        break;
+    }
+    return offset;
+}
 
 int swap_status_read_record(uint32_t rec_offset, uint8_t *data, uint32_t *copy_counter)
 { /* returns BOOT_SWAP_STATUS_PAYLD_SZ of data */
