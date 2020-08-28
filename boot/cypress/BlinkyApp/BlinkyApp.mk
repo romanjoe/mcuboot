@@ -54,12 +54,12 @@ include $(CUR_APP_PATH)/libs.mk
 include $(CUR_APP_PATH)/toolchains.mk
 
 # Application-specific DEFINES
-ifeq ($(IMG_TYPE), BOOT)
-	DEFINES_APP := -DBOOT_IMG
-else
-	DEFINES_APP := -DUPGRADE_IMG
-	DEFINES_APP += -DSWAP_ENABLED=$(SWAP_UPGRADE)
-endif
+#ifeq ($(IMG_TYPE), BOOT)
+#	DEFINES_APP := -DBOOT_IMG
+#else
+#	DEFINES_APP := -DUPGRADE_IMG
+#	DEFINES_APP += -DSWAP_ENABLED=$(SWAP_UPGRADE)
+#endif
 
 # Define start of application, RAM start and size, slot size
 ifeq ($(PLATFORM), PSOC_062_2M)
@@ -74,6 +74,10 @@ else
 endif
 
 endif
+
+# TODO
+#DEFINES_APP := -DUPGRADE_IMG
+DEFINES_APP += -DSWAP_ENABLED=$(SWAP_UPGRADE)
 
 # Collect Test Application sources
 SOURCES_APP_SRC := $(wildcard $(CUR_APP_PATH)/*.c)

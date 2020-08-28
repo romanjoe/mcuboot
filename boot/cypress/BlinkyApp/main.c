@@ -28,6 +28,9 @@
 #include "cyhal.h"
 #include "cy_retarget_io.h"
 
+#include "../bootutil/src/swap_status.h"
+#include "flash_map_backend/flash_map_backend.h"
+
 /* Define pins for UART debug output */
 
 #define CY_DEBUG_UART_TX (P5_1)
@@ -85,6 +88,9 @@ void test_app_init_hardware(void)
     /* enable interrupts */
     __enable_irq();
 
+    volatile uint32_t flag=1;
+    while(flag);
+
     /* Disabling watchdog so it will not interrupt normal flow later */
     Cy_GPIO_Pin_Init(LED_PORT, LED_PIN, &LED_config);
     /* Initialize retarget-io to use the debug UART port */
@@ -108,6 +114,21 @@ int main(void)
     test_app_init_hardware();
 
     printf(GREETING_MESSAGE_INFO);
+#if (SWAP_ENABLED == 1)
+    uint32_t area_id;
+    int rc;
+
+    uint32_t offs = 0;
+    uint32_t len = 4;
+
+    area_id = FLASH_AREA_IMAGE_0;
+
+    const struct flash_area *fap_stat;
+    rc = flash_area_open(FLASH_AREA_IMAGE_SWAP_STATUS, &fap_stat);
+
+    uint8_t data[4] = {0xAA, 0xAA, 0xAA, 0xAA};
+    rc = swap_status_update(area_id, offs, data, len);
+#endif
 
     for (;;)
     {
