@@ -87,11 +87,11 @@ void check_result(int res)
 * Writes 1 byte `src` into flash memory at `address`
 * It does a sequence of RD/Modify/WR of data in a Flash Row.
  */
-int flash_write_byte(uint32_t address, uint8_t src)
+cy_en_flashdrv_status_t flash_write_byte(uint32_t address, uint8_t src)
 {
-    cy_en_flashdrv_status_t rc = CY_FLASH_DRV_SUCCESS;
+    cy_en_flashdrv_status_t rc = CY_FLASH_DRV_ERR_UNC;
     uint32_t row_addr = 0;
-    uint8_t row_buff[512];
+    uint8_t row_buff[CY_FLASH_SIZEOF_ROW];
 
     /* accepting arbitrary address */
     row_addr = (address/CY_FLASH_SIZEOF_ROW)*CY_FLASH_SIZEOF_ROW;
@@ -105,7 +105,7 @@ int flash_write_byte(uint32_t address, uint8_t src)
     /* Programming updated row back */
     rc = Cy_Flash_WriteRow(row_addr, (const uint32_t *)row_buff);
 
-    return (int) rc;
+    return rc;
 }
 
 void test_app_init_hardware(void)
@@ -158,12 +158,10 @@ int main(void)
     if (*((uint8_t *)img_ok_addr) != USER_SWAP_IMAGE_OK)
     {
         rc = flash_write_byte(img_ok_addr, USER_SWAP_IMAGE_OK);
-        if (0 == rc)
-        {
+        if (CY_FLASH_DRV_SUCCESS == rc) {
             printf("[BlinkyApp] SWAP Status : Image OK was set at 0x%08lx.\r\n", img_ok_addr);
         }
-        else
-        {
+        else {
             printf("[BlinkyApp] SWAP Status : Failed to set Image OK.\r\n");
         }
     } else
@@ -172,8 +170,7 @@ int main(void)
     }
 #endif
 
-    for (;;)
-    {
+    for (;;) {
         /* Toggle the user LED periodically */
         Cy_SysLib_Delay(blinky_period/2);
 
