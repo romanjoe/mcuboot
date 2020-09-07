@@ -261,7 +261,7 @@ boot_read_swap_state(const struct flash_area *fap,
                      struct boot_swap_state *state)
 {
     uint32_t magic[BOOT_MAGIC_ARR_SZ];
-    uint32_t off;
+    uint32_t off, trailer_magic_off;
     uint8_t swap_info;
     int rc;
 
@@ -281,8 +281,31 @@ boot_read_swap_state(const struct flash_area *fap,
         return BOOT_EFLASH;
     }
     /* fill magic number value if equal to expected */
-    if (rc == 1) {
-        state->magic = BOOT_MAGIC_UNSET;
+    if (rc == 1 && (fap->fa_id == FLASH_AREA_IMAGE_1 ||
+                    fap->fa_id == FLASH_AREA_IMAGE_3)) {
+            /* attempt to find magic in upgrade img slot trailer */
+            state->magic = BOOT_MAGIC_UNSET;
+
+            trailer_magic_off = fap->fa_size - BOOT_MAGIC_SZ;
+
+            rc = flash_area_read_is_empty(fap, trailer_magic_off, magic, BOOT_MAGIC_SZ);
+            if (rc < 0) {
+                return BOOT_EFLASH;
+            }
+            if (rc == 1) {
+                state->magic = BOOT_MAGIC_UNSET;
+            } else {
+                state->magic = boot_magic_decode(magic);
+                /* put magic in status partition for upgrade slot*/
+                rc = swap_status_update(fap->fa_id, off,
+                                (uint8_t *) boot_img_magic, BOOT_MAGIC_SZ);
+                if (rc < 0) {
+                    return BOOT_EFLASH;
+                } else {
+                    /* erase magic from upgrade img trailer */
+                    rc = flash_erase_row(fap->fa_off + trailer_magic_off);
+                }
+            }
     } else {
         state->magic = boot_magic_decode(magic);
     }

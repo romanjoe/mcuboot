@@ -50,7 +50,7 @@
 
 /* Uncomment to enable the overwrite-only code path. */
 // TODO: BOHD rev3
-#define MCUBOOT_OVERWRITE_ONLY 1
+//#define MCUBOOT_OVERWRITE_ONLY 1
 
 #ifdef MCUBOOT_OVERWRITE_ONLY
 /* Uncomment to only erase and overwrite those slot 0 sectors needed
