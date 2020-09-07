@@ -212,12 +212,15 @@ boot_status_off(const struct flash_area *fap)
     assert(off_from_end <= fap->fa_size);
     return fap->fa_size - off_from_end;
 }
+#endif
 
 static inline uint32_t
 boot_magic_off(const struct flash_area *fap)
 {
     return fap->fa_size - BOOT_MAGIC_SZ;
 }
+
+#ifndef MCUBOOT_SWAP_USING_STATUS
 
 static inline uint32_t
 boot_image_ok_off(const struct flash_area *fap)
@@ -242,6 +245,7 @@ boot_swap_size_off(const struct flash_area *fap)
 {
     return boot_swap_info_off(fap) - BOOT_MAX_ALIGN;
 }
+#endif
 
 #ifdef MCUBOOT_ENC_IMAGES
 static inline uint32_t
@@ -256,6 +260,7 @@ boot_enc_key_off(const struct flash_area *fap, uint8_t slot)
 }
 #endif
 
+#ifndef MCUBOOT_SWAP_USING_STATUS
 int
 boot_read_swap_state(const struct flash_area *fap,
                      struct boot_swap_state *state)

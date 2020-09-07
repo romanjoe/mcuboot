@@ -473,6 +473,23 @@ int flash_area_id_to_image_slot(int area_id)
     return flash_area_id_to_multi_image_slot(0, area_id);
 }
 
+/*
+ * Erases aligned row of flash, where passed address resided
+ */
+int flash_erase_row(uint32_t address)
+{
+    cy_en_flashdrv_status_t rc = CY_FLASH_DRV_SUCCESS;
+    uint32_t row_addr = 0;
+
+    /* Calculate start of row arbitrary address */
+    row_addr = (address/CY_FLASH_SIZEOF_ROW)*CY_FLASH_SIZEOF_ROW;
+
+    /* Erase whole row of flash */
+    rc = Cy_Flash_EraseRow(row_addr);
+
+    return (int) rc;
+}
+
 uint8_t flash_area_erased_val(const struct flash_area *fap)
 {
     int ret = 0;
