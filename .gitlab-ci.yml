@@ -1,0 +1,151 @@
+stages:
+  - build
+
+variables:
+# DO NOT EDIT. Internal CI tools path
+    OBJCOPY_PATH: C:/Users/cydesigner/ModusToolbox/tools_2.0/gcc-7.2.1/bin/arm-none-eabi-objcopy
+    OPENOCD_PATH: C:/Users/cydesigner/ModusToolbox/tools_2.0/openocd
+    TOOLCHAIN_PATH: /home/fw-security/ModusToolbox/tools_2.0/gcc-7.2.1
+
+
+.build_common:
+  stage: build
+  tags:
+    - FWS_LIN_BUILD
+
+
+lin_build_blinky_boot:
+  extends: .build_common
+  artifacts:
+    expire_in: 4 weeks
+    paths:
+      - boot/cypress/BlinkyApp/out/PSOC_062_2M/Debug/boot/BlinkyApp.elf
+      - boot/cypress/BlinkyApp/out/PSOC_062_2M/Release/boot/BlinkyApp.elf
+  script:
+    - '[ ! -z $REPO ] && git pull $REPO $BRANCH || echo "Using current branch"'
+    - git submodule deinit --all -f
+    - git submodule update --init --recursive
+    - rm -rf boot/cypress/MCUBootApp/config/mcuboot_config/mcuboot_config.h
+    - mv boot/cypress/MCUBootApp/config/mcuboot_config/mcuboot_config_swap.h boot/cypress/MCUBootApp/config/mcuboot_config/mcuboot_config.h
+    - cd boot/cypress 
+
+    - make app APP_NAME=BlinkyApp BUILDCFG=Debug PLATFORM=PSOC_062_2M IMG_TYPE=BOOT
+    - make app APP_NAME=BlinkyApp BUILDCFG=Release PLATFORM=PSOC_062_2M IMG_TYPE=BOOT
+
+
+
+lin_build_blinky_upgrade:
+  extends: .build_common
+  artifacts:
+    expire_in: 4 weeks
+    paths:
+      - boot/cypress/BlinkyApp/out/PSOC_062_2M/Debug/upgrade/BlinkyApp.elf
+      - boot/cypress/BlinkyApp/out/PSOC_062_2M/Release/upgrade/BlinkyApp.elf
+  script:  
+    - '[ ! -z $REPO ] && git pull $REPO $BRANCH || echo "Using current branch"'
+    - git submodule deinit --all -f
+    - git submodule update --init --recursive
+    - rm -rf boot/cypress/MCUBootApp/config/mcuboot_config/mcuboot_config.h
+    - mv boot/cypress/MCUBootApp/config/mcuboot_config/mcuboot_config_swap.h boot/cypress/MCUBootApp/config/mcuboot_config/mcuboot_config.h
+    - cd boot/cypress 
+
+    - make app APP_NAME=BlinkyApp BUILDCFG=Debug PLATFORM=PSOC_062_2M IMG_TYPE=UPGRADE HEADER_OFFSET=0x10000
+    - make app APP_NAME=BlinkyApp BUILDCFG=Release PLATFORM=PSOC_062_2M IMG_TYPE=UPGRADE HEADER_OFFSET=0x10000
+
+
+
+lin_build_blinky_upgrade_smif:
+  extends: .build_common
+  artifacts:
+    expire_in: 4 weeks
+    paths:
+      - boot/cypress/BlinkyApp/out/PSOC_062_2M/Debug/upgrade/BlinkyApp.elf
+      - boot/cypress/BlinkyApp/out/PSOC_062_2M/Release/upgrade/BlinkyApp.elf
+  script:
+    - '[ ! -z $REPO ] && git pull $REPO $BRANCH || echo "Using current branch"'
+    - git submodule deinit --all -f
+    - git submodule update --init --recursive
+    - rm -rf boot/cypress/MCUBootApp/config/mcuboot_config/mcuboot_config.h
+    - mv boot/cypress/MCUBootApp/config/mcuboot_config/mcuboot_config_swap.h boot/cypress/MCUBootApp/config/mcuboot_config/mcuboot_config.h
+    - cd boot/cypress   
+  
+    - make app APP_NAME=BlinkyApp BUILDCFG=Debug PLATFORM=PSOC_062_2M IMG_TYPE=UPGRADE HEADER_OFFSET=0x7FE8000 ERASED_VALUE=0xff USE_EXTERNAL_FLASH=1
+    - make app APP_NAME=BlinkyApp BUILDCFG=Release PLATFORM=PSOC_062_2M IMG_TYPE=UPGRADE HEADER_OFFSET=0x7FE8000 ERASED_VALUE=0xff USE_EXTERNAL_FLASH=1
+
+
+
+lin_build_mcuboot_single:
+  extends: .build_common
+  artifacts:
+    expire_in: 4 weeks
+    paths:
+      - boot/cypress/MCUBootApp/out/PSOC_062_2M/Debug/MCUBootApp.hex
+      - boot/cypress/MCUBootApp/out/PSOC_062_2M/Release/MCUBootApp.hex
+  script:
+    - '[ ! -z $REPO ] && git pull $REPO $BRANCH || echo "Using current branch"'
+    - git submodule deinit --all -f
+    - git submodule update --init --recursive
+    - rm -rf boot/cypress/MCUBootApp/config/mcuboot_config/mcuboot_config.h
+    - mv boot/cypress/MCUBootApp/config/mcuboot_config/mcuboot_config_swap.h boot/cypress/MCUBootApp/config/mcuboot_config/mcuboot_config.h
+    - cd boot/cypress 
+
+    - make app APP_NAME=MCUBootApp BUILDCFG=Debug MCUBOOT_IMAGE_NUMBER=1
+    - make app APP_NAME=MCUBootApp BUILDCFG=Release MCUBOOT_IMAGE_NUMBER=1
+
+
+
+lin_build_mcuboot_multi:
+  extends: .build_common
+  artifacts:
+    expire_in: 4 weeks
+    paths:
+      - boot/cypress/MCUBootApp/out/PSOC_062_2M/Debug/MCUBootApp.hex
+      - boot/cypress/MCUBootApp/out/PSOC_062_2M/Release/MCUBootApp.hex
+  script:
+    - '[ ! -z $REPO ] && git pull $REPO $BRANCH || echo "Using current branch"'
+    - git submodule deinit --all -f
+    - git submodule update --init --recursive
+    - rm -rf boot/cypress/MCUBootApp/config/mcuboot_config/mcuboot_config.h
+    - mv boot/cypress/MCUBootApp/config/mcuboot_config/mcuboot_config_swap.h boot/cypress/MCUBootApp/config/mcuboot_config/mcuboot_config.h
+    - cd boot/cypress 
+
+    - make app APP_NAME=MCUBootApp BUILDCFG=Debug MCUBOOT_IMAGE_NUMBER=2
+    - make app APP_NAME=MCUBootApp BUILDCFG=Release MCUBOOT_IMAGE_NUMBER=2
+
+
+lin_build_mcuboot_single_smif:
+  extends: .build_common
+  artifacts:
+    expire_in: 4 weeks
+    paths:
+      - boot/cypress/MCUBootApp/out/PSOC_062_2M/Debug/MCUBootApp.hex
+      - boot/cypress/MCUBootApp/out/PSOC_062_2M/Release/MCUBootApp.hex
+  script:
+    - '[ ! -z $REPO ] && git pull $REPO $BRANCH || echo "Using current branch"'
+    - git submodule deinit --all -f
+    - git submodule update --init --recursive
+    - rm -rf boot/cypress/MCUBootApp/config/mcuboot_config/mcuboot_config.h
+    - mv boot/cypress/MCUBootApp/config/mcuboot_config/mcuboot_config_swap.h boot/cypress/MCUBootApp/config/mcuboot_config/mcuboot_config.h
+    - cd boot/cypress 
+
+    - make app APP_NAME=MCUBootApp BUILDCFG=Debug MCUBOOT_IMAGE_NUMBER=1 USE_EXTERNAL_FLASH=1
+    - make app APP_NAME=MCUBootApp BUILDCFG=Release MCUBOOT_IMAGE_NUMBER=1 USE_EXTERNAL_FLASH=1
+
+
+lin_build_mcuboot_multi_smif:
+  extends: .build_common
+  artifacts:
+    expire_in: 4 weeks
+    paths:
+      - boot/cypress/MCUBootApp/out/PSOC_062_2M/Debug/MCUBootApp.hex
+      - boot/cypress/MCUBootApp/out/PSOC_062_2M/Release/MCUBootApp.hex
+  script:
+    - '[ ! -z $REPO ] && git pull $REPO $BRANCH || echo "Using current branch"'
+    - git submodule deinit --all -f
+    - git submodule update --init --recursive
+    - rm -rf boot/cypress/MCUBootApp/config/mcuboot_config/mcuboot_config.h
+    - mv boot/cypress/MCUBootApp/config/mcuboot_config/mcuboot_config_swap.h boot/cypress/MCUBootApp/config/mcuboot_config/mcuboot_config.h
+    - cd boot/cypress 
+
+    - make app APP_NAME=MCUBootApp BUILDCFG=Debug MCUBOOT_IMAGE_NUMBER=2 USE_EXTERNAL_FLASH=1
+    - make app APP_NAME=MCUBootApp BUILDCFG=Release MCUBOOT_IMAGE_NUMBER=2 USE_EXTERNAL_FLASH=1
