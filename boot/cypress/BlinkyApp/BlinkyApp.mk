@@ -36,6 +36,7 @@ IMG_TYPES = BOOT UPGRADE
 
 # use SWAP_UPGRADE = 0 for overwrite only mode
 # use SWAP_UPGRADE = 1 for swap upgrade mode
+# use SWAP_UPGRADE = 2 for swap upgrade mode, upgrade image is in the external memory
 SWAP_UPGRADE ?= 1
 
 # possible values are 0 and 0xff
@@ -64,7 +65,13 @@ ifeq ($(PLATFORM), PSOC_062_2M)
 	DEFINES_APP += -DRAM_START=0x08040000
 	DEFINES_APP += -DRAM_SIZE=0x10000
 	DEFINES_APP += -DUSER_APP_START=0x10018000
+
+ifeq ($(SWAP_UPGRADE), 2)
+	SLOT_SIZE ?= 0xC0000
+else
 	SLOT_SIZE ?= 0x10000
+endif
+
 endif
 
 # Collect Test Application sources
