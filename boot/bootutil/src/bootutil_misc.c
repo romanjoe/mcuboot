@@ -601,6 +601,17 @@ boot_write_enc_key(const struct flash_area *fap, uint8_t slot,
 }
 #endif
 
+#define BOOT_LOG_SWAP_STATE(area, state)                            \
+    BOOT_LOG_INF("%s: magic=%s, swap_type=0x%x, copy_done=0x%x, "   \
+                 "image_ok=0x%x",                                   \
+                 (area),                                            \
+                 ((state)->magic == BOOT_MAGIC_GOOD ? "good" :      \
+                  (state)->magic == BOOT_MAGIC_UNSET ? "unset" :    \
+                  "bad"),                                           \
+                 (state)->swap_type,                                \
+                 (state)->copy_done,                                \
+                 (state)->image_ok)
+
 int
 boot_swap_type_multi(int image_index)
 {
@@ -618,6 +629,9 @@ boot_swap_type_multi(int image_index)
 
     rc = boot_read_swap_state_by_id(FLASH_AREA_IMAGE_SECONDARY(image_index),
                                     &secondary_slot);
+
+    BOOT_LOG_SWAP_STATE("boot_swap_type_multi: Primary image", &primary_slot);
+    BOOT_LOG_SWAP_STATE("boot_swap_type_multi: Secondary image", &secondary_slot);
     if (rc) {
         return BOOT_SWAP_TYPE_PANIC;
     }

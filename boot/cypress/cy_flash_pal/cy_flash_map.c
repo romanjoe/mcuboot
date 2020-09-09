@@ -348,9 +348,9 @@ int flash_area_erase(const struct flash_area *fa, uint32_t off, uint32_t len)
     size_t erase_start_addr;
     size_t erase_end_addr;
 
-    assert(off < fa->fa_off);
-    assert(off + len < fa->fa_off);
-    assert(!(len % CY_FLASH_SIZEOF_ROW));
+    assert(len < fa->fa_size);
+    assert(off < fa->fa_size);
+    assert(off + len < fa->fa_off + fa->fa_size);
 
     /* convert to absolute address inside a device*/
     erase_start_addr = fa->fa_off + off;
@@ -360,13 +360,15 @@ int flash_area_erase(const struct flash_area *fa, uint32_t off, uint32_t len)
     {
         int row_number = 0;
         uint32_t row_addr = 0;
+        uint32_t row_start_addr = (erase_start_addr / CY_FLASH_SIZEOF_ROW) * CY_FLASH_SIZEOF_ROW;
+        uint32_t row_end_addr = (erase_end_addr / CY_FLASH_SIZEOF_ROW) * CY_FLASH_SIZEOF_ROW;
 
-        row_number = (erase_end_addr - erase_start_addr) / CY_FLASH_SIZEOF_ROW;
+        row_number = (row_end_addr - row_start_addr) / CY_FLASH_SIZEOF_ROW;
 
         while (row_number != 0)
         {
             row_number--;
-            row_addr = erase_start_addr + row_number * (uint32_t) CY_FLASH_SIZEOF_ROW;
+            row_addr = row_start_addr + row_number * (uint32_t) CY_FLASH_SIZEOF_ROW;
             rc = Cy_Flash_EraseRow(row_addr);
         }
     }
