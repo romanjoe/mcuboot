@@ -63,6 +63,7 @@ MEMORY
      * Your changes must be aligned with the corresponding memory regions for the CM4 core in 'xx_cm4_dual.ld',
      * where 'xx' is the device group; for example, 'cy8c6xx7_cm4_dual.ld'.
      */
+    public_ram        (rw)    : ORIGIN = 0x08000000, LENGTH = 0x800
     ram               (rwx)   : ORIGIN = 0x08020000, LENGTH = 0x20000
     flash             (rx)    : ORIGIN = 0x10000000, LENGTH = 0x18000
 
@@ -233,6 +234,15 @@ SECTIONS
         __ram_vectors_end__   = .;
     } > ram
 
+    /* Unprotected public RAM */
+    .cy_sharedmem (NOLOAD):
+    {
+        . = ALIGN(4);
+        __public_ram_start__ = .;
+        KEEP(*(.cy_sharedmem))
+        . = ALIGN(4);
+        __public_ram_end__ = .;
+    } > public_ram
 
     .data __ram_vectors_end__ : AT (__etext)
     {
