@@ -284,7 +284,7 @@ swap_status_source(struct boot_loader_state *state)
             &state_primary_slot);
     assert(rc == 0);
 
-    BOOT_LOG_SWAP_STATE("Primary image", &state_primary_slot);
+    BOOT_LOG_SWAP_STATE("swap_status_source: Primary image", &state_primary_slot);
 
     if (state_primary_slot.magic == BOOT_MAGIC_GOOD &&
             state_primary_slot.copy_done == BOOT_FLAG_UNSET) {
@@ -409,7 +409,7 @@ fixup_revert(const struct boot_loader_state *state, struct boot_status *bs,
     rc = boot_read_swap_state_by_id(sec_id, &swap_state);
     assert(rc == 0);
 
-    BOOT_LOG_SWAP_STATE("Secondary image", &swap_state);
+    BOOT_LOG_SWAP_STATE("fixup_revert: Secondary image", &swap_state);
 
     if (swap_state.magic == BOOT_MAGIC_UNSET) {
         rc = swap_erase_trailer_sectors(state, fap_sec);
