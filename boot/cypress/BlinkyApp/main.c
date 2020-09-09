@@ -28,8 +28,8 @@
 #include "cyhal.h"
 #include "cy_retarget_io.h"
 
-#include "../bootutil/src/swap_status.h"
-#include "flash_map_backend/flash_map_backend.h"
+// #include "../bootutil/src/swap_status.h"
+// #include "flash_map_backend/flash_map_backend.h"
 
 /* Define pins for UART debug output */
 
@@ -83,13 +83,38 @@ void check_result(int res)
     }
 }
 
+/*
+* Writes 1 byte from `src` into flash memory at `address`
+* It does a sequence of RD/Modify/WR of data in a Flash Row.
+ */
+int flash_write_byte(uint32_t address, uint8_t src)
+{
+    cy_en_flashdrv_status_t rc = CY_FLASH_DRV_SUCCESS;
+    uint32_t row_addr = 0;
+    uint8_t row_buff[512];
+
+    /* accepting arbitrary address */
+    row_addr = (address/CY_FLASH_SIZEOF_ROW)*CY_FLASH_SIZEOF_ROW;
+
+    /* preserving Row */
+    memcpy((void *)row_buff, (void *)row_addr, sizeof(row_buff));
+
+    /* Modifying the target byte */
+    row_buff[address%CY_FLASH_SIZEOF_ROW] = src;
+
+    /* Programming updated row back, NO Erase */
+    rc = Cy_Flash_WriteRow(row_addr, (const uint32_t *)row_buff);
+
+    return (int) rc;
+}
+
 void test_app_init_hardware(void)
 {
     /* enable interrupts */
     __enable_irq();
 
-    volatile uint32_t flag=1;
-    while(flag);
+//    volatile uint32_t flag=1;
+//    while(flag);
 
     /* Disabling watchdog so it will not interrupt normal flow later */
     Cy_GPIO_Pin_Init(LED_PORT, LED_PIN, &LED_config);
@@ -114,20 +139,31 @@ int main(void)
     test_app_init_hardware();
 
     printf(GREETING_MESSAGE_INFO);
-#if (SWAP_ENABLED == 1)
-    uint32_t area_id;
+
+#if defined(SWAP_ENABLED) && defined(UPGRADE_IMG)
+
+    #define USER_SWAP_IMAGE_OK_OFFS (24)
+    #define USER_SWAP_IMAGE_OK      (1)
+    uint32_t img_ok_addr;
     int rc;
 
-    uint32_t offs = 0;
-    uint32_t len = 4;
+    printf("[BlinkyApp] Try to set img_ok\r\n");
 
-    area_id = FLASH_AREA_IMAGE_0;
-
-    const struct flash_area *fap_stat;
-    rc = flash_area_open(FLASH_AREA_IMAGE_SWAP_STATUS, &fap_stat);
-
-    uint8_t data[4] = {0xAA, 0xAA, 0xAA, 0xAA};
-    rc = swap_status_update(area_id, offs, data, len);
+    /* Write Image OK flag to the slot trailer, so MCUBoot-loader
+     * will not revert new image */
+    img_ok_addr = USER_APP_START + USER_APP_SIZE - USER_SWAP_IMAGE_OK_OFFS;
+    if (*((uint8_t *)img_ok_addr) != USER_SWAP_IMAGE_OK)
+    {
+        rc = flash_write_byte(img_ok_addr, USER_SWAP_IMAGE_OK);
+        if (0 == rc)
+        {
+            printf("[BlinkyApp] SWAP Status : Image OK was set at 0x%08lx.\r\n", img_ok_addr);
+        }
+        else
+        {
+            printf("[BlinkyApp] SWAP Status : Failed to set Image OK.\r\n");
+        }
+    }
 #endif
 
     for (;;)
