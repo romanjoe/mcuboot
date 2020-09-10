@@ -222,6 +222,8 @@ class Image():
                 padding = bytes([self.erased_val] *
                                 (trailer_size - len(boot_magic))) + boot_magic
                 h.puts(trailer_addr, padding)
+                if self.confirm and not self.overwrite_only:
+                    h[trailer_addr + trailer_size - len(boot_magic) - MAX_ALIGN] = 0x01  # image_ok = 0x01
             h.tofile(path, 'hex')
         else:
             if self.pad:
