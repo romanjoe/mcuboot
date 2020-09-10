@@ -201,8 +201,12 @@ static struct flash_area status =
     .fa_id = FLASH_AREA_IMAGE_SWAP_STATUS,
     .fa_device_id = FLASH_DEVICE_INTERNAL_FLASH,
     .fa_off = SWAP_STATUS_PARTITION_OFF,
-    // TODO: think of multi-image case as well
-    .fa_size = (BOOT_SWAP_STATUS_SZ_PRIM + BOOT_SWAP_STATUS_SZ_SEC)
+#if (MCUBOOT_IMAGE_NUMBER == 1) /* if single-image */
+    .fa_size = (BOOT_SWAP_STATUS_SZ_PRIM + BOOT_SWAP_STATUS_SZ_SEC) 
+#elif (MCUBOOT_IMAGE_NUMBER == 2) /* if dual-image */
+    .fa_size = (BOOT_SWAP_STATUS_SZ_PRIM + BOOT_SWAP_STATUS_SZ_SEC) * BOOT_IMAGE_NUMBER
+#endif
+
 };
 #endif
 
