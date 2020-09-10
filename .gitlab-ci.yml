@@ -69,8 +69,8 @@ lin_build_blinky_upgrade_smif:
     - mv boot/cypress/MCUBootApp/config/mcuboot_config/mcuboot_config_swap.h boot/cypress/MCUBootApp/config/mcuboot_config/mcuboot_config.h
     - cd boot/cypress   
   
-    - make app APP_NAME=BlinkyApp BUILDCFG=Debug PLATFORM=PSOC_062_2M IMG_TYPE=UPGRADE HEADER_OFFSET=0x7FE8000 ERASED_VALUE=0xff USE_EXTERNAL_FLASH=1
-    - make app APP_NAME=BlinkyApp BUILDCFG=Release PLATFORM=PSOC_062_2M IMG_TYPE=UPGRADE HEADER_OFFSET=0x7FE8000 ERASED_VALUE=0xff USE_EXTERNAL_FLASH=1
+    - make app APP_NAME=BlinkyApp BUILDCFG=Debug PLATFORM=PSOC_062_2M IMG_TYPE=UPGRADE HEADER_OFFSET=0x7FE8000 ERASED_VALUE=0xff SWAP_UPGRADE=2
+    - make app APP_NAME=BlinkyApp BUILDCFG=Release PLATFORM=PSOC_062_2M IMG_TYPE=UPGRADE HEADER_OFFSET=0x7FE8000 ERASED_VALUE=0xff SWAP_UPGRADE=2
 
 
 
