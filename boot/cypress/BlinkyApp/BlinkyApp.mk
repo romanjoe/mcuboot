@@ -43,13 +43,6 @@ SWAP_UPGRADE ?= 1
 # internal Flash by default
 ERASED_VALUE ?= 0
 
-# size of image slot
-ifeq ($(SWAP_UPGRADE), 2)
-	SLOT_SIZE ?= 0xC0000
-else
-	SLOT_SIZE ?= 0x10000
-endif
-
 ifneq ($(COMPILER), GCC_ARM)
 $(error Only GCC ARM is supported at this moment)
 endif
@@ -73,6 +66,12 @@ ifeq ($(PLATFORM), PSOC_062_2M)
 	DEFINES_APP += -DRAM_START=0x08040000
 	DEFINES_APP += -DRAM_SIZE=0x10000
 	DEFINES_APP += -DUSER_APP_START=0x10018000
+	# size of image slot
+ifeq ($(SWAP_UPGRADE), 2)
+	SLOT_SIZE ?= 0xC0000
+else
+	SLOT_SIZE ?= 0x10000
+endif
 endif
 
 # TODO
