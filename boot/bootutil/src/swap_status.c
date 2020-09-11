@@ -123,14 +123,17 @@ swap_read_status_bytes(const struct flash_area *fap,
 {
     uint32_t off;
     uint8_t status;
-    uint8_t last_status;
+    uint8_t last_status_move;
+    uint8_t last_status_swap;
     int max_entries;
-    int found_idx;
+    int found_idx_move;
+    int found_idx_swap;
     int move_entries;
     int rc;
     int last_rc;
     int erased_sections;
     int i;
+    int image_index;
     (void)state;
 
     if (fap->fa_id != FLASH_AREA_IMAGE_SCRATCH) {
@@ -140,7 +143,7 @@ swap_read_status_bytes(const struct flash_area *fap,
     }
 
     erased_sections = 0;
-    found_idx = -1;
+    found_idx_move = -1;
     /* skip erased sectors at the end */
     last_rc = 1;
     off = boot_status_off(fap);
@@ -151,10 +154,16 @@ swap_read_status_bytes(const struct flash_area *fap,
             return BOOT_EFLASH;
         }
 
+        if(status == BOOT_STATUS_STATE_0 || status == BOOT_STATUS_STATE_1)
+        {
+        	found_idx_swap = i - BOOT_STATUS_IDX_0;
+        	last_status_swap = status;
+        }
+
         if (status != flash_area_erased_val(fap)) {
-            if (found_idx == -1) {
-                found_idx = i;
-                last_status = status;
+            if (found_idx_move == -1) {
+                found_idx_move = i;
+                last_status_move = status;
             }
         }
         else
@@ -182,19 +191,24 @@ swap_read_status_bytes(const struct flash_area *fap,
 #endif
     }
 
-    move_entries = BOOT_MAX_IMG_SECTORS;
-    if (found_idx == -1) {
+    image_index = BOOT_CURR_IMG(state);
+    rc = boot_read_swap_size(image_index, &bs->swap_size);
+    assert(rc == 0);
+    /* get image size in blocks */
+    move_entries = bs->swap_size / state->write_sz + (bs->swap_size % state->write_sz != 0);
+
+    if (found_idx_move == -1) {
         /* no swap status found; nothing to do */
-    } else if (found_idx < move_entries) {
+    } else if (found_idx_move < move_entries) {
+    	/* continue move sector up operation */
         bs->op = BOOT_STATUS_OP_MOVE;
-        /* BOOT_STATUS_MOVE_STATE_COUNT = 1 for SWAP MOVE with STATUS */
-        bs->idx = found_idx + BOOT_STATUS_IDX_0;
-        bs->state = last_status;
+        bs->idx = found_idx_move;
+        bs->state = last_status_move;
     } else {
+    	/* resume swap sectors operation */
         bs->op = BOOT_STATUS_OP_SWAP;
-        /* BOOT_STATUS_MOVE_STATE_COUNT = 1 for SWAP MOVE with STATUS */
-        bs->idx = (found_idx - move_entries) + BOOT_STATUS_IDX_0;
-        bs->state = last_status;
+        bs->idx = found_idx_swap;
+        bs->state = last_status_swap;
     }
 
     return 0;
