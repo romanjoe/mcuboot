@@ -58,6 +58,7 @@ ifeq ($(IMG_TYPE), BOOT)
 	DEFINES_APP := -DBOOT_IMG
 else
 	DEFINES_APP := -DUPGRADE_IMG
+	DEFINES_APP += -DSWAP_ENABLED=$(SWAP_UPGRADE)
 endif
 
 # Define start of application, RAM start and size, slot size
@@ -65,14 +66,18 @@ ifeq ($(PLATFORM), PSOC_062_2M)
 	DEFINES_APP += -DRAM_START=0x08040000
 	DEFINES_APP += -DRAM_SIZE=0x10000
 	DEFINES_APP += -DUSER_APP_START=0x10018000
-
+	# size of image slot
 ifeq ($(SWAP_UPGRADE), 2)
 	SLOT_SIZE ?= 0xC0000
 else
 	SLOT_SIZE ?= 0x10000
 endif
-
 endif
+
+# TODO
+#DEFINES_APP := -DUPGRADE_IMG
+#DEFINES_APP += -DSWAP_ENABLED=$(SWAP_UPGRADE)
+DEFINES_APP += -DUSER_APP_SIZE=$(SLOT_SIZE)
 
 # Collect Test Application sources
 SOURCES_APP_SRC := $(wildcard $(CUR_APP_PATH)/*.c)
@@ -82,6 +87,23 @@ SOURCES_APP += $(SOURCES_APP_SRC)
 # Collect includes for BlinkyApp
 INCLUDE_DIRS_APP := $(addprefix -I, $(CURDIR))
 INCLUDE_DIRS_APP += $(addprefix -I, $(CUR_APP_PATH))
+
+# # special case to allow user seet "image_OK" easy
+# ifeq ($(SWAP_UPGRADE), 1)
+# 	DEFINES_APP += -DMCUBOOT_IMAGE_NUMBER=1
+
+# 	INCLUDE_DIRS_APP += $(addprefix -I, $(CURDIR)/MCUBootApp/)
+# 	INCLUDE_DIRS_APP += $(addprefix -I, $(CURDIR)/MCUBootApp/config/)
+# 	INCLUDE_DIRS_APP += $(addprefix -I, $(CURDIR)/../bootutil/src)
+# 	INCLUDE_DIRS_APP += $(addprefix -I, $(CURDIR)/../bootutil/include/)
+# 	INCLUDE_DIRS_APP += $(addprefix -I, $(CURDIR)/cy_flash_pal/include/)
+# 	INCLUDE_DIRS_APP += $(addprefix -I, $(CURDIR)/cy_flash_pal/flash_qspi/)
+# 	INCLUDE_DIRS_APP += $(addprefix -I, $(CURDIR)/libs/crc-lib/)
+	
+# 	SOURCES_APP += $(wildcard $(CURDIR)/cy_flash_pal/*.c)
+# 	SOURCES_APP += $(wildcard $(CURDIR)/libs/crc-lib/*.c)
+# 	SOURCES_APP += $(CURDIR)/../bootutil/src/swap_status_part.c
+# endif
 
 # Overwite path to linker script if custom is required, otherwise default from BSP is used
 ifeq ($(COMPILER), GCC_ARM)

@@ -96,7 +96,7 @@
 /* Default number of separately updateable images; change in case of
  * multiple images. */
 #ifndef MCUBOOT_IMAGE_NUMBER
-#define MCUBOOT_IMAGE_NUMBER 2
+#define MCUBOOT_IMAGE_NUMBER 1
 #endif
 
 /*

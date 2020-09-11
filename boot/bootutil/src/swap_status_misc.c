@@ -262,7 +262,7 @@ boot_read_swap_state(const struct flash_area *fap,
                      struct boot_swap_state *state)
 {
     uint32_t magic[BOOT_MAGIC_ARR_SZ];
-    uint32_t off, trailer_magic_off, trailer_img_ok_off, trailer_row_start;
+    uint32_t off, trailer_off;
     uint8_t swap_info;
     int rc;
     uint32_t erase_trailer = 0;
@@ -283,29 +283,34 @@ boot_read_swap_state(const struct flash_area *fap,
         return BOOT_EFLASH;
     }
     /* fill magic number value if equal to expected */
-    if (rc == 1 && (fap->fa_id == FLASH_AREA_IMAGE_1 ||
-                    fap->fa_id == FLASH_AREA_IMAGE_3)) {
-            /* attempt to find magic in upgrade img slot trailer */
+    if (rc == 1) {
 
-            trailer_magic_off = fap->fa_size - BOOT_MAGIC_SZ;
+        state->magic = BOOT_MAGIC_UNSET;
+        
+        /* attempt to find magic in upgrade img slot trailer */
+        if (fap->fa_id == FLASH_AREA_IMAGE_1 ||
+            fap->fa_id == FLASH_AREA_IMAGE_3) {
 
-            rc = flash_area_read_is_empty(fap, trailer_magic_off, magic, BOOT_MAGIC_SZ);
-            if (rc < 0) {
-                return BOOT_EFLASH;
-            }
-            if (rc == 1) {
-                state->magic = BOOT_MAGIC_UNSET;
-            } else {
-                state->magic = boot_magic_decode(magic);
-                /* put magic to status partition for upgrade slot*/
-                rc = swap_status_update(fap->fa_id, off,
-                                (uint8_t *) boot_img_magic, BOOT_MAGIC_SZ);
+                trailer_off = fap->fa_size - BOOT_MAGIC_SZ;
+
+                rc = flash_area_read_is_empty(fap, trailer_off, magic, BOOT_MAGIC_SZ);
                 if (rc < 0) {
                     return BOOT_EFLASH;
-                } else {
-                    erase_trailer = 1;
                 }
-            }
+                if (rc == 1) {
+                    state->magic = BOOT_MAGIC_UNSET;
+                } else {
+                    state->magic = boot_magic_decode(magic);
+                    /* put magic to status partition for upgrade slot*/
+                    rc = swap_status_update(fap->fa_id, off,
+                                    (uint8_t *) boot_img_magic, BOOT_MAGIC_SZ);
+                    if (rc < 0) {
+                        return BOOT_EFLASH;
+                    } else {
+                        erase_trailer = 1;
+                    }
+                }
+        }
     } else {
         state->magic = boot_magic_decode(magic);
     }
@@ -360,11 +365,19 @@ boot_read_swap_state(const struct flash_area *fap,
         /* attempt to read img_ok value in upgrade img slots trailer area 
          * it is set when image in slot for upgrade is signed for swap_type permanent
         */
-        if (fap->fa_id == FLASH_AREA_IMAGE_1 ||
-                fap->fa_id == FLASH_AREA_IMAGE_3) {
-            trailer_img_ok_off = fap->fa_size - BOOT_MAGIC_SZ - BOOT_MAX_ALIGN;
+        switch (fap->fa_id)
+        {
+        case FLASH_AREA_IMAGE_0:
+        case FLASH_AREA_IMAGE_2:
+        {
+            if (!(state->copy_done == BOOT_FLAG_SET))
+                break;
+        }
+        case FLASH_AREA_IMAGE_1:
+        case FLASH_AREA_IMAGE_3:
+            trailer_off = fap->fa_size - BOOT_MAGIC_SZ - BOOT_MAX_ALIGN;
 
-            rc = flash_area_read_is_empty(fap, trailer_img_ok_off, &state->image_ok, sizeof state->image_ok);
+            rc = flash_area_read_is_empty(fap, trailer_off, &state->image_ok, sizeof state->image_ok);
             if (rc < 0) {
                 return BOOT_EFLASH;
             }
@@ -382,6 +395,10 @@ boot_read_swap_state(const struct flash_area *fap,
                     erase_trailer = 1;
                 }
             }
+            break;
+        default:
+            erase_trailer = 1;
+            break;
         }
     } else {
        state->image_ok = boot_flag_decode(state->image_ok);
@@ -390,7 +407,7 @@ boot_read_swap_state(const struct flash_area *fap,
     if (erase_trailer)
     {
         /* erase magic from upgrade img trailer */
-        rc = flash_area_erase(fap, trailer_magic_off, BOOT_MAGIC_SZ);
+        rc = flash_area_erase(fap, trailer_off, BOOT_MAGIC_SZ);
     }
 
     return 0;
@@ -460,14 +477,14 @@ swap_erase_trailer_sectors(const struct boot_loader_state *state,
     uint32_t sector;
     uint32_t trailer_sz;
     uint32_t total_sz;
-    uint32_t off, sub_offs;
+    uint32_t off, sub_offs, trailer_offs;
     uint32_t sz;
     int fa_id_primary;
     int fa_id_secondary;
     uint8_t image_index;
     int rc;
 
-    BOOT_LOG_DBG("Erasing trailer; fa_id=%d", fap->fa_id);
+    BOOT_LOG_INF("Erasing trailer; fa_id=%d", fap->fa_id);
     /* trailer is located in status-partition */
     const struct flash_area *fap_stat;
 
@@ -500,6 +517,13 @@ swap_erase_trailer_sectors(const struct boot_loader_state *state,
         sector--;
         total_sz += sz;
     } while (total_sz < trailer_sz);
+
+    /* 
+     * it is also needed to erase trailer area in slots since they may contain
+     * data, which is already cleared in corresponding status partition
+     */
+    trailer_offs = fap->fa_size - BOOT_SWAP_STATUS_TRAILER_SIZE;
+    rc = flash_area_erase(fap, trailer_offs, BOOT_SWAP_STATUS_TRAILER_SIZE);
 
     flash_area_close(fap_stat);
 
