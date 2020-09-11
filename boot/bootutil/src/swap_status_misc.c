@@ -230,7 +230,8 @@ boot_write_status(const struct boot_loader_state *state, struct boot_status *bs)
     }
     off = boot_status_off(fap) + boot_status_internal_off(bs, 1);
 
-    rc = swap_status_update(fap->fa_id, off, &(bs->state), 1);
+    uint8_t tmp_state = ((bs->op == BOOT_STATUS_OP_MOVE) ? bs->state : bs->state + 1);
+    rc = swap_status_update(fap->fa_id, off, &tmp_state, 1);
     if (rc != 0) {
         rc = BOOT_EFLASH;
         goto done;
