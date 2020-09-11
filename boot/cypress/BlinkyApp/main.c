@@ -28,9 +28,6 @@
 #include "cyhal.h"
 #include "cy_retarget_io.h"
 
-// #include "../bootutil/src/swap_status.h"
-// #include "flash_map_backend/flash_map_backend.h"
-
 /* Define pins for UART debug output */
 
 #define CY_DEBUG_UART_TX (P5_1)
@@ -102,7 +99,7 @@ int flash_write_byte(uint32_t address, uint8_t src)
     /* Modifying the target byte */
     row_buff[address%CY_FLASH_SIZEOF_ROW] = src;
 
-    /* Programming updated row back, NO Erase */
+    /* Programming updated row back */
     rc = Cy_Flash_WriteRow(row_addr, (const uint32_t *)row_buff);
 
     return (int) rc;
@@ -112,9 +109,6 @@ void test_app_init_hardware(void)
 {
     /* enable interrupts */
     __enable_irq();
-
-//    volatile uint32_t flag=1;
-//    while(flag);
 
     /* Disabling watchdog so it will not interrupt normal flow later */
     Cy_GPIO_Pin_Init(LED_PORT, LED_PIN, &LED_config);
@@ -147,7 +141,7 @@ int main(void)
     uint32_t img_ok_addr;
     int rc;
 
-    printf("[BlinkyApp] Try to set img_ok\r\n");
+    printf("[BlinkyApp] Try to set img_ok to confirm upgrade image\r\n");
 
     /* Write Image OK flag to the slot trailer, so MCUBoot-loader
      * will not revert new image */
@@ -163,6 +157,9 @@ int main(void)
         {
             printf("[BlinkyApp] SWAP Status : Failed to set Image OK.\r\n");
         }
+    } else
+    {
+        printf("[BlinkyApp] Img_ok is already set in trailer\r\n");
     }
 #endif
 
