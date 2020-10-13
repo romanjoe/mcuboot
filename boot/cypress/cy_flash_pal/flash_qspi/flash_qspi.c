@@ -63,8 +63,14 @@
 * so agrees to indemnify Cypress against all liability.
 *
 ******************************************************************************/
-#include "cy_pdl.h"
 #include <stdio.h>
+
+/* PSoC6 PDL headers */
+#include "cy_smif.h"
+#include "cy_smif_memslot.h"
+#include "cy_sysclk.h"
+#include "cy_sysint.h"
+
 #include "flash_qspi.h"
 
 #define CY_SMIF_SYSCLK_HFCLK_DIVIDER     CY_SYSCLK_CLKHF_DIVIDE_BY_4

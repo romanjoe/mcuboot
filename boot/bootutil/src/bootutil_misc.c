@@ -45,8 +45,6 @@
 #include "swap_status.h"
 #endif
 
-#include "mcuboot_config/mcuboot_config.h"
-
 MCUBOOT_LOG_MODULE_DECLARE(mcuboot);
 
 /* Currently only used by imgmgr */

@@ -106,8 +106,9 @@ int main(void)
 
     /* Redefine number of sectors as there 2MB will be
      * available on PSoC062-2M in case of external
-     * memory usage */
-    #define MCUBOOT_MAX_IMG_SECTORS 4096
+     * memory usage
+     * See MAX_IMG_SECTORS parameter in MCUBootApp.mk
+     */
     rc = qspi_init_sfdp(smif_id);
     if (rc == CY_SMIF_SUCCESS)
     {
@@ -125,11 +126,11 @@ int main(void)
         if (fih_eq(fih_rc, FIH_SUCCESS))
         {
             BOOT_LOG_INF("User Application validated successfully");
-            /* intitalize watchdog timer. it should be updated from user app
-            to mark successful start up of this app. if the watchdog is not updated,
-            reset will be initiated by watchdog timer and swap revert operation started
-            to roll back to operable image.
-            */
+            /* Intitalize watchdog timer. it should be updated from user app
+             * to mark successful start up of this app. if the watchdog is not updated,
+             * reset will be initiated by watchdog timer and swap revert operation started
+             * to roll back to operable image.
+             */
             cy_wdg_init(WDT_TIME_OUT_MS);
             do_boot(&rsp);
             boot_succeeded = true;

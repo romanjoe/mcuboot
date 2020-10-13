@@ -26,14 +26,12 @@
  * under the License.
  */
 
-#ifndef BOOT_BOOTUTIL_SRC_SWAP_STATUS_H_
-#define BOOT_BOOTUTIL_SRC_SWAP_STATUS_H_
+#ifndef H_SWAP_STATUS_H_
+#define H_SWAP_STATUS_H_
 
 #include <stdint.h>
 #include "sysflash/sysflash.h"
 #include "bootutil_priv.h"
-
-#include "mcuboot_config/mcuboot_config.h"
 
 #ifdef MCUBOOT_SWAP_USING_STATUS
 
@@ -105,7 +103,7 @@ struct status_part_record{
  */
 #define BOOT_SWAP_STATUS_TRAILER_SIZE 64UL
 // TODO: check if min write size is 64 or larger
-// TODO: small-magic, coutner and crc aren't coutned here
+// TODO: small-magic, counter and crc aren't counted here
 
 /* number of rows trailer data should fit into */
 #define BOOT_SWAP_STATUS_TRAIL_ROWS_NUM  (((BOOT_SWAP_STATUS_TRAILER_SIZE-1)/BOOT_SWAP_STATUS_PAYLD_SZ)+1)
@@ -142,4 +140,4 @@ int boot_write_trailer(const struct flash_area *fap, uint32_t off,
 
 #endif /* MCUBOOT_SWAP_USING_STATUS */
 
-#endif /* BOOT_BOOTUTIL_SRC_SWAP_STATUS_H_ */
+#endif /* H_SWAP_STATUS_H_ */

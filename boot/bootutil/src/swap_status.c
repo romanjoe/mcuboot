@@ -223,11 +223,8 @@ uint32_t
 boot_status_internal_off(const struct boot_status *bs, int elem_sz)
 {
     uint32_t off;
-    int idx_sz;
 
-    idx_sz = elem_sz;
-
-    off = bs->idx * idx_sz;
+    off = bs->idx * elem_sz;
 
     return off;
 }
