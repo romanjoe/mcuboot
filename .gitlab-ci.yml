@@ -1,7 +1,5 @@
 stages:
   - build
-  - swap_tests
-  - overwrite_tests
   - checks
 
 
