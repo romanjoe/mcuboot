@@ -1,5 +1,7 @@
 stages:
   - build
+  - swap_tests
+  - overwrite_tests
   - checks
 
 
@@ -296,7 +298,7 @@ overwrite_mcuboot_multi_smif:
 ################################################ S W A P   T E S T S ##################################################################
 #######################################################################################################################################
 
-single_swap:
+.single_swap:
   extends: .swap_common
   needs:
     - swap_mcuboot_single
@@ -307,7 +309,7 @@ single_swap:
     TEST_SELECT: $SINGLE_SWAP
 
 
-single_smif_swap:
+.single_smif_swap:
   extends: .swap_common
   needs:
     - swap_mcuboot_single_smif
@@ -318,7 +320,7 @@ single_smif_swap:
     TEST_SELECT: $SINGLE_SMIF_SWAP
 
 
-multi_app1_swap:
+.multi_app1_swap:
   extends: .swap_common
   needs:
     - swap_mcuboot_multi
@@ -329,7 +331,7 @@ multi_app1_swap:
     TEST_SELECT: $MULTI_APP1_SWAP
 
 
-multi_app1_smif_swap:
+.multi_app1_smif_swap:
   extends: .swap_common
   only:
     - schedules
@@ -344,7 +346,7 @@ multi_app1_smif_swap:
     TEST_SELECT: $MULTI_APP1_SMIF_SWAP  
    
 
-single_swap_release:
+.single_swap_release:
   extends: .swap_common
   only:
     - schedules
@@ -360,7 +362,7 @@ single_swap_release:
     BUILDCFG_TEST: Release    
 
 
-single_smif_swap_release:
+.single_smif_swap_release:
   extends: .swap_common
   only:
     - schedules
@@ -376,7 +378,7 @@ single_smif_swap_release:
     BUILDCFG_TEST: Release    
 
 
-multi_app1_swap_release:
+.multi_app1_swap_release:
   extends: .swap_common
   only:
     - schedules
@@ -392,7 +394,7 @@ multi_app1_swap_release:
     BUILDCFG_TEST: Release    
 
 
-multi_app1_smif_swap_release:
+.multi_app1_smif_swap_release:
   extends: .swap_common
   only:
     - schedules
@@ -411,7 +413,7 @@ multi_app1_smif_swap_release:
 ################################################# O V E R W R I T E   T E S T S #######################################################
 #######################################################################################################################################
 
-single_overwrite:
+.single_overwrite:
   extends: .overwrite_common
   needs:
     - overwrite_mcuboot_single
@@ -422,7 +424,7 @@ single_overwrite:
     TEST_SELECT: $SINGLE_OVERWRITE
 
 
-single_smif_overwrite:
+.single_smif_overwrite:
   extends: .overwrite_common
   needs:
     - overwrite_mcuboot_single_smif
@@ -433,7 +435,7 @@ single_smif_overwrite:
     TEST_SELECT: $SINGLE_SMIF_OVERWRITE
 
 
-multi_app1_overwrite:
+.multi_app1_overwrite:
   extends: .overwrite_common
   needs:
     - overwrite_mcuboot_multi
@@ -444,7 +446,7 @@ multi_app1_overwrite:
     TEST_SELECT: $MULTI_APP1_OVERWRITE
   
   
-multi_app2_overwrite:
+.multi_app2_overwrite:
   extends: .overwrite_common
   only:
     - schedules
@@ -457,7 +459,7 @@ multi_app2_overwrite:
     TEST_SELECT: $MULTI_APP2_OVERWRITE
 
 
-multi_app1_smif_overwrite:
+.multi_app1_smif_overwrite:
   extends: .overwrite_common
   only:
     - schedules
@@ -470,7 +472,7 @@ multi_app1_smif_overwrite:
     TEST_SELECT: $MULTI_APP1_SMIF_OVERWRITE
 
 
-multi_app2_smif_overwrite:
+.multi_app2_smif_overwrite:
   extends: .overwrite_common
   only:
     - schedules
@@ -483,7 +485,7 @@ multi_app2_smif_overwrite:
     TEST_SELECT: $MULTI_APP2_SMIF_OVERWRITE
 
 
-single_overwrite_release:
+.single_overwrite_release:
   extends: .overwrite_common
   only:
     - schedules
@@ -497,7 +499,7 @@ single_overwrite_release:
     BUILDCFG_TEST: Release
 
 
-single_smif_overwrite_release:
+.single_smif_overwrite_release:
   extends: .overwrite_common
   only:
     - schedules
@@ -511,7 +513,7 @@ single_smif_overwrite_release:
     BUILDCFG_TEST: Release
 
 
-multi_app1_overwrite_release:
+.multi_app1_overwrite_release:
   extends: .overwrite_common
   only:
     - schedules
@@ -525,7 +527,7 @@ multi_app1_overwrite_release:
     BUILDCFG_TEST: Release
   
   
-multi_app2_overwrite_release:
+.multi_app2_overwrite_release:
   extends: .overwrite_common
   only:
     - schedules
@@ -539,7 +541,7 @@ multi_app2_overwrite_release:
     BUILDCFG_TEST: Release
 
 
-multi_app1_smif_overwrite_release:
+.multi_app1_smif_overwrite_release:
   extends: .overwrite_common
   only:
     - schedules
@@ -553,7 +555,7 @@ multi_app1_smif_overwrite_release:
     BUILDCFG_TEST: Release
 
 
-multi_app2_smif_overwrite_release:
+.multi_app2_smif_overwrite_release:
   extends: .overwrite_common
   only:
     - schedules
