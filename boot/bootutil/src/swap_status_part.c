@@ -160,8 +160,7 @@ int swap_status_read_record(uint32_t rec_offset, uint8_t *data, uint32_t *copy_c
     }
     else {
         /* no valid CRC found - status pre-read failure */
-        if (crc_fail == BOOT_SWAP_STATUS_MULT)
-        {
+        if (crc_fail == BOOT_SWAP_STATUS_MULT) {
             max_idx = -1;
         }
         else {
@@ -331,7 +330,7 @@ int swap_status_retrieve(uint32_t target_area_id, uint32_t offs, void *data, uin
     uint32_t copy_sz;
     uint32_t copy_counter;
     uint32_t data_idx = 0;
-    uint32_t buff_idx = offs%BOOT_SWAP_STATUS_PAYLD_SZ;
+    uint32_t buff_idx = offs % BOOT_SWAP_STATUS_PAYLD_SZ;
 
     uint8_t buff[BOOT_SWAP_STATUS_PAYLD_SZ];
 

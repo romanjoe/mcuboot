@@ -453,14 +453,21 @@ swap_run(struct boot_loader_state *state, struct boot_status *bs,
     g_last_idx = 0;
 
     sector_sz = boot_img_sector_size(state, BOOT_PRIMARY_SLOT, 0);
-    while (1) {
+
+    do {
         sz += sector_sz;
         /* Skip to next sector because all sectors will be moved up. */
         g_last_idx++;
-        if (sz >= copy_size) {
-            break;
-        }
-    }
+    } while(sz >= copy_size);
+
+//    while (1) {
+//        sz += sector_sz;
+//        /* Skip to next sector because all sectors will be moved up. */
+//        g_last_idx++;
+//        if (sz >= copy_size) {
+//            break;
+//        }
+//    }
 
     image_index = BOOT_CURR_IMG(state);
 
