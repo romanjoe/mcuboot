@@ -155,7 +155,7 @@ int main(void)
     /* Write Image OK flag to the slot trailer, so MCUBoot-loader
      * will not revert new image */
     img_ok_addr = USER_APP_START + USER_APP_SIZE - USER_SWAP_IMAGE_OK_OFFS;
-    if (*img_ok_addr) != USER_SWAP_IMAGE_OK)
+    if (*img_ok_addr != USER_SWAP_IMAGE_OK)
     {
         rc = flash_write_byte(img_ok_addr, USER_SWAP_IMAGE_OK);
         if (CY_FLASH_DRV_SUCCESS == rc) {

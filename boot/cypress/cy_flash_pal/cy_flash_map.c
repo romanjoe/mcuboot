@@ -387,7 +387,7 @@ int flash_area_erase(const struct flash_area *fa, uint32_t off, uint32_t len)
 
             while (row_number != 0) {
                 row_number--;
-                row_addr = row_start_addr + row_number * (uint32_t) CY_FLASH_SIZEOF_ROW;
+                row_addr = row_start_addr + row_number * CY_FLASH_SIZEOF_ROW;
                 rc = Cy_Flash_EraseRow(row_addr);
                 assert(rc == CY_FLASH_DRV_SUCCESS);
             }
