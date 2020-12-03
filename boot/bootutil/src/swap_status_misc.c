@@ -196,7 +196,25 @@ boot_write_magic(const struct flash_area *fap)
 
 int boot_status_num_sectors(const struct boot_loader_state *state)
 {
-    return (int)(BOOT_SWAP_STATUS_SIZE / boot_status_sector_size(state, 0));
+    int sectors = 0;
+    size_t sector_size = boot_status_sector_size(state, 0);
+    if ((BOOT_SWAP_STATUS_SIZE != 0) && (sector_size != 0))
+    {
+        // BOOT_LOG_DBG("> boot_status_num_sectors");
+        // BOOT_LOG_DBG(" * BOOT_SWAP_STATUS_SIZE=%ld", BOOT_SWAP_STATUS_SIZE);
+        // BOOT_LOG_DBG(" * boot_status_sector_size=%ld", boot_status_sector_size(state, 0));
+        if (BOOT_SWAP_STATUS_SIZE < sector_size)
+        {
+            sectors = 1;
+        }
+        else
+        {
+            sectors = BOOT_SWAP_STATUS_SIZE / sector_size;
+        }
+    }
+    // return (int)(BOOT_SWAP_STATUS_SIZE / boot_status_sector_size(state, 0));
+
+    return sectors;
 }
 
 /**

@@ -128,9 +128,9 @@ swap_read_status_bytes(const struct flash_area *fap,
         struct boot_loader_state *state, struct boot_status *bs)
 {
     uint32_t off;
-    uint8_t status;
-    uint8_t last_status_move;
-    uint8_t last_status_swap;
+    uint8_t status = 0u;
+    uint8_t last_status_move = 0xffu;
+    uint8_t last_status_swap = 0xffu;
     int max_entries;
     int found_idx_move;
     int found_idx_swap;
@@ -150,6 +150,7 @@ swap_read_status_bytes(const struct flash_area *fap,
 
     erased_sections = 0;
     found_idx_move = -1;
+    found_idx_swap = -1;
     /* skip erased sectors at the end */
     last_rc = 1;
     off = boot_status_off(fap);

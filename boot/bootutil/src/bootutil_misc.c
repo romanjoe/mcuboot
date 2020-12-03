@@ -154,7 +154,7 @@ boot_status_off(const struct flash_area *fap)
     assert(off_from_end <= fap->fa_size);
     return fap->fa_size - off_from_end;
 }
-#endif
+// #endif
 
 static inline uint32_t
 boot_magic_off(const struct flash_area *fap)
@@ -162,7 +162,7 @@ boot_magic_off(const struct flash_area *fap)
     return fap->fa_size - BOOT_MAGIC_SZ;
 }
 
-#ifndef MCUBOOT_SWAP_USING_STATUS
+// #ifndef MCUBOOT_SWAP_USING_STATUS
 
 static inline uint32_t
 boot_image_ok_off(const struct flash_area *fap)

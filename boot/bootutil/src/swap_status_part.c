@@ -94,11 +94,12 @@ int swap_status_read_record(uint32_t rec_offset, uint8_t *data, uint32_t *copy_c
 { /* returns BOOT_SWAP_STATUS_PAYLD_SZ of data */
     int rc = -1;
 
-    uint32_t fin_offset, data_offset;
+    uint32_t fin_offset;
+    uint32_t data_offset = 0u;
     uint32_t counter, crc, magic;
-    uint32_t crc_fail = 0;
-    uint32_t magic_fail = 0;
-    uint32_t max_cnt = 0;
+    uint32_t crc_fail = 0u;
+    uint32_t magic_fail = 0u;
+    uint32_t max_cnt = 0u;
 
     int32_t max_idx = 0;
 
@@ -120,20 +121,26 @@ int swap_status_read_record(uint32_t rec_offset, uint8_t *data, uint32_t *copy_c
         if (rc != 0) {
             return BOOT_EFLASH;
         }
+
         /* read magic value to know if area was pre-erased */
-        magic = *((uint32_t *)&buff[BOOT_SWAP_STATUS_ROW_SZ -\
-                                  BOOT_SWAP_STATUS_MGCREC_SZ -\
-                                  BOOT_SWAP_STATUS_CNT_SZ-\
-                                  BOOT_SWAP_STATUS_CRC_SZ]);
-        if (magic == BOOT_SWAP_STATUS_MAGIC) {   /* read CRC */
-            crc = *((uint32_t *)&buff[BOOT_SWAP_STATUS_ROW_SZ -\
-                                      BOOT_SWAP_STATUS_CRC_SZ]);
+        memcpy(&magic, &buff[BOOT_SWAP_STATUS_ROW_SZ -
+                                  BOOT_SWAP_STATUS_MGCREC_SZ -
+                                  BOOT_SWAP_STATUS_CNT_SZ-
+                                  BOOT_SWAP_STATUS_CRC_SZ], sizeof(magic));
+
+        if (magic == BOOT_SWAP_STATUS_MAGIC)
+        {
+            /* read CRC */
+            (void)memcpy(&crc, &buff[BOOT_SWAP_STATUS_ROW_SZ - BOOT_SWAP_STATUS_CRC_SZ], sizeof(crc));
+
             /* check record data integrity first */
-            if (crc == calc_record_crc(buff, BOOT_SWAP_STATUS_ROW_SZ-BOOT_SWAP_STATUS_CRC_SZ)) {
+            if (crc == calc_record_crc(buff, BOOT_SWAP_STATUS_ROW_SZ-BOOT_SWAP_STATUS_CRC_SZ))
+            {
                 /* look for counter */
-                counter = *((uint32_t *)&buff[BOOT_SWAP_STATUS_ROW_SZ -\
-                                              BOOT_SWAP_STATUS_CNT_SZ - \
-                                              BOOT_SWAP_STATUS_CRC_SZ]);
+                memcpy(&counter, &buff[BOOT_SWAP_STATUS_ROW_SZ -
+                                              BOOT_SWAP_STATUS_CNT_SZ -
+                                              BOOT_SWAP_STATUS_CRC_SZ], sizeof(counter));
+
                 /* find out counter max */
                 if (counter >= max_cnt) {
                     max_cnt = counter;
