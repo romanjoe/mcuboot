@@ -45,6 +45,8 @@
 #include "swap_status.h"
 #endif
 
+#include "mcuboot_config/mcuboot_config.h"
+
 MCUBOOT_LOG_MODULE_DECLARE(mcuboot);
 
 /* Currently only used by imgmgr */
@@ -179,7 +181,6 @@ boot_swap_size_off(const struct flash_area *fap)
 {
     return boot_swap_info_off(fap) - BOOT_MAX_ALIGN;
 }
-#endif
 
 #ifdef MCUBOOT_ENC_IMAGES
 static inline uint32_t
