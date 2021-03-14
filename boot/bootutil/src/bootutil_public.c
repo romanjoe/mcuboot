@@ -153,11 +153,11 @@ boot_copy_done_off(const struct flash_area *fap)
     return boot_image_ok_off(fap) - BOOT_MAX_ALIGN;
 }
 
-static inline uint32_t
-boot_swap_size_off(const struct flash_area *fap)
-{
-    return boot_swap_info_off(fap) - BOOT_MAX_ALIGN;
-}
+// static inline uint32_t
+// boot_swap_size_off(const struct flash_area *fap)
+// {
+//     return boot_swap_info_off(fap) - BOOT_MAX_ALIGN;
+// }
 
 uint32_t
 boot_swap_info_off(const struct flash_area *fap)
@@ -191,7 +191,7 @@ boot_magic_compatible_check(uint8_t tbl_val, uint8_t val)
     }
 }
 
-#ifdef MCUBOOT_ENC_IMAGES
+/* #ifdef MCUBOOT_ENC_IMAGES
 static inline uint32_t
 boot_enc_key_off(const struct flash_area *fap, uint8_t slot)
 {
@@ -202,7 +202,7 @@ boot_enc_key_off(const struct flash_area *fap, uint8_t slot)
     return boot_swap_size_off(fap) - ((slot + 1) * BOOT_ENC_KEY_SIZE);
 #endif
 }
-#endif
+#endif */
 
 bool bootutil_buffer_is_erased(const struct flash_area *area,
                                const void *buffer, size_t len)

@@ -429,22 +429,25 @@ boot_enc_set_key(struct enc_key_data *enc_state, uint8_t slot,
     return 0;
 }
 
-#define EXPECTED_ENC_LEN        BOOT_ENC_TLV_SIZE
-#define EXPECTED_ENC_EXT_LEN    (EXPECTED_ENC_LEN + BOOTUTIL_CRYPTO_SHA256_DIGEST_SIZE)
+#define EXPECTED_ENC_LEN            BOOT_ENC_TLV_SIZE
 
 #if defined(MCUBOOT_ENCRYPT_RSA)
-#    define EXPECTED_ENC_TLV    IMAGE_TLV_ENC_RSA2048
+#    define EXPECTED_ENC_TLV        IMAGE_TLV_ENC_RSA2048
+#    define EXPECTED_ENC_EXT_LEN    EXPECTED_ENC_TLV
 #elif defined(MCUBOOT_ENCRYPT_KW)
-#    define EXPECTED_ENC_TLV    IMAGE_TLV_ENC_KW128
+#    define EXPECTED_ENC_TLV        IMAGE_TLV_ENC_KW128
+#    define EXPECTED_ENC_EXT_LEN    EXPECTED_ENC_TLV
 #elif defined(MCUBOOT_ENCRYPT_EC256)
-#    define EXPECTED_ENC_TLV    IMAGE_TLV_ENC_EC256
+#    define EXPECTED_ENC_TLV        IMAGE_TLV_ENC_EC256
+#    define EXPECTED_ENC_EXT_LEN    (EXPECTED_ENC_LEN + BOOTUTIL_CRYPTO_SHA256_DIGEST_SIZE)
 #    define EC_PUBK_INDEX       (0)
 #    define EC_TAG_INDEX        (65)
 #    define EC_CIPHERKEY_INDEX  (65 + 32)
 _Static_assert(EC_CIPHERKEY_INDEX + 16 == EXPECTED_ENC_LEN,
         "Please fix ECIES-P256 component indexes");
 #elif defined(MCUBOOT_ENCRYPT_X25519)
-#    define EXPECTED_ENC_TLV    IMAGE_TLV_ENC_X25519
+#    define EXPECTED_ENC_TLV        IMAGE_TLV_ENC_X25519
+#    define EXPECTED_ENC_EXT_LEN    EXPECTED_ENC_TLV
 #    define EC_PUBK_INDEX       (0)
 #    define EC_TAG_INDEX        (32)
 #    define EC_CIPHERKEY_INDEX  (32 + 32)
@@ -490,6 +493,9 @@ boot_enc_decrypt(const uint8_t *buf, uint32_t sz, uint8_t *enckey, uint8_t *enci
     const uint8_t *my_salt = salt;
     uint8_t *my_key_iv = counter;
     uint8_t *my_counter = counter;
+#else
+    (void)sz;
+    (void)enciv;
 #endif
     int rc = -1;
 
